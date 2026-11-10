@@ -22,7 +22,18 @@ targets:
     platform: iOS
     sources:
       - path: Playlister
-        excludes: ["**/*.md", "**/.gitkeep"]
+        excludes:
+          - "**/*.md"
+          - "**/.gitkeep"
+          - "**/.DS_Store"
+          - "Info.plist"
+          # Only SemiBold, Bold and ExtraBold are bundled (see Info.plist > UIAppFonts)
+          - "Resources/Fonts/Unbounded-VariableFont_wght.ttf"
+          - "Resources/Fonts/Unbounded-Black.ttf"
+          - "Resources/Fonts/Unbounded-ExtraLight.ttf"
+          - "Resources/Fonts/Unbounded-Light.ttf"
+          - "Resources/Fonts/Unbounded-Medium.ttf"
+          - "Resources/Fonts/Unbounded-Regular.ttf"
     dependencies:
       - package: Networking
       - package: PlaylisterUI
@@ -31,6 +42,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.company.playlister
         INFOPLIST_KEY_CFBundleDisplayName: "Playlister"
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: Playlister/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_EMIT_LOC_STRINGS: YES
         LOCALIZATION_PREFERS_STRING_CATALOGS: YES
