@@ -16,7 +16,7 @@ final class HomeCoordinator: Coordinator {
     }
 
     func start() -> some View {
-        HomeView(viewModel: dependencies.makeViewModel())
+        HomeView(dependencies: dependencies)
             .navigationDestination(for: Route.self) { route in
                 self.destination(for: route)
             }

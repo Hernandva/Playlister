@@ -10,6 +10,6 @@ final class HomeDependencies {
     }
 
     func makeViewModel() -> HomeViewModel {
-        HomeViewModel(useCase: makeUseCase())
+        HomeViewModel(dependencies: self)
     }
 }
