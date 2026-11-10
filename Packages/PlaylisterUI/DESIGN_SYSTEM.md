@@ -41,6 +41,13 @@ They follow the component guides of the Playlister design system (Claude Design)
 | `DSToggle(_:isOn:)` | Switch row; the 51 × 31 switch fills with the animated gradient when on (`DSSwitchToggleStyle`). |
 | `DSSectionHeader(_:)` | Small-caps header above a `DSListGroup`. |
 | `DSCard { … }` | Large block on `surface-1`, `hairline` border, `radius-panel`, `space-5` padding. |
+| `DSIconButton(_:systemImage:style:diameter:action:)` | Round icon button. `.play` (96–132 pt, gradient + `magenta` pulse, only in Home), `.glass` (60 pt in game, 44 pt in nav bars), `.gradient` (Siguiente on the revealed view). The text is the accessibility label. |
+| `DSSegmentedControl(selection:segments:)` | 34 pt segments on `fill`; the selected one wears the gradient and slides. Titles are passed localised. |
+| `DSPlaylistCard(_:subtitle:covers:size:)` | 2×2 mosaic of up to 4 covers (`radius-card`, `shadow-card`), name and song count. `DSCoverMosaic` and `DSCoverImage` are public too. |
+| `DSVinyl(phase:category:level:levels:diameter:)` | Game vinyl. `.playing` (1.8 s per turn, equalizer bars, pass `levels` 0…1 to bind them to audio) and `.revealed(cover:)` (6 s per turn, cover pops in). With a Bingo `category` it takes its color and shows the category name. |
+| `DSBingoCategory` / `DSBingoLevel` | The five Bingo categories with their color, `ink` (`bg-night`) and localised `title(for:)` (keys `bingo.category.<color>.<beginner|expert>`). |
+| `DSBingoCategoryRow(category:level:isOn:)` | Settings row: color square, name and switch; 45 % opacity when off. |
+| `DSSongRevealCard(title:artist:year:details:category:)` | Revealed song card on `surface-2`, or in the category color with `bg-night` text. Insert it with `.transition(DSSongRevealCard.revealTransition)`. |
 
 Styles shared by the components live in `Sources/PlaylisterUI/Styles/` (hand-written, not generated):
 
@@ -49,7 +56,7 @@ Styles shared by the components live in `Sources/PlaylisterUI/Styles/` (hand-wri
 - `.dsShadow(.glow | .card | .disc)`: shadow tokens (the generator does not read `shadow.tokens` yet).
 - With Reduce Motion on, gradients and glow stay on their first frame.
 
-New components go in `Sources/PlaylisterUI/Components/`, use only tokens, are `public` and include a `#Preview`. A component that shows text conforms to `DSLocalizableText`.
+New components go in `Sources/PlaylisterUI/Components/`, use only tokens, are `public` and include a `#Preview`. A component that shows a single text conforms to `DSLocalizableText`; components with several texts take them already localised.
 
 ## Localisation: `.localized(_:)`
 

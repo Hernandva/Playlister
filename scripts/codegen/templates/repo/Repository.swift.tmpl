@@ -3,7 +3,10 @@ import Foundation
 /// Public API of the {{Repo}} repository. Features depend on this protocol, never on the concrete class.
 public protocol {{Repo}}RepositoryProtocol: Sendable {
     /// Calls one of the services in `{{Repo}}Repository.configuration.serviceNames`.
-    func fetch(_ request: some {{Repo}}RequestProtocol, serviceName: String) async throws -> any {{Repo}}ResponseProtocol
+    func fetch(
+        _ request: some {{Repo}}RequestProtocol,
+        serviceName: String
+    ) async throws -> any {{Repo}}ResponseProtocol
 }
 
 /// Talks to the {{Repo}} services.
@@ -26,7 +29,10 @@ public final class {{Repo}}Repository: {{Repo}}RepositoryProtocol {
         self.configuration = configuration
     }
 
-    public func fetch(_ request: some {{Repo}}RequestProtocol, serviceName: String) async throws -> any {{Repo}}ResponseProtocol {
+    public func fetch(
+        _ request: some {{Repo}}RequestProtocol,
+        serviceName: String
+    ) async throws -> any {{Repo}}ResponseProtocol {
         let url = try configuration.url(for: serviceName)
         let requestDAO = {{Repo}}RequestDAO(request)
         let responseDAO: {{Repo}}ResponseDAO = try await client.request(url, method: .get, body: requestDAO)
