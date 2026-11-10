@@ -36,16 +36,16 @@ SWIFT_KEYWORDS = {
 
 # Semantic roles used by the components -> token names that may play that role, in priority order.
 COLOR_ROLES: dict[str, list[str]] = {
-    "background": ["background", "bg", "paper", "canvas", "surface-background", "page"],
+    "background": ["background", "bg", "bg-night", "paper", "canvas", "surface-background", "page"],
     "surface": ["surface", "card", "surface-1", "elevated", "panel"],
     "textPrimary": ["text-primary", "text", "ink", "foreground", "fg", "on-surface", "on-background", "label"],
     "textSecondary": ["text-secondary", "ink-2", "text-muted", "muted", "foreground-muted", "secondary-label"],
-    "accent": ["accent", "primary", "brand", "tint", "action"],
-    "onAccent": ["on-accent", "on-primary", "on-brand", "on-tint"],
+    "accent": ["accent", "primary", "brand", "tint", "action", "magenta"],
+    "onAccent": ["on-accent", "on-primary", "on-brand", "on-tint", "text-primary"],
     "fillSecondary": ["fill-secondary", "fill-quiet", "fill", "secondary", "surface-2"],
     "destructive": ["destructive", "danger", "error", "critical"],
-    "onDestructive": ["on-destructive", "on-danger", "on-error"],
-    "separator": ["separator", "border", "divider", "outline", "stroke"],
+    "onDestructive": ["on-destructive", "on-danger", "on-error", "bg-night"],
+    "separator": ["separator", "border", "divider", "outline", "stroke", "hairline"],
 }
 COLOR_FALLBACKS = {
     "background": "Color.clear",
@@ -63,7 +63,7 @@ COLOR_FALLBACKS = {
 # Semantic font -> (candidate style names, SwiftUI text style it scales with, fallback)
 FONT_ROLES: dict[str, tuple[list[str], str, str]] = {
     "largeTitle": (["large-title", "largetitle", "display", "display-large", "h1"], "largeTitle", ".largeTitle"),
-    "title": (["title", "hero-title", "title-1", "h2", "display-medium"], "title", ".title"),
+    "title": (["title", "hero-title", "title-1", "title-2", "h2", "display-medium"], "title", ".title"),
     "headline": (["headline", "nav-title", "title-3", "h3", "subtitle"], "headline", ".headline"),
     "body": (["body", "body-regular", "paragraph", "text"], "body", ".body"),
     "bodyStrong": (["body-strong", "body-bold", "body-emphasis", "button", "label"], "body", ".body.weight(.semibold)"),
@@ -291,7 +291,7 @@ def generate(tokens_path: Path, package_dir: Path) -> list[str]:
     median = values[len(values) // 2] if values else 12.0
     small = values[0] if values else 6.0
     control = radius_for(r"control|button", median)
-    card = radius_for(r"card|list|surface|container|panel", max(values) if values else 16.0)
+    card = radius_for(r"card", radius_for(r"list|surface|container|panel", max(values) if values else 16.0))
     radius_lines = members({swift_identifier(k): v for k, v in radius.items()},
                            {"small": small, "control": control, "card": card})
     report.append(f"DSRadius small/control/card = {small:g}/{control:g}/{card:g}")

@@ -4,42 +4,52 @@ import SwiftUI
 
 /// Every color token of the design system, with light and dark values.
 public enum DSPalette {
-    /// Noche: fondo de pantalla. La app es siempre oscura.
-    public static let background = Color("background", bundle: .module)
-    /// Ciruela: superficie 1, tarjetas y secciones.
-    public static let surface = Color("surface", bundle: .module)
-    /// Uva: superficie 2, listas agrupadas.
-    public static let surfaceElevated = Color("surface-elevated", bundle: .module)
-    /// Texto primario.
+    /// Fondo de todas las pantallas. La app es siempre oscura.
+    public static let bgNight = Color("bg-night", bundle: .module)
+    /// Tarjetas grandes y secciones sobre bg-night.
+    public static let surface1 = Color("surface-1", bundle: .module)
+    /// Listas agrupadas inset, filas de ajustes y tarjeta de información de canción.
+    public static let surface2 = Color("surface-2", bundle: .module)
+    /// Pista del segmented control, search field, pista del slider y toggles apagados.
+    public static let fill = Color("fill", bundle: .module)
+    /// Separadores de filas y bordes de tarjetas.
+    public static let hairline = Color("hairline", bundle: .module)
+    /// Acento de marca. Sombras y auras de fondo.
+    public static let violet = Color("violet", bundle: .module)
+    /// Acento de marca. Auras, pulso del botón Play y acento de controles nativos (slider).
+    public static let magenta = Color("magenta", bundle: .module)
+    /// Primer stop del gradiente primario animado. Texto blanco encima: 6:1 o más.
+    public static let gradientStart = Color("gradient-start", bundle: .module)
+    /// Stop central del gradiente primario y del resplandor del vinilo.
+    public static let gradientMid = Color("gradient-mid", bundle: .module)
+    /// Último stop del gradiente primario. Texto blanco encima: 5,6:1.
+    public static let gradientEnd = Color("gradient-end", bundle: .module)
+    /// Primer color del brillo de títulos y tinte de chips.
+    public static let orchid = Color("orchid", bundle: .module)
+    /// Segundo color del brillo de títulos, enlaces, botones plain y checks de listas.
+    public static let bubblegum = Color("bubblegum", bundle: .module)
+    /// Fondo de botones secundarios y chips (modo de juego).
+    public static let tintFill = Color("tint-fill", bundle: .module)
+    /// Texto sobre tint-fill.
+    public static let tintInk = Color("tint-ink", bundle: .module)
+    /// Texto principal sobre bg-night, superficies y el gradiente primario.
     public static let textPrimary = Color("text-primary", bundle: .module)
-    /// Texto secundario.
+    /// Subtítulos, metadatos y cabeceras de sección sobre bg-night o surface-2.
     public static let textSecondary = Color("text-secondary", bundle: .module)
-    /// Texto terciario.
+    /// Notas al pie y etiquetas pequeñas sobre bg-night o surface-1 (6:1 o más).
     public static let textTertiary = Color("text-tertiary", bundle: .module)
-    /// Violeta: acento principal y base del gradiente.
-    public static let accent = Color("accent", bundle: .module)
-    /// Magenta: acento secundario.
-    public static let accentSecondary = Color("accent-secondary", bundle: .module)
-    /// Orquídea: tinte, brillo de texto.
-    public static let tintOrchid = Color("tint-orchid", bundle: .module)
-    /// Chicle: enlaces, checks y botones de texto.
-    public static let tintLink = Color("tint-link", bundle: .module)
-    /// Texto e iconos sobre acento o gradiente.
-    public static let onAccent = Color("on-accent", bundle: .module)
-    /// Lavanda oscura: relleno de controles, search field, segmented.
-    public static let fillSecondary = Color("fill-secondary", bundle: .module)
-    /// Acciones destructivas.
+    /// Acciones destructivas como Cerrar sesión.
     public static let destructive = Color("destructive", bundle: .module)
-    /// Texto sobre destructivo.
-    public static let onDestructive = Color("on-destructive", bundle: .module)
-    /// Separadores entre filas.
-    public static let separator = Color("separator", bundle: .module)
-    /// Gradiente primario animado (8 s), parada 1.
-    public static let gradient1 = Color("gradient-1", bundle: .module)
-    /// Gradiente primario animado, parada 2.
-    public static let gradient2 = Color("gradient-2", bundle: .module)
-    /// Gradiente primario animado, parada 3.
-    public static let gradient3 = Color("gradient-3", bundle: .module)
-    /// Botón Continuar con Spotify.
-    public static let spotify = Color("spotify", bundle: .module)
+    /// Solo el botón Continuar con Spotify, con texto #0A0A0A.
+    public static let spotifyGreen = Color("spotify-green", bundle: .module)
+    /// Categoría de bingo 1 (Grupo o solista / Título). Texto encima en bg-night.
+    public static let bingoPink = Color("bingo-pink", bundle: .module)
+    /// Categoría de bingo 2 (¿Antes del 2000? / Año exacto). Texto encima en bg-night.
+    public static let bingoYellow = Color("bingo-yellow", bundle: .module)
+    /// Categoría de bingo 3 (± 4 años / Nombre del grupo). Texto encima en bg-night.
+    public static let bingoCyan = Color("bingo-cyan", bundle: .module)
+    /// Categoría de bingo 4 (Década). Texto encima en bg-night.
+    public static let bingoGreen = Color("bingo-green", bundle: .module)
+    /// Categoría de bingo 5 (± 2 años / ± 3 años). Texto encima en bg-night.
+    public static let bingoOrange = Color("bingo-orange", bundle: .module)
 }

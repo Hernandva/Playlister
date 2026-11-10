@@ -4,14 +4,14 @@ import SwiftUI
 
 /// Semantic colors used by the components.
 public enum DSColor {
-    public static let background = DSPalette.background
-    public static let surface = DSPalette.surface
+    public static let background = DSPalette.bgNight
+    public static let surface = DSPalette.surface1
     public static let textPrimary = DSPalette.textPrimary
     public static let textSecondary = DSPalette.textSecondary
-    public static let accent = DSPalette.accent
-    public static let onAccent = DSPalette.onAccent
-    public static let fillSecondary = DSPalette.fillSecondary
+    public static let accent = DSPalette.magenta
+    public static let onAccent = DSPalette.textPrimary
+    public static let fillSecondary = DSPalette.fill
     public static let destructive = DSPalette.destructive
-    public static let onDestructive = DSPalette.onDestructive
-    public static let separator = DSPalette.separator
+    public static let onDestructive = DSPalette.bgNight
+    public static let separator = DSPalette.hairline
 }

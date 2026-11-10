@@ -5,9 +5,11 @@ import CoreGraphics
 /// Corner radius tokens and the semantic radii used by the components.
 public enum DSRadius {
     public static let radiusControl: CGFloat = 10
+    public static let radiusList: CGFloat = 14
     public static let radiusCard: CGFloat = 18
-    public static let radiusSheet: CGFloat = 28
-    public static let radiusCapsule: CGFloat = 999
+    public static let radiusPanel: CGFloat = 24
+    public static let radiusSheet: CGFloat = 32
+    public static let radiusPill: CGFloat = 999
     public static let small: CGFloat = 10
     public static let control: CGFloat = 10
     public static let card: CGFloat = 18

@@ -5,10 +5,11 @@ import SwiftUI
 /// Every type style of the design system.
 public enum DSTypeScale {
     public static let largeTitle = Font.custom("Unbounded", size: 34, relativeTo: .body).weight(.heavy)
-    public static let title = Font.custom("Unbounded", size: 22, relativeTo: .body).weight(.bold)
+    public static let hero = Font.custom("Unbounded", size: 40, relativeTo: .body).weight(.heavy)
+    public static let title2 = Font.custom("Unbounded", size: 22, relativeTo: .body).weight(.bold)
+    public static let sectionTitle = Font.custom("Unbounded", size: 20, relativeTo: .body).weight(.bold)
     public static let headline = Font.system(size: 17, weight: .semibold)
     public static let body = Font.system(size: 17, weight: .regular)
-    public static let bodyStrong = Font.system(size: 17, weight: .semibold)
     public static let subheadline = Font.system(size: 15, weight: .regular)
     public static let footnote = Font.system(size: 13, weight: .regular)
     public static let caption = Font.system(size: 12, weight: .semibold)
@@ -20,7 +21,7 @@ public enum DSFont {
     public static let title = Font.custom("Unbounded", size: 22, relativeTo: .title).weight(.bold)
     public static let headline = Font.system(size: 17, weight: .semibold)
     public static let body = Font.system(size: 17, weight: .regular)
-    public static let bodyStrong = Font.system(size: 17, weight: .semibold)
+    public static let bodyStrong = Font.body.weight(.semibold)
     public static let footnote = Font.system(size: 13, weight: .regular)
     public static let caption = Font.system(size: 12, weight: .semibold)
 }
