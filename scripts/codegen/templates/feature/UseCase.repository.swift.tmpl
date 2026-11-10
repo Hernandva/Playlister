@@ -1,0 +1,26 @@
+import Foundation
+import Networking
+
+protocol {{Feature}}UseCaseProtocol: Sendable {
+    func execute() async throws -> {{Feature}}ViewData
+}
+
+/// Request sent to the {{Repo}} repository. Add the fields its public request protocol declares.
+struct {{Feature}}Request: {{Repo}}RequestProtocol {}
+
+/// Business logic of {{Feature}}: calls the {{Repo}} repository public API and maps the response into ViewData.
+struct {{Feature}}UseCase: {{Feature}}UseCaseProtocol {
+    /// One of the service names declared in `{{Repo}}Repository.configuration.serviceNames`.
+    private let serviceName = ""
+
+    private let repository: any {{Repo}}RepositoryProtocol
+
+    init(repository: any {{Repo}}RepositoryProtocol) {
+        self.repository = repository
+    }
+
+    func execute() async throws -> {{Feature}}ViewData {
+        let response = try await repository.fetch({{Feature}}Request(), serviceName: serviceName)
+        return {{Feature}}ViewData(response: response)
+    }
+}

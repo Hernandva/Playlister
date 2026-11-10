@@ -1,0 +1,33 @@
+import PlaylisterUI
+import SwiftUI
+
+struct {{Feature}}View: View {
+    @State private var viewModel: {{Feature}}ViewModel
+
+    init(viewModel: {{Feature}}ViewModel) {
+        _viewModel = State(initialValue: viewModel)
+    }
+
+    var body: some View {
+        DSScreen {
+            DSText(style: .largeTitle).localized("{{key}}.title")
+
+            switch viewModel.state {
+            case .idle, .loading:
+                ProgressView()
+            case .loaded:
+                // Compose the screen with PlaylisterUI components fed by {{Feature}}ViewData.
+                EmptyView()
+            case .failed(let message):
+                DSText(message, style: .footnote, color: DSColor.destructive)
+            }
+        }
+        .task { await viewModel.load() }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        {{Feature}}Coordinator().start()
+    }
+}

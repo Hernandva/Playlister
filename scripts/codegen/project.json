@@ -1,0 +1,12 @@
+{
+  "name": "Playlister",
+  "slug": "playlister",
+  "appDirectory": "Playlister",
+  "rootFeature": "Home",
+  "networkingSources": "Packages/Networking/Sources/Networking",
+  "designSystemPackage": "Packages/PlaylisterUI",
+  "platforms": [
+    "iphone",
+    "ipad"
+  ]
+}

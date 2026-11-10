@@ -1,0 +1,89 @@
+# Playlister — Features configuration
+
+This file is the source of truth for how scenes (features) are built in the `Playlister` app target
+and how they connect to each other. Humans and coding agents must follow it, and the
+`playlister-new-feature` skill keeps the **Feature registry** and the **App map** below up to date.
+Do not remove the `codegen` markers: the generator writes between them.
+
+## Stack
+
+- UI: SwiftUI only. Views compose components from the `PlaylisterUI` package; they never style raw controls.
+- Language: Swift 6 language mode, strict concurrency. View models are `@MainActor @Observable`.
+- Architecture: MVVM, feature based. One folder per feature under `Playlister/Features/`.
+- Data: features never talk to Alamofire or DAOs. They reach the `Networking` package only through a
+  repository's public API (`<Name>RepositoryProtocol`) and its public request/response protocols.
+
+## Anatomy of a feature
+
+Every new feature gets its own folder with this exact structure (example: `Profile`):
+
+```
+Features/Profile/
+├── ProfileCoordinator.swift        # Entry point: builds the view and resolves navigation routes
+├── ProfileDependencies.swift       # Dependency injection container of the feature
+├── View/ProfileView.swift          # SwiftUI view built only with PlaylisterUI components
+├── ViewModel/ProfileViewModel.swift# @MainActor @Observable state holder, calls the use case
+├── Model/ProfileViewData.swift     # Display-ready data consumed by the view
+└── UseCase/ProfileUseCase.swift    # Business logic; calls the repository public API
+```
+
+### Responsibilities
+
+| Type | Responsibility | Rules |
+|---|---|---|
+| `<Feature>Coordinator` | Initialises the view through `<Feature>Dependencies` and declares the routes (`Route` enum) to the features that can be opened from it. | Conforms to `Coordinator`. Only coordinators create other coordinators. |
+| `<Feature>Dependencies` | Builds the use case, the view model and injects the repository. | The only place where concrete types are created. Takes protocols in its `init` so tests can inject fakes. |
+| `<Feature>View` | Renders state. Adds PlaylisterUI components and localises text with `.localized("key")`. | No business logic, no networking, no hard-coded colors or fonts. |
+| `<Feature>ViewModel` | Owns the screen state (`idle`, `loading`, `loaded(ViewData)`, `failed`). | Depends on `<Feature>UseCaseProtocol`, never on a repository. |
+| `<Feature>ViewData` | Display model. Maps the repository's public **response protocol** into the fields the view needs. | Value type, `Equatable` and `Sendable`. Never exposes Networking types to the view. |
+| `<Feature>UseCase` | Calls the repository through its **public API** and turns the response protocol into `ViewData`. | Depends on `<Name>RepositoryProtocol` from `Networking`. |
+
+### Data flow
+
+```
+View ──▶ ViewModel ──▶ UseCase ──▶ <Name>RepositoryProtocol (Networking public API)
+                                        │
+View ◀── ViewModel ◀── ViewData ◀── <Name>ResponseProtocol
+```
+
+### Navigation
+
+- Each coordinator declares `enum Route: Hashable` with one case per child feature, and maps each case
+  to the child's coordinator in `destination(for:)`.
+- A view opens a child feature with `NavigationLink(value: <Parent>Coordinator.Route.<child>) { ... }`.
+- The root feature is started by `App/RootView.swift` inside the `NavigationStack`.
+
+### Localisation
+
+- Strings live in `Resources/Localizable.xcstrings`. Keys follow `<featureName>.<element>`, e.g. `profile.title`.
+- Components that show text expose `.localized("key")` (see `Packages/PlaylisterUI/DESIGN_SYSTEM.md`).
+
+### Creating a feature
+
+Use the `playlister-new-feature` skill, or run:
+
+```
+python3 scripts/codegen/new_feature.py --name <FeatureName> --parent <ExistingFeature> [--repository <RepositoryName>]
+```
+
+It creates the branch `feature/Playlister-<FeatureName>` from `develop`, the folder and classes above,
+adds the route to the parent coordinator and updates this file.
+
+## Feature registry
+
+<!-- codegen:feature-registry:start -->
+| Feature | Opened from | Repository |
+|---|---|---|
+| `Home` | — (root) | — |
+<!-- codegen:feature-registry:end -->
+
+## App map
+
+Which feature opens which. `A --> B` means feature A can open feature B.
+
+<!-- codegen:app-map:start -->
+```mermaid
+graph TD
+    Home
+```
+<!-- codegen:app-map:end -->

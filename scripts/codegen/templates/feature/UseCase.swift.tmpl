@@ -1,0 +1,14 @@
+import Foundation
+
+protocol {{Feature}}UseCaseProtocol: Sendable {
+    func execute() async throws -> {{Feature}}ViewData
+}
+
+/// Business logic of {{Feature}}.
+/// When the feature needs remote data, inject a repository from Networking through
+/// {{Feature}}Dependencies and map its public response protocol into {{Feature}}ViewData.
+struct {{Feature}}UseCase: {{Feature}}UseCaseProtocol {
+    func execute() async throws -> {{Feature}}ViewData {
+        {{Feature}}ViewData()
+    }
+}

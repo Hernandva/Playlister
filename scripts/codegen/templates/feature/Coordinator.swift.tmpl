@@ -1,0 +1,30 @@
+import SwiftUI
+
+/// Entry point of the {{Feature}} feature.
+/// Builds the view through `{{Feature}}Dependencies` and resolves the routes to the features opened from it.
+@MainActor
+final class {{Feature}}Coordinator: Coordinator {
+    /// One case per feature that can be opened from {{Feature}}.
+    enum Route: Hashable {
+        // @codegen:routes
+    }
+
+    private let dependencies: {{Feature}}Dependencies
+
+    init(dependencies: {{Feature}}Dependencies = {{Feature}}Dependencies()) {
+        self.dependencies = dependencies
+    }
+
+    func start() -> some View {
+        {{Feature}}View(viewModel: dependencies.makeViewModel())
+            .navigationDestination(for: Route.self) { route in
+                self.destination(for: route)
+            }
+    }
+
+    func destination(for route: Route) -> AnyView {
+        switch route {
+        // @codegen:destinations
+        }
+    }
+}

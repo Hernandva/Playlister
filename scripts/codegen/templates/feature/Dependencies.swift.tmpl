@@ -1,0 +1,15 @@
+import Foundation
+
+/// Dependency injection container of {{Feature}}: the only place where its concrete types are built.
+@MainActor
+final class {{Feature}}Dependencies {
+    init() {}
+
+    func makeUseCase() -> any {{Feature}}UseCaseProtocol {
+        {{Feature}}UseCase()
+    }
+
+    func makeViewModel() -> {{Feature}}ViewModel {
+        {{Feature}}ViewModel(useCase: makeUseCase())
+    }
+}
