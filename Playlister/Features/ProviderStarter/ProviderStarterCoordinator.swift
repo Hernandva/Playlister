@@ -7,6 +7,7 @@ import SwiftUI
 final class ProviderStarterCoordinator: Coordinator {
     /// One case per feature that can be opened from ProviderStarter.
     enum Route: Hashable {
+        case settings
         // @codegen:routes
     }
 
@@ -30,6 +31,8 @@ final class ProviderStarterCoordinator: Coordinator {
 
     func destination(for route: Route) -> AnyView {
         switch route {
+        case .settings:
+            return AnyView(SettingsCoordinator().start())
         // @codegen:destinations
         }
     }

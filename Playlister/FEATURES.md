@@ -145,6 +145,7 @@ adds the route to the parent coordinator and updates this file.
 |---|---|---|
 | `Home` | — (root) | `Authorization`, `Login` |
 | `ProviderStarter` | Home | `LastPlaylistRepository` |
+| `Settings` | ProviderStarter | `SettingsRepository` |
 <!-- codegen:feature-registry:end -->
 
 ## App map
@@ -156,5 +157,6 @@ Which feature opens which. `A --> B` means feature A can open feature B.
 graph TD
     Home
     Home --> ProviderStarter
+    ProviderStarter --> Settings
 ```
 <!-- codegen:app-map:end -->
