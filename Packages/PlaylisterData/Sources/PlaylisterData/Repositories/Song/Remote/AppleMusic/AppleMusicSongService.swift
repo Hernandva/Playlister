@@ -22,14 +22,22 @@ struct AppleMusicSongService: SongServiceProtocol {
         }
         do {
             let playlist = try await findPlaylist(id: request.playlistID).with([.tracks])
-            let picked = RandomSongPicker.pick(Array(playlist.tracks ?? []), count: request.count)
+            let tracks = Array(playlist.tracks ?? [])
+            let picked = RandomSongPicker.pick(tracks, count: request.count)
+            Self.log("playlist \(request.playlistID): \(tracks.count) songs in the first batch")
+            Self.log("picked: \(picked.map { "\($0.id.rawValue) (artwork: \(Self.scheme(of: $0.artwork)))" })")
             let songs = try await findSongs(ids: picked.map(\.id))
-            return SongResponseDAO(provider: .appleMusic, items: songs.compactMap(Self.item(from:)))
+            Self.log("found: \(songs.map { "\($0.id.rawValue) (artwork: \(Self.scheme(of: $0.artwork)))" })")
+            let items = songs.compactMap(Self.item(from:))
+            Self.log("returned \(items.count) covers")
+            return SongResponseDAO(provider: .appleMusic, items: items)
         } catch let error as SongError {
+            Self.log("failed: \(error)")
             throw error
         } catch is CancellationError {
             throw CancellationError()
         } catch {
+            Self.log("failed: \(error)")
             throw SongError.unavailable
         }
     }
@@ -56,9 +64,12 @@ struct AppleMusicSongService: SongServiceProtocol {
     private func findSongs(ids: [MusicItemID]) async throws -> [Song] {
         let libraryIDs = ids.filter { $0.rawValue.hasPrefix(Self.librarySongIDPrefix) }
         let catalogIDs = ids.filter { !$0.rawValue.hasPrefix(Self.librarySongIDPrefix) }
+        Self.log("library ids: \(libraryIDs.map(\.rawValue)), catalog ids: \(catalogIDs.map(\.rawValue))")
         async let librarySongs = findLibrarySongs(ids: libraryIDs)
         async let catalogSongs = findCatalogSongs(ids: catalogIDs)
-        return try await librarySongs + catalogSongs
+        let (library, catalog) = try await (librarySongs, catalogSongs)
+        Self.log("library request found \(library.count), catalog request found \(catalog.count)")
+        return library + catalog
     }
 
     private func findLibrarySongs(ids: [MusicItemID]) async throws -> [Song] {
@@ -77,6 +88,18 @@ struct AppleMusicSongService: SongServiceProtocol {
     private static func item(from song: Song) -> SongItemDAO? {
         guard let url = webURL(of: song.artwork) else { return nil }
         return SongItemDAO(id: song.id.rawValue, title: song.title, artistName: song.artistName, artworkURL: url)
+    }
+
+    /// Debug builds only: one line per step of `fetchRandomSongs(_:)`, to see why a playlist gets no covers.
+    private static func log(_ message: @autoclosure () -> String) {
+        #if DEBUG
+        debugPrint("[Songs] \(message())")
+        #endif
+    }
+
+    /// Scheme of an artwork's URL (`https`, `musicKit`…), or `none` when there is no artwork. For the debug log.
+    private static func scheme(of artwork: Artwork?) -> String {
+        artwork?.url(width: artworkSide, height: artworkSide)?.scheme ?? "none"
     }
 
     /// Only web URLs are kept: library artwork can use a MusicKit scheme that `AsyncImage` cannot load.
