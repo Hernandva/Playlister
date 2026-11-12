@@ -4,7 +4,7 @@ import Testing
 
 private struct PlaylistsRequest: PlaylistsRequestProtocol {
     let provider: MusicProvider
-    let recommendationsTerm: String
+    let recommendedPlaylistIDs: [String]
 }
 
 private final class FakePlaylistsService: PlaylistsServiceProtocol, @unchecked Sendable {
@@ -22,7 +22,8 @@ private final class FakePlaylistsService: PlaylistsServiceProtocol, @unchecked S
 }
 
 struct PlaylistsRepositoryTests {
-    private static let request = PlaylistsRequest(provider: .appleMusic, recommendationsTerm: "Hitster")
+    private static let playlistIDs = ["pl.u-DdANxEPFj4Jyvq"]
+    private static let request = PlaylistsRequest(provider: .appleMusic, recommendedPlaylistIDs: playlistIDs)
     private static let playlist = PlaylistsItemDAO(
         id: "pl.1",
         name: "Hitster España",
@@ -39,8 +40,8 @@ struct PlaylistsRepositoryTests {
 
         let expected = PlaylistsRequestDAO(
             provider: .appleMusic,
-            recommendationsTerm: "Hitster",
-            limits: PlaylistsLimits(recommendations: 20, recommendationsSearch: 1000, library: 20)
+            recommendedPlaylistIDs: Self.playlistIDs,
+            libraryLimit: 20
         )
         #expect(service.receivedRequest == expected)
         #expect(result.provider == .appleMusic)
@@ -60,7 +61,7 @@ struct PlaylistsRepositoryTests {
     @Test func rejectsAProviderWithoutService() async {
         let repository = PlaylistsRepository(services: [:])
         await #expect(throws: PlaylistsError.unsupportedProvider(.spotify)) {
-            try await repository.fetch(PlaylistsRequest(provider: .spotify, recommendationsTerm: "Hitster"))
+            try await repository.fetch(PlaylistsRequest(provider: .spotify, recommendedPlaylistIDs: Self.playlistIDs))
         }
     }
 }

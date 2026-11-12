@@ -11,8 +11,8 @@ public protocol PlaylistsRepositoryProtocol: Sendable {
 /// Flow: PlaylistsRequestProtocol -> PlaylistsRequestDAO -> provider service -> PlaylistsResponseDAO
 /// -> PlaylistsResponseProtocol.
 public final class PlaylistsRepository: PlaylistsRepositoryProtocol {
-    /// How many playlists each call returns, and how far the catalogue search goes to find the recommended ones.
-    static let limits = PlaylistsLimits(recommendations: 20, recommendationsSearch: 1000, library: 20)
+    /// Library playlists returned at most, most recently played first.
+    static let libraryLimit = 20
 
     private let services: [MusicProvider: any PlaylistsServiceProtocol]
 
@@ -29,6 +29,6 @@ public final class PlaylistsRepository: PlaylistsRepositoryProtocol {
         guard let service = services[request.provider] else {
             throw PlaylistsError.unsupportedProvider(request.provider)
         }
-        return try await service.fetch(PlaylistsRequestDAO(request, limits: Self.limits))
+        return try await service.fetch(PlaylistsRequestDAO(request, libraryLimit: Self.libraryLimit))
     }
 }

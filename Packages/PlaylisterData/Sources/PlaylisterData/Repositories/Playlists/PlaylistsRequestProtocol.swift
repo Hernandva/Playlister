@@ -4,8 +4,7 @@ import Foundation
 public protocol PlaylistsRequestProtocol: Sendable {
     /// Music service the user signed in with.
     var provider: MusicProvider { get }
-    /// Search term of the recommended playlists in the service's catalogue, e.g. «Hitster» or, in quotes, «"Hitster"».
-    /// It is sent to the search as is. Only playlists whose name contains it, ignoring case, accents and the quotes
-    /// around it, are recommended.
-    var recommendationsTerm: String { get }
+    /// Identifiers, in the service's catalogue, of the recommended playlists, in the order they are shown,
+    /// e.g. `pl.u-DdANxEPFj4Jyvq`. Playlists that no longer exist or are no longer shared are left out.
+    var recommendedPlaylistIDs: [String] { get }
 }

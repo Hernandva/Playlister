@@ -24,7 +24,7 @@ public protocol PlaylistsItemProtocol: Sendable {
 public protocol PlaylistsResponseProtocol: Sendable {
     /// Music service the playlists belong to.
     var provider: MusicProvider { get }
-    /// Playlists of the catalogue whose name contains the request's `recommendationsTerm`.
+    /// Catalogue playlists of the request's `recommendedPlaylistIDs` that still exist, in the same order.
     var recommended: [any PlaylistsItemProtocol] { get }
     /// Playlists in the user's library.
     var library: [any PlaylistsItemProtocol] { get }

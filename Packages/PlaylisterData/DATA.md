@@ -124,21 +124,17 @@ setting keeps the rest. Write failures are thrown as `SettingsError.storageFaile
 ### Playlists (MusicKit, no HTTP)
 
 `PlaylistsRepository` follows the same shape as `LoginRepository`: `fetch(_:)` takes a `PlaylistsRequestProtocol`
-(the provider the user signed in with and the `recommendationsTerm`, e.g. «Hitster») and forwards it, as the internal
-`PlaylistsRequestDAO` with `PlaylistsRepository.limits`, to the internal `PlaylistsServiceProtocol` of that provider,
-registered in `PlaylistsRepository.init()`. It returns a `PlaylistsResponseProtocol` with the `recommended` and the
-`library` playlists, each a `PlaylistsItemProtocol` with only what the service returns for the playlist itself: id,
-name, curator and artwork URL. It **never reads the songs**.
+(the provider the user signed in with and the `recommendedPlaylistIDs`) and forwards it, as the internal
+`PlaylistsRequestDAO` with `PlaylistsRepository.libraryLimit`, to the internal `PlaylistsServiceProtocol` of that
+provider, registered in `PlaylistsRepository.init()`. It returns a `PlaylistsResponseProtocol` with the `recommended`
+and the `library` playlists, each a `PlaylistsItemProtocol` with only what the service returns for the playlist
+itself: id, name, curator and artwork URL. It **never reads the songs**.
 
-- **Limits** live in `PlaylistsRepository.limits` (`PlaylistsLimits`): 20 recommended playlists, at most 1000 catalogue
-  search results read to find them (40 pages), and 20 library playlists, most recently played first.
-- **Recommended:** the catalogue search returns loose matches, so `RecommendationsCollector` keeps only the playlists
-  whose name contains the term, ignoring case, accents and the quotes around the term (the app sends «"Hitster"»
-  in quotes; the quotes reach the search as is). The search asks for no top results
-  (`includeTopResults = false`). `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`)
-  reads the search in pages of 25 (the MusicKit maximum), each a request with an explicit
-  `offset` because search results offer no next batch, and stops as soon as there are 20 matches, 1000 results
-  have been read, or there are no more.
+- **Recommended:** read by catalogue identifier, never searched (the public catalogue search barely returns playlists
+  shared by users, such as the «Hitster» ones). `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`) reads every id
+  in **one** `MusicCatalogResourceRequest` and keeps the order of the ids. Ids that are not in the catalogue (deleted
+  or no longer shared) are left out without failing. The ids live in the feature (`PlaylistsUseCase`).
+- **Library:** the `PlaylistsRepository.libraryLimit` (20) most recently played playlists.
 - Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme `AsyncImage` cannot load).
 - Without MusicKit access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure
   `PlaylistsError.unavailable`, and a provider without a service throws `PlaylistsError.unsupportedProvider`.

@@ -7,18 +7,21 @@ protocol PlaylistsUseCaseProtocol: Sendable {
     func execute() async throws -> PlaylistSelectorViewData.Playlists
 }
 
-/// Request sent to the Playlists repository: the music service and the term of the recommended playlists.
+/// Request sent to the Playlists repository: the music service and the recommended playlists.
 struct PlaylistsRequest: PlaylistsRequestProtocol {
     let provider: MusicProvider
-    let recommendationsTerm: String
+    let recommendedPlaylistIDs: [String]
 }
 
 /// Business logic of PlaylistSelector: calls the Playlists repository public API and returns only the data of its
 /// response, mapped out of the PlaylisterData types.
 struct PlaylistsUseCase: PlaylistsUseCaseProtocol {
-    /// The recommended playlists are the «Hitster» ones of the catalogue: the repository returns only those whose
-    /// name contains it. In quotes, so the catalogue search looks for the exact word. Brand names are not translated.
-    private static let recommendationsTerm = "\"Hitster\""
+    /// Apple Music catalogue identifiers of the recommended «Hitster» playlists, in the order they are shown.
+    /// It is the last part of the playlist's link, e.g. music.apple.com/es/playlist/hitster/pl.u-DdANxEPFj4Jyvq.
+    /// Add more by hand; they are all read in one request.
+    private static let recommendedPlaylistIDs = [
+        "pl.u-DdANxEPFj4Jyvq"
+    ]
 
     private let provider: MusicProvider
     private let repository: any PlaylistsRepositoryProtocol
@@ -32,7 +35,7 @@ struct PlaylistsUseCase: PlaylistsUseCaseProtocol {
     }
 
     func execute() async throws -> PlaylistSelectorViewData.Playlists {
-        let request = PlaylistsRequest(provider: provider, recommendationsTerm: Self.recommendationsTerm)
+        let request = PlaylistsRequest(provider: provider, recommendedPlaylistIDs: Self.recommendedPlaylistIDs)
         let response = try await repository.fetch(request)
         return PlaylistSelectorViewData.Playlists(
             recommended: response.recommended.map(Self.playlist(from:)),
