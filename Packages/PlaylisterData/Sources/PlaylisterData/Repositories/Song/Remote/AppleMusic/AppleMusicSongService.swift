@@ -3,8 +3,8 @@ import MusicKit
 
 /// Apple Music songs. Internal: the app only sees `SongRepositoryProtocol`.
 /// Wraps MusicKit: finds the playlist in the library or in the catalogue and reads the first batch of its songs.
-/// Those songs may come with little more than their identifier, so it looks a few random ones up by identifier to
-/// get their artwork, then picks the final ones with `RandomSongPicker`.
+/// Those songs may come with little more than their identifier, so it picks `count` of them at random and looks only
+/// those up by identifier to get their artwork.
 struct AppleMusicSongService: SongServiceProtocol {
     /// Side, in pixels, of the artwork URLs.
     private static let artworkSide = 400
@@ -12,9 +12,6 @@ struct AppleMusicSongService: SongServiceProtocol {
     private static let libraryPlaylistIDPrefix = "p."
     /// Library song identifiers start with it; catalogue ones are numbers.
     private static let librarySongIDPrefix = "i."
-    /// Random songs looked up per playlist, more than requested so songs from different albums and with artwork
-    /// can still be picked.
-    private static let candidatesPerSong = 3
 
     func fetchRandomSongs(_ request: SongRequestDAO) async throws -> SongResponseDAO {
         guard request.provider == .appleMusic else {
@@ -25,15 +22,9 @@ struct AppleMusicSongService: SongServiceProtocol {
         }
         do {
             let playlist = try await findPlaylist(id: request.playlistID).with([.tracks])
-            let candidates = (playlist.tracks ?? []).shuffled().prefix(request.count * Self.candidatesPerSong)
-            let songs = try await findSongs(ids: candidates.map(\.id))
-            let picked = RandomSongPicker.pick(
-                songs,
-                count: request.count,
-                album: { $0.albumTitle },
-                artworkURL: { Self.webURL(of: $0.artwork) }
-            )
-            return SongResponseDAO(provider: .appleMusic, items: picked.compactMap(Self.item(from:)))
+            let picked = RandomSongPicker.pick(Array(playlist.tracks ?? []), count: request.count)
+            let songs = try await findSongs(ids: picked.map(\.id))
+            return SongResponseDAO(provider: .appleMusic, items: songs.compactMap(Self.item(from:)))
         } catch let error as SongError {
             throw error
         } catch is CancellationError {

@@ -151,12 +151,11 @@ internal `SongServiceProtocol` of that provider, registered in `SongRepository.i
 `SongResponseProtocol` with up to `count` random `SongItemProtocol`s (id, title, artist and web artwork URL).
 
 - `AppleMusicSongService` (in `Remote/AppleMusic/`) finds the playlist in the library when its id starts with `p.`,
-  else in the catalogue, and reads only the **first batch** of its songs. Those songs may come with little more than
-  their id, so it takes `count × 3` of them at random and **looks them up by id** to get their artwork: library songs
-  (ids starting with `i.`) with one `MusicLibraryRequest`, catalogue songs with one `MusicCatalogResourceRequest`,
-  at the same time.
-- `RandomSongPicker` picks the songs at random among those with web artwork, at most one per album, so a cover mosaic
-  shows four different covers. With fewer songs or albums it returns fewer songs.
+  else in the catalogue, and reads the **first batch** of its songs, which may come with little more than their id.
+  `RandomSongPicker` picks `count` of them at random, and **only those** are looked up by id to get their artwork:
+  library songs (ids starting with `i.`) with one `MusicLibraryRequest`, catalogue songs with one
+  `MusicCatalogResourceRequest`, at the same time. Picked songs without web artwork are left out, so it may return
+  fewer than `count`.
 - Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme `AsyncImage` cannot load).
 - Without MusicKit access it throws `SongError.notAuthorized`, an unknown playlist `SongError.playlistNotFound`, any
   other MusicKit failure `SongError.unavailable`, and a provider without a service `SongError.unsupportedProvider`.

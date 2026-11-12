@@ -2,7 +2,7 @@ import Foundation
 import PlaylisterData
 
 protocol PlaylistCustomArtworkUseCaseProtocol: Sendable {
-    /// Returns up to four covers of random songs of the playlist, from different albums, for a playlist that has no
+    /// Returns up to four covers of random songs of the playlist, for a playlist that has no
     /// artwork of its own. The view model adds them to the `customArtworks` of its `PlaylistSelectorViewData`.
     func execute(playlistID: String, provider: MusicProvider) async throws -> [URL]
 }

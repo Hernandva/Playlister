@@ -54,27 +54,14 @@ struct SongRepositoryTests {
 }
 
 struct RandomSongPickerTests {
-    private struct Song: Equatable {
-        let album: String?
-        let artwork: String?
+    @Test func picksCountDifferentSongs() {
+        let picked = RandomSongPicker.pick(Array(1...10), count: 4)
+        #expect(picked.count == 4)
+        #expect(Set(picked).count == 4)
+        #expect(Set(picked).isSubset(of: Set(1...10)))
     }
 
-    private static func pick(_ songs: [Song], count: Int) -> [Song] {
-        RandomSongPicker.pick(songs, count: count, album: \.album, artworkURL: { $0.artwork.flatMap(URL.init) })
-    }
-
-    @Test func picksUpToCountSongs() {
-        let songs = (1...10).map { Song(album: "Album \($0)", artwork: "https://example.com/\($0).jpg") }
-        #expect(Self.pick(songs, count: 4).count == 4)
-    }
-
-    @Test func neverPicksSongsWithoutArtwork() {
-        let songs = [Song(album: "A", artwork: nil), Song(album: "B", artwork: "https://example.com/b.jpg")]
-        #expect(Self.pick(songs, count: 4) == [Song(album: "B", artwork: "https://example.com/b.jpg")])
-    }
-
-    @Test func picksOneSongPerAlbum() {
-        let songs = (1...6).map { Song(album: "Same album", artwork: "https://example.com/\($0).jpg") }
-        #expect(Self.pick(songs, count: 4).count == 1)
+    @Test func picksEverySongOfAShortPlaylist() {
+        #expect(Set(RandomSongPicker.pick([1, 2], count: 4)) == [1, 2])
     }
 }
