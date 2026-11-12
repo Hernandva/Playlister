@@ -79,6 +79,7 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 | `LastPlaylist` | `LastPlaylistRepositoryProtocol` / `LastPlaylistRepository` | `Sources/PlaylisterData/Repositories/LastPlaylist/` |
 | `Settings` | `SettingsRepositoryProtocol` / `SettingsRepository` | `Sources/PlaylisterData/Repositories/Settings/` |
 | `Playlists` | `PlaylistsRepositoryProtocol` / `PlaylistsRepository` | `Sources/PlaylisterData/Repositories/Playlists/` |
+| `Song` | `SongRepositoryProtocol` | `Sources/PlaylisterData/Repositories/Song` |
 <!-- codegen:repository-registry:end -->
 
 ### Authorization (no HTTP)
