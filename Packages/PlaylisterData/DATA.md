@@ -102,8 +102,8 @@ Failures are thrown as `LoginError`; a provider without a service throws `LoginE
 
 `LastPlaylistRepository` keeps the last playlist played with each `MusicProvider` on the device.
 `fetch(_:)` takes a `LastPlaylistRequestProtocol` (the provider the user signed in with) and returns a
-`LastPlaylistResponseProtocol` whose `lastPlaylist` (`LastPlaylistItemProtocol`: id, name, song count and up to
-four covers) is `nil` until one is saved. `saveLastPlaylist(_:for:)` stores a playlist for a provider and
+`LastPlaylistResponseProtocol` whose `lastPlaylist` (`LastPlaylistItemProtocol`: id, name, song count, `nil` when the
+playlist was chosen without reading its songs, and up to four covers) is `nil` until one is saved. `saveLastPlaylist(_:for:)` stores a playlist for a provider and
 replaces the previous one; each provider has its own entry. The internal `LastPlaylistStorageProtocol` (in `Local/`) is backed by
 `LastPlaylistUserDefaultsStorage`, which writes the `Codable` `LastPlaylistItemDAO` as JSON under
 `playlisterData.lastPlaylist.<provider>`. Do not change those keys: saved playlists would be lost.
@@ -127,9 +127,9 @@ setting keeps the rest. Write failures are thrown as `SettingsError.storageFaile
 (the provider the user signed in with and the `recommendationsTerm` searched in the catalogue, e.g. «Hitster») and
 forwards it, as the internal `PlaylistsRequestDAO`, to the internal `PlaylistsServiceProtocol` of that provider,
 registered in `PlaylistsRepository.init()`. It returns a `PlaylistsResponseProtocol` with the `recommended` playlists
-(catalogue search) and the `library` playlists of the user, each a `PlaylistsItemProtocol` (id, name, song count and
-up to four covers from different albums). `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`) reads up to 12
-catalogue playlists and the 50 most recently played library playlists, and `AppleMusicPlaylistMapper` loads their
-songs (up to 1000 per playlist) to count them and pick the covers; only `https` cover URLs are kept. Without MusicKit
-access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure `PlaylistsError.unavailable`, and a provider
-without a service throws `PlaylistsError.unsupportedProvider`.
+(catalogue search) and the `library` playlists of the user, each a `PlaylistsItemProtocol` with only what the service
+returns for the playlist itself: id, name, curator and artwork URL. It **never reads the songs**, so a list costs two
+requests: `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`) reads up to 12 catalogue playlists and the 50 most
+recently played library playlists. Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme
+`AsyncImage` cannot load). Without MusicKit access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure
+`PlaylistsError.unavailable`, and a provider without a service throws `PlaylistsError.unsupportedProvider`.

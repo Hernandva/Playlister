@@ -29,7 +29,8 @@ struct ProviderStarterViewData: Equatable, Sendable {
         /// Identifier of the playlist in its music service.
         let id: String
         let name: String
-        let songCount: Int
+        /// `nil` when it was chosen in the selector, which does not read the songs.
+        let songCount: Int?
         let covers: [URL]
     }
 

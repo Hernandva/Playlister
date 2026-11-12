@@ -3,7 +3,8 @@ import PlaylisterUI
 import SwiftUI
 
 /// Playlist selector: a search field, the «Hitster» playlists of the catalogue and the user's playlists.
-/// Tapping a playlist asks to confirm it; once confirmed, ProviderStarter shows it and the selector closes.
+/// Cards show only the playlist's artwork, name and curator. Tapping one asks to confirm it; once confirmed,
+/// ProviderStarter shows it and the selector closes.
 struct PlaylistSelectorView: View {
     /// Card sides of the design system: 200 pt in the recommended carousel, 150 pt in «Your playlists».
     private static let recommendedCardSize: CGFloat = 200
@@ -111,7 +112,7 @@ struct PlaylistSelectorView: View {
                     } label: {
                         DSPlaylistCard(
                             playlist.name,
-                            subtitle: viewModel.songCountText(for: playlist),
+                            subtitle: viewModel.subtitle(for: playlist),
                             covers: playlist.covers,
                             size: cardSize
                         )

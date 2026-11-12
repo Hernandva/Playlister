@@ -9,15 +9,15 @@ public enum PlaylistsError: Error, Equatable, Sendable {
     case unavailable
 }
 
-/// A playlist of a music service, as the selector shows it.
+/// A playlist of a music service, with only what the service returns for the playlist itself.
 public protocol PlaylistsItemProtocol: Sendable {
     /// Identifier of the playlist in its music service.
     var id: String { get }
     var name: String { get }
-    /// Number of songs in the playlist.
-    var songCount: Int { get }
-    /// Up to four album covers of the playlist's songs, from different albums.
-    var coverURLs: [URL] { get }
+    /// Who made the playlist (e.g. «Apple Music»), when the service says so.
+    var curatorName: String? { get }
+    /// The playlist's own artwork, when it has one that can be loaded from the web.
+    var artworkURL: URL? { get }
 }
 
 /// Public data the Playlists repository returns to the app.

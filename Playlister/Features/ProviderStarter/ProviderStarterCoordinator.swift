@@ -44,10 +44,11 @@ final class ProviderStarterCoordinator: Coordinator {
         case .playlistSelector:
             let selectPlaylist = dependencies.resolveSelectPlaylist()
             return AnyView(PlaylistSelectorCoordinator(provider: dependencies.resolveProvider()) { playlist in
+                // The selector does not read the songs, so the count is unknown until the game loads them.
                 selectPlaylist(ProviderStarterViewData.Playlist(
                     id: playlist.id,
                     name: playlist.name,
-                    songCount: playlist.songCount,
+                    songCount: nil,
                     covers: playlist.covers
                 ))
             }.start())

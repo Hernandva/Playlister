@@ -22,11 +22,12 @@ private final class FakePlaylistsService: PlaylistsServiceProtocol, @unchecked S
 }
 
 struct PlaylistsRepositoryTests {
+    private static let request = PlaylistsRequest(provider: .appleMusic, recommendationsTerm: "Hitster")
     private static let playlist = PlaylistsItemDAO(
         id: "pl.1",
         name: "Hitster España",
-        songCount: 312,
-        coverURLs: [URL(string: "https://example.com/cover.jpg")!]
+        curatorName: "Apple Music",
+        artworkURL: URL(string: "https://example.com/cover.jpg")
     )
 
     @Test func forwardsTheRequestToTheProviderService() async throws {
@@ -34,12 +35,12 @@ struct PlaylistsRepositoryTests {
         let service = FakePlaylistsService(result: .success(response))
         let repository = PlaylistsRepository(services: [.appleMusic: service])
 
-        let result = try await repository.fetch(PlaylistsRequest(provider: .appleMusic, recommendationsTerm: "Hitster"))
+        let result = try await repository.fetch(Self.request)
 
         #expect(service.receivedRequest == PlaylistsRequestDAO(provider: .appleMusic, recommendationsTerm: "Hitster"))
         #expect(result.provider == .appleMusic)
         #expect(result.recommended.map(\.name) == ["Hitster España"])
-        #expect(result.recommended.first?.songCount == 312)
+        #expect(result.recommended.first?.curatorName == "Apple Music")
         #expect(result.library.isEmpty)
     }
 
@@ -47,7 +48,7 @@ struct PlaylistsRepositoryTests {
         let service = FakePlaylistsService(result: .failure(.notAuthorized))
         let repository = PlaylistsRepository(services: [.appleMusic: service])
         await #expect(throws: PlaylistsError.notAuthorized) {
-            try await repository.fetch(PlaylistsRequest(provider: .appleMusic, recommendationsTerm: "Hitster"))
+            try await repository.fetch(Self.request)
         }
     }
 

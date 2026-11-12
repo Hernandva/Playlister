@@ -5,11 +5,14 @@ import PlaylisterData
 /// to its own field, so a new result never erases the rest of the data.
 struct PlaylistSelectorViewData: Equatable, Sendable {
     /// A playlist shown in a carousel and handed to ProviderStarter when the user selects it.
+    /// Only what the music service returns for the playlist itself: its songs are never read here.
     struct Playlist: Equatable, Sendable, Identifiable {
         /// Identifier of the playlist in its music service.
         let id: String
         let name: String
-        let songCount: Int
+        /// Who made the playlist, e.g. «Apple Music», when the service says so.
+        let curatorName: String?
+        /// The playlist's artwork: one URL, or none when it has no web artwork.
         let covers: [URL]
     }
 

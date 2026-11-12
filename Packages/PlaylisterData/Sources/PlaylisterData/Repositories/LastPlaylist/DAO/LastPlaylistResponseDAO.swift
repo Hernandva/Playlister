@@ -12,10 +12,11 @@ struct LastPlaylistResponseDAO: Sendable, LastPlaylistResponseProtocol {
 struct LastPlaylistItemDAO: Codable, Sendable, Equatable, LastPlaylistItemProtocol {
     let id: String
     let name: String
-    let songCount: Int
+    /// Optional so playlists saved before it was optional, with a count, still decode.
+    let songCount: Int?
     let coverURLs: [URL]
 
-    init(id: String, name: String, songCount: Int, coverURLs: [URL]) {
+    init(id: String, name: String, songCount: Int?, coverURLs: [URL]) {
         self.id = id
         self.name = name
         self.songCount = songCount

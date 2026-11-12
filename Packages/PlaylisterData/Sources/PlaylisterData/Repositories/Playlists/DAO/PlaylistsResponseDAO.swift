@@ -14,6 +14,6 @@ struct PlaylistsResponseDAO: Sendable, Equatable, PlaylistsResponseProtocol {
 struct PlaylistsItemDAO: Sendable, Equatable, PlaylistsItemProtocol {
     let id: String
     let name: String
-    let songCount: Int
-    let coverURLs: [URL]
+    let curatorName: String?
+    let artworkURL: URL?
 }

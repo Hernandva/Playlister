@@ -4,6 +4,8 @@ import Observation
 @MainActor
 @Observable
 final class PlaylistSelectorViewModel {
+    typealias Playlist = PlaylistSelectorViewData.Playlist
+
     enum State: Equatable {
         case idle
         case loading
@@ -18,12 +20,12 @@ final class PlaylistSelectorViewModel {
     /// Text of the search field. Filters both carousels by playlist name.
     var searchText = ""
     /// Playlist whose confirmation sheet is shown, or `nil` when the sheet is closed.
-    var pendingPlaylist: PlaylistSelectorViewData.Playlist?
+    var pendingPlaylist: Playlist?
     /// Set once the user selected a playlist: the view closes once the sheet has closed.
     private(set) var wantsToClose = false
 
     private let playlistsUseCase: any PlaylistsUseCaseProtocol
-    private let selectPlaylist: @MainActor (PlaylistSelectorViewData.Playlist) -> Void
+    private let selectPlaylist: @MainActor (Playlist) -> Void
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: PlaylistSelectorDependencies) {
@@ -33,12 +35,12 @@ final class PlaylistSelectorViewModel {
     }
 
     /// «Hitster» playlists that match the search.
-    var recommended: [PlaylistSelectorViewData.Playlist] {
+    var recommended: [Playlist] {
         filtered(viewData.playlists?.recommended ?? [])
     }
 
     /// The user's playlists that match the search.
-    var library: [PlaylistSelectorViewData.Playlist] {
+    var library: [Playlist] {
         filtered(viewData.playlists?.library ?? [])
     }
 
@@ -57,19 +59,24 @@ final class PlaylistSelectorViewModel {
         String(localized: "playlistSelector.library.empty \(viewData.providerName)")
     }
 
-    /// Song count under the playlist name: «312 songs».
-    func songCountText(for playlist: PlaylistSelectorViewData.Playlist) -> String {
-        String(localized: "playlistSelector.songs \(playlist.songCount)")
+    /// Text under the playlist name: its curator, when the music service gives one.
+    func subtitle(for playlist: Playlist) -> String {
+        playlist.curatorName ?? ""
     }
 
-    /// Message of the confirmation sheet: «312 songs · Apple Music», then the question.
-    func confirmationMessage(for playlist: PlaylistSelectorViewData.Playlist) -> String {
-        let details = "\(songCountText(for: playlist)) · \(viewData.providerName)"
+    /// Message of the confirmation sheet: the curator and the music service (once if they match), then the question.
+    func confirmationMessage(for playlist: Playlist) -> String {
+        let details = [playlist.curatorName, viewData.providerName]
+            .compactMap { $0 }
+            .reduce(into: [String]()) { names, name in
+                if !names.contains(name) { names.append(name) }
+            }
+            .joined(separator: " · ")
         return details + "\n" + String(localized: "playlistSelector.confirm.question")
     }
 
     /// A playlist was tapped: asks the user to confirm it.
-    func didTap(_ playlist: PlaylistSelectorViewData.Playlist) {
+    func didTap(_ playlist: Playlist) {
         wantsToClose = false
         pendingPlaylist = playlist
     }
@@ -97,7 +104,7 @@ final class PlaylistSelectorViewModel {
         }
     }
 
-    private func filtered(_ playlists: [PlaylistSelectorViewData.Playlist]) -> [PlaylistSelectorViewData.Playlist] {
+    private func filtered(_ playlists: [Playlist]) -> [Playlist] {
         let query = searchText.trimmingCharacters(in: .whitespaces)
         guard !query.isEmpty else { return playlists }
         return playlists.filter { $0.name.localizedStandardContains(query) }

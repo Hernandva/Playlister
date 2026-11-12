@@ -45,8 +45,8 @@ private extension PlaylistsUseCase {
         PlaylistSelectorViewData.Playlist(
             id: item.id,
             name: item.name,
-            songCount: item.songCount,
-            covers: item.coverURLs
+            curatorName: item.curatorName,
+            covers: item.artworkURL.map { [$0] } ?? []
         )
     }
 }

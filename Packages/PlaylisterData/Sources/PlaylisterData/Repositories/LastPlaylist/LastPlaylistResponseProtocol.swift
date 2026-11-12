@@ -10,8 +10,8 @@ public protocol LastPlaylistItemProtocol: Sendable {
     /// Identifier of the playlist in its music service.
     var id: String { get }
     var name: String { get }
-    /// Number of songs in the playlist.
-    var songCount: Int { get }
+    /// Number of songs in the playlist, or `nil` when it was chosen without reading its songs.
+    var songCount: Int? { get }
     /// Up to four album covers of the playlist's songs, from different albums.
     var coverURLs: [URL] { get }
 }

@@ -3,7 +3,7 @@ import Foundation
 /// Public API of the Playlists repository. Features depend on this protocol, never on the concrete class.
 public protocol PlaylistsRepositoryProtocol: Sendable {
     /// Reads the recommended playlists and the user's own playlists of the music service in `request`.
-    /// Throws `PlaylistsError` when they cannot be read.
+    /// Only the playlists themselves are read, never their songs. Throws `PlaylistsError`.
     func fetch(_ request: some PlaylistsRequestProtocol) async throws -> any PlaylistsResponseProtocol
 }
 

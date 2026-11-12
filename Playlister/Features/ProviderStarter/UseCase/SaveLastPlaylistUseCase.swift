@@ -10,7 +10,7 @@ protocol SaveLastPlaylistUseCaseProtocol: Sendable {
 struct SavedPlaylist: LastPlaylistItemProtocol {
     let id: String
     let name: String
-    let songCount: Int
+    let songCount: Int?
     let coverURLs: [URL]
 }
 

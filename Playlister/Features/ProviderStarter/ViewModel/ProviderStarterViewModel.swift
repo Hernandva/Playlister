@@ -89,9 +89,9 @@ final class ProviderStarterViewModel {
         isChangeProviderSheetPresented = false
     }
 
-    /// Song count under the playlist name: «312 songs».
-    func songCountText(for playlist: ProviderStarterViewData.Playlist) -> String {
-        String(localized: "providerStarter.selectedPlaylist.songs \(playlist.songCount)")
+    /// Song count under the playlist name: «312 songs», or `nil` when it is not known.
+    func songCountText(for playlist: ProviderStarterViewData.Playlist) -> String? {
+        playlist.songCount.map { String(localized: "providerStarter.selectedPlaylist.songs \($0)") }
     }
 
     /// Called by the playlist selector with the playlist the user chose.

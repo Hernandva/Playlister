@@ -172,7 +172,9 @@ struct ProviderStarterView: View {
             VStack(alignment: .leading, spacing: DSSpacing.space1) {
                 DSText(playlist.name, style: .headline)
                     .lineLimit(2)
-                DSText(viewModel.songCountText(for: playlist), style: .subheadline)
+                if let songCount = viewModel.songCountText(for: playlist) {
+                    DSText(songCount, style: .subheadline)
+                }
             }
         }
         .accessibilityElement(children: .combine)
