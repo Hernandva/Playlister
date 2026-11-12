@@ -27,14 +27,36 @@ struct AppleMusicAPIDAOTests {
             {"id": "p.rXAJLqVCO1X0D", "type": "library-playlists", "attributes": {"name": "Sin portada"}},
             {"id": "p.noAttributes", "type": "library-playlists"}
         ]}
-        """, as: AppleMusicLibraryPlaylistAttributesDAO.self)
+        """, as: AppleMusicPlaylistAttributesDAO.self)
 
-        let items = page.data.compactMap { PlaylistsItemDAO(libraryPlaylist: $0, artworkSide: 400) }
+        let items = page.data.compactMap { PlaylistsItemDAO(playlist: $0, artworkSide: 400) }
 
         #expect(items.map(\.id) == ["p.vMO5BZKFN4369", "p.rXAJLqVCO1X0D"])
         #expect(items.first?.artworkURL?.absoluteString == "https://example.com/400x400.jpg")
         #expect(items.last?.artworkURL == nil)
         #expect(items.allSatisfy { $0.curatorName == nil })
+    }
+
+    @Test func decodesASearchWithCatalogPlaylists() throws {
+        let json = """
+        {"results": {"playlists": {
+            "data": [{"id": "pl.u-DdANxEPFj4Jyvq", "type": "playlists",
+                      "attributes": {"name": "Hitster", "curatorName": "Alguien",
+                                     "artwork": {"url": "https://example.com/{w}x{h}.jpg"}}}],
+            "next": "/v1/catalog/es/search?offset=25"
+        }}}
+        """
+        let response = try JSONDecoder().decode(AppleMusicPlaylistsSearchDAO.self, from: Data(json.utf8))
+        let page = try #require(response.results.playlists)
+        let items = page.data.compactMap { PlaylistsItemDAO(playlist: $0, artworkSide: 400) }
+
+        #expect(items.map(\.curatorName) == ["Alguien"])
+        #expect(page.next != nil)
+    }
+
+    @Test func decodesASearchWithoutPlaylists() throws {
+        let response = try JSONDecoder().decode(AppleMusicPlaylistsSearchDAO.self, from: Data(#"{"results": {}}"#.utf8))
+        #expect(response.results.playlists == nil)
     }
 
     @Test func keepsOnlySongsWithWebArtwork() throws {

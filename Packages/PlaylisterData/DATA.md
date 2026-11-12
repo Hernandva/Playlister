@@ -11,8 +11,10 @@ Humans and coding agents must follow this file; the `playlister-new-repo` skill 
 - The **Apple Music API** (`https://api.music.apple.com/v1/`) is the one exception: only MusicKit can sign its
   requests, so every call to it goes through `Core/Remote/AppleMusic/AppleMusicAPIClient.swift`, which uses
   `MusicDataRequest`. Its responses share the DAOs of `AppleMusicAPIDAO.swift` (page, resource, artwork template).
-  Use it when MusicKit's own requests fall short, e.g. the user's library: `MusicLibraryRequest` gives `musicKit://`
-  artwork that `AsyncImage` cannot load, the API gives web artwork.
+- **Apple Music data always comes from the API**, never from MusicKit's own requests (`MusicCatalog…Request`,
+  `MusicLibraryRequest`): the API gives web artwork everywhere (`MusicLibraryRequest` gives `musicKit://` artwork
+  that `AsyncImage` cannot load) and one shape of DAO for the catalogue and the library. MusicKit is used only for
+  what the API cannot do: the permission (`MusicAuthorization`) and the subscription (`MusicSubscription`).
 - Each repository lives in its own folder: `Sources/PlaylisterData/Repositories/<Name>/`.
 - Data sources are split by where the data lives, both in `Core/` and inside each repository:
   - `Remote/`: whatever leaves the device, such as HTTP through `NetworkClient` or a provider SDK like MusicKit.
@@ -100,8 +102,9 @@ Every provider service is `internal`, refines the public `AuthorizationServicePr
 `LoginRepository` follows the same shape as `AuthorizationRepository`: it forwards
 `login(with: MusicProvider)` to the internal service of each provider. Every provider service is
 `internal`, refines the public `LoginServiceProtocol` (e.g. `AppleMusicLoginServiceProtocol`, which
-checks the MusicKit authorisation, validates the session by fetching the storefront and requires a
-subscription that can play the catalogue) and is registered in `LoginRepository.init()`.
+checks the MusicKit authorisation, validates the session by fetching the storefront through `AppleMusicAPIClient`
+and requires, through MusicKit's `MusicSubscription`, a subscription that can play the catalogue) and is registered
+in `LoginRepository.init()`.
 Failures are thrown as `LoginError`; a provider without a service throws `LoginError.unsupportedProvider`.
 
 ### LastPlaylist (local storage, no HTTP)
@@ -127,29 +130,30 @@ its own entry. The internal `SettingsStorageProtocol` (in `Local/`) is backed by
 values of the `Settings…` enums: saved settings would be lost. A missing field reads as its default, so adding a
 setting keeps the rest. Write failures are thrown as `SettingsError.storageFailed`.
 
-### Playlists (MusicKit, no HTTP)
+### Playlists (Apple Music API)
 
 `PlaylistsRepository` follows the same shape as `LoginRepository`: each call is forwarded, as an internal DAO, to the
 internal `PlaylistsServiceProtocol` of its provider, registered in `PlaylistsRepository.init()`. Every call returns
 `PlaylistsItemProtocol`s with only what the service returns for the playlist itself (id, name, curator and artwork
-URL) and **never reads the songs**. Each call is one request (Apple Music API for the library, MusicKit for the catalogue), so the app can run them in
-parallel.
+URL) and **never reads the songs**. Each call is one request to the Apple Music API through `AppleMusicAPIClient` (and one more, cached by MusicKit,
+for the storefront of catalogue paths), so the app can run them in parallel. Library and catalogue playlists share
+`AppleMusicPlaylistAttributesDAO`.
 
 | Call | Request | Returns |
 |---|---|---|
 | `fetchLibrary(_:)` | `LibraryPlaylistsRequestProtocol` (provider) | Up to `PlaylistsRepository.libraryLimit` (20) library playlists from `GET /v1/me/library/playlists` (Apple Music API), in the order the API returns them, with their web artwork when they have one. |
-| `fetchRecommended(_:)` | `RecommendedPlaylistsRequestProtocol` (provider, `playlistIDs`) | Every catalogue playlist of the ids in **one** `MusicCatalogResourceRequest`, in the order of the ids. Ids not in the catalogue (deleted or no longer shared) are left out without failing. |
-| `search(_:)` | `PlaylistsSearchRequestProtocol` (provider, `term`, `offset`) | One page of `PlaylistsRepository.searchPageSize` (25) catalogue playlists, without top results, as a `PlaylistsSearchResponseProtocol` whose `hasMore` is `true` when the page was full. An empty term returns no playlists. |
+| `fetchRecommended(_:)` | `RecommendedPlaylistsRequestProtocol` (provider, `playlistIDs`) | Every catalogue playlist of the ids from **one** `GET /v1/catalog/{storefront}/playlists?ids=…`, in the order of the ids. Ids not in the catalogue (deleted or no longer shared) are left out without failing. |
+| `search(_:)` | `PlaylistsSearchRequestProtocol` (provider, `term`, `offset`) | One page of `PlaylistsRepository.searchPageSize` (25) playlists from `GET /v1/catalog/{storefront}/search?types=playlists`, as a `PlaylistsSearchResponseProtocol` whose `hasMore` is `true` when the API announces a `next` page. An empty term returns no playlists. |
 
 - The recommended ids live in the feature (`HitsterPlayListUseCase`). They are read by id, never searched: the public
   catalogue search barely returns playlists shared by users, such as the «Hitster» ones.
-- The catalogue search seems to stop at about 100 results: past them, pages come back empty and `hasMore` is `false`.
-- Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme `AsyncImage` cannot load).
-- Without MusicKit access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure
+- The catalogue search seems to stop at about 100 results: past them the API announces no `next` page.
+- Only `https` artwork URLs are kept.
+- Without MusicKit access it throws `PlaylistsError.notAuthorized`, on any other failure
   `PlaylistsError.unavailable`, a cancelled call rethrows `CancellationError`, and a provider without a service throws
   `PlaylistsError.unsupportedProvider`.
 
-### Song (MusicKit, no HTTP)
+### Song (Apple Music API)
 
 `SongRepository` follows the same shape as `PlaylistsRepository`: `fetchRandomSongs(_:)` takes a
 `SongRequestProtocol` (provider, `playlistID` and `count`) and forwards it, as the internal `SongRequestDAO`, to the
@@ -161,6 +165,6 @@ internal `SongServiceProtocol` of that provider, registered in `SongRepository.i
   `GET /v1/catalog/{storefront}/playlists/{id}/tracks`. Each song already comes with its web artwork, so no song is
   looked up again. `RandomSongPicker` then picks `count` of those with artwork at random; with fewer songs with
   artwork it returns fewer.
-- Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme `AsyncImage` cannot load).
+- Only `https` artwork URLs are kept.
 - Without MusicKit access it throws `SongError.notAuthorized`, an unknown playlist (API 404)
   `SongError.playlistNotFound`, any other failure `SongError.unavailable`, and a provider without a service `SongError.unsupportedProvider`.
