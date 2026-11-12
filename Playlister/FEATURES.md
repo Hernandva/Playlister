@@ -23,7 +23,7 @@ Features/Profile/
 ├── ProfileDependencies.swift       # Dependency injection container of the feature
 ├── View/ProfileView.swift          # SwiftUI view built only with PlaylisterUI components
 ├── ViewModel/ProfileViewModel.swift# @MainActor @Observable state holder, calls the use case
-├── Model/ProfileViewData.swift     # Display-ready data consumed by the view
+├── Model/ProfileViewData.swift     # Display-ready data, owned by the view model as a variable
 └── UseCase/ProfileUseCase.swift    # Business logic; calls the repository public API
 ```
 
@@ -32,11 +32,11 @@ Features/Profile/
 | Type | Responsibility | Rules |
 |---|---|---|
 | `<Feature>Coordinator` | Initialises the view through `<Feature>Dependencies` and declares the routes (`Route` enum) to the features that can be opened from it. | Conforms to `Coordinator`. Only coordinators create other coordinators. |
-| `<Feature>Dependencies` | Builds the use case, the view model and injects the repository. | The only place where concrete types are created. Keeps each dependency as a `private let` and exposes it through a `resolve<Name>()` function (`resolveRepository()`, `resolveViewData()`, `resolveUseCase()`, `resolveViewModel()`). |
+| `<Feature>Dependencies` | Builds the use case, the view model and injects the repository. | The only place where concrete types are created. Keeps each dependency as a `private let` and exposes it through a `resolve<Name>()` function (`resolveRepository()`, `resolveUseCase()`, `resolveViewModel()`). It never builds the ViewData. |
 | `<Feature>View` | Renders state. Adds PlaylisterUI components and localises text with `.localized("key")`. | No business logic, no networking, no hard-coded colors or fonts. |
-| `<Feature>ViewModel` | Owns the screen state (`idle`, `loading`, `loaded(ViewData)`, `failed`). | Depends on `<Feature>UseCaseProtocol`, never on a repository. |
-| `<Feature>ViewData` | Display model. Maps the repository's public **response protocol** into the fields the view needs. | Value type, `Equatable` and `Sendable`. Never exposes Networking types to the view. |
-| `<Feature>UseCase` | Calls the repository through its **public API** and turns the response protocol into `ViewData`. | Depends on `<Name>RepositoryProtocol` from `Networking`. |
+| `<Feature>ViewModel` | Owns the screen state (`idle`, `loading`, `loaded`, `failed`) and the `viewData` variable. Adds each use case result to its own field of `viewData`. | Depends on `<Feature>UseCaseProtocol`, never on a repository. `private(set) var viewData`; the state never carries the ViewData. |
+| `<Feature>ViewData` | Display model held by the view model. One field (and, if needed, one nested type) per use case result. | Value type, `Equatable` and `Sendable`, with `var` fields. Never maps response protocols and never exposes Networking types to the view. |
+| `<Feature>UseCase` | Calls the repository through its **public API** and returns **only the data of the response**, mapped out of the Networking types into a ViewData field type. | Depends on `<Name>RepositoryProtocol` from `Networking`. Never builds or returns the whole ViewData. |
 
 ### Initialisers: only the container
 
@@ -74,8 +74,46 @@ init(dependencies: ProfileDependencies) {
 ```
 View ──▶ ViewModel ──▶ UseCase ──▶ <Name>RepositoryProtocol (Networking public API)
                                         │
-View ◀── ViewModel ◀── ViewData ◀── <Name>ResponseProtocol
+View ◀── ViewModel.viewData ◀── response data ◀── <Name>ResponseProtocol
+            (adds it to a field)   (use case maps it)
 ```
+
+### ViewData lives in the view model
+
+The view model owns the screen data as a variable, and each use case only hands it the data of its response:
+
+```swift
+// ViewData: one field per use case result
+struct ProfileViewData: Equatable, Sendable {
+    struct User: Equatable, Sendable { let name: String }
+    var user: User?
+}
+
+// UseCase: returns only the data of the response, mapped out of Networking
+func execute() async throws -> ProfileViewData.User {
+    let response = try await repository.fetch(ProfileRequest(), serviceName: serviceName)
+    return ProfileViewData.User(name: response.name)
+}
+
+// ViewModel: keeps the ViewData and adds each result to its own field
+private(set) var state: State = .idle          // idle, loading, loaded, failed
+private(set) var viewData = ProfileViewData()
+
+func load() async {
+    state = .loading
+    do {
+        viewData.user = try await useCase.execute()
+        state = .loaded
+    } catch {
+        state = .failed(error.localizedDescription)
+    }
+}
+```
+
+- A new result never erases the rest of the data: assign only the field of that use case.
+- The view reads `viewModel.viewData` (or view model properties built on it), and switches on `state`
+  only to show loading or error.
+- A screen with several use cases has one field per use case, and may have one `…Loaded` state per result.
 
 ### Navigation
 
@@ -106,6 +144,7 @@ adds the route to the parent coordinator and updates this file.
 | Feature | Opened from | Repository |
 |---|---|---|
 | `Home` | — (root) | `Authorization`, `Login` |
+| `ProviderStarter` | Home | `LastPlaylistRepository` |
 <!-- codegen:feature-registry:end -->
 
 ## App map
@@ -116,5 +155,6 @@ Which feature opens which. `A --> B` means feature A can open feature B.
 ```mermaid
 graph TD
     Home
+    Home --> ProviderStarter
 ```
 <!-- codegen:app-map:end -->

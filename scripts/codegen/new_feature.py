@@ -29,7 +29,7 @@ FILES = [
     ("ViewData.swift.tmpl", "Model/{F}ViewData.swift"),
     ("UseCase.swift.tmpl", "UseCase/{F}UseCase.swift"),
 ]
-WITH_REPOSITORY = {"Dependencies.swift.tmpl", "ViewData.swift.tmpl", "UseCase.swift.tmpl"}
+WITH_REPOSITORY = {"Dependencies.swift.tmpl", "UseCase.swift.tmpl"}
 
 
 def create_branch(project: str, feature: str) -> str:

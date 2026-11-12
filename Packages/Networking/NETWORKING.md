@@ -64,6 +64,7 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 |---|---|---|
 | `Authorization` | `AuthorizationServiceProtocol` / `AuthorizationRepository` | `Sources/Networking/Repositories/Authorization/` |
 | `Login` | `LoginServiceProtocol` / `LoginRepository` | `Sources/Networking/Repositories/Login/` |
+| `LastPlaylist` | `LastPlaylistRepositoryProtocol` / `LastPlaylistRepository` | `Sources/Networking/Repositories/LastPlaylist/` |
 <!-- codegen:repository-registry:end -->
 
 ### Authorization (no HTTP)
@@ -82,3 +83,14 @@ Every provider service is `internal`, refines the public `AuthorizationServicePr
 checks the MusicKit authorisation, validates the session by fetching the storefront and requires a
 subscription that can play the catalogue) and is registered in `LoginRepository.init()`.
 Failures are thrown as `LoginError`; a provider without a service throws `LoginError.unsupportedProvider`.
+
+### LastPlaylist (local storage, no HTTP)
+
+`LastPlaylistRepository` keeps the last playlist played with each `MusicProvider` on the device.
+`fetch(_:)` takes a `LastPlaylistRequestProtocol` (the provider the user signed in with) and returns a
+`LastPlaylistResponseProtocol` whose `lastPlaylist` (`LastPlaylistItemProtocol`: id, name, song count and up to
+four covers) is `nil` until one is saved. `saveLastPlaylist(_:for:)` stores a playlist for a provider and
+replaces the previous one; each provider has its own entry. The internal `LastPlaylistStorageProtocol` is backed by
+`LastPlaylistUserDefaultsStorage`, which writes the `Codable` `LastPlaylistItemDAO` as JSON under
+`networking.lastPlaylist.<provider>`. Do not change those keys: saved playlists would be lost.
+Write failures are thrown as `LastPlaylistError.storageFailed`; unreadable data reads as no playlist.

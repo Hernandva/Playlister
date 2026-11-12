@@ -2,13 +2,15 @@ import Foundation
 import Networking
 
 protocol {{Feature}}UseCaseProtocol: Sendable {
-    func execute() async throws -> {{Feature}}ViewData
+    /// Returns only the data of the response. The view model adds it to its `{{Feature}}ViewData`.
+    func execute() async throws -> {{Feature}}ViewData.Content
 }
 
 /// Request sent to the {{Repo}} repository. Add the fields its public request protocol declares.
 struct {{Feature}}Request: {{Repo}}RequestProtocol {}
 
-/// Business logic of {{Feature}}: calls the {{Repo}} repository public API and maps the response into ViewData.
+/// Business logic of {{Feature}}: calls the {{Repo}} repository public API and returns only the data of its
+/// response, mapped out of the Networking types.
 struct {{Feature}}UseCase: {{Feature}}UseCaseProtocol {
     /// One of the service names declared in `{{Repo}}Repository.configuration.serviceNames`.
     private let serviceName = ""
@@ -22,8 +24,15 @@ struct {{Feature}}UseCase: {{Feature}}UseCaseProtocol {
         self.repository = dependencies.resolveRepository()
     }
 
-    func execute() async throws -> {{Feature}}ViewData {
+    func execute() async throws -> {{Feature}}ViewData.Content {
         let response = try await repository.fetch({{Feature}}Request(), serviceName: serviceName)
-        return {{Feature}}ViewData(response: response)
+        return Self.content(from: response)
+    }
+}
+
+private extension {{Feature}}UseCase {
+    /// Maps the fields of {{Repo}}ResponseProtocol into the data the view model adds to its ViewData.
+    static func content(from response: any {{Repo}}ResponseProtocol) -> {{Feature}}ViewData.Content {
+        {{Feature}}ViewData.Content()
     }
 }

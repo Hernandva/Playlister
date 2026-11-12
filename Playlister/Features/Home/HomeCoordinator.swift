@@ -1,3 +1,5 @@
+import Networking
+import Observation
 import SwiftUI
 
 /// Navigation that Home's view model can trigger.
@@ -10,13 +12,18 @@ protocol HomeCoordinatorProtocol: AnyObject {
 /// Entry point of the Home feature.
 /// Builds the view through `HomeDependencies` and resolves the routes to the features opened from it.
 @MainActor
+@Observable
 final class HomeCoordinator: Coordinator, HomeCoordinatorProtocol {
     /// One case per feature that can be opened from Home.
     enum Route: Hashable {
+        /// Home with a session, for the music service the user signed in with.
+        case providerStarter(MusicProvider)
         // @codegen:routes
     }
 
-    private let dependencies: HomeDependencies
+    /// Route pushed by the view model, e.g. after signing in. `nil` while Home is on top.
+    var presentedRoute: Route?
+    @ObservationIgnored private let dependencies: HomeDependencies
 
     init(dependencies: HomeDependencies = HomeDependencies()) {
         self.dependencies = dependencies
@@ -28,15 +35,29 @@ final class HomeCoordinator: Coordinator, HomeCoordinatorProtocol {
             .navigationDestination(for: Route.self) { route in
                 self.destination(for: route)
             }
+            .navigationDestination(item: Bindable(self).presentedRoute) { route in
+                self.destination(for: route)
+            }
     }
 
     func openProvider(_ provider: HomeViewModel.Provider) {
-        // The screen of the provider does not exist yet.
+        presentedRoute = .providerStarter(Self.musicProvider(for: provider))
     }
 
     func destination(for route: Route) -> AnyView {
         switch route {
+        case .providerStarter(let provider):
+            return AnyView(ProviderStarterCoordinator(provider: provider).start())
         // @codegen:destinations
+        }
+    }
+}
+
+private extension HomeCoordinator {
+    static func musicProvider(for provider: HomeViewModel.Provider) -> MusicProvider {
+        switch provider {
+        case .spotify: .spotify
+        case .appleMusic: .appleMusic
         }
     }
 }
