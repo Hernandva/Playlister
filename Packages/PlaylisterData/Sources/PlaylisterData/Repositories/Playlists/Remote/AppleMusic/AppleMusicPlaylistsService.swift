@@ -31,21 +31,20 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
     }
 
     /// Reads search pages until there are enough playlists that contain the term, the search has been read as
-    /// far as `limits.recommendationsSearch`, or there are no more results.
+    /// far as `limits.recommendationsSearch`, or a page comes back empty.
+    /// Each page is its own request with an explicit `offset`: search results do not offer a next batch.
     private func recommendedPlaylists(term: String, limits: PlaylistsLimits) async throws -> [Playlist] {
         var collector = RecommendationsCollector<Playlist>(term: term, limits: limits) { $0.name }
-        var request = MusicCatalogSearchRequest(term: term, types: [Playlist.self])
-        request.limit = Self.searchPageSize
-        var page = try await request.response().playlists
-        var requestCount = 1
-        collector.add(Array(page))
-        logSearchPage(requestCount, pageSize: page.count, collector: collector)
-        while !collector.isComplete, page.hasNextBatch,
-              let next = try await page.nextBatch(limit: Self.searchPageSize), !next.isEmpty {
+        var requestCount = 0
+        while !collector.isComplete {
+            var request = MusicCatalogSearchRequest(term: term, types: [Playlist.self])
+            request.limit = Self.searchPageSize
+            request.offset = requestCount * Self.searchPageSize
+            let page = Array(try await request.response().playlists)
             requestCount += 1
-            collector.add(Array(next))
-            logSearchPage(requestCount, pageSize: next.count, collector: collector)
-            page = next
+            collector.add(page)
+            logSearchPage(requestCount, page: page, collector: collector)
+            if page.isEmpty { break }
         }
         #if DEBUG
         debugPrint("[Playlists] search «\(term)» done: \(requestCount) requests, "
@@ -54,11 +53,13 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
         return collector.items
     }
 
-    /// Debug builds only: one line per search page with the requests made and the matches found so far.
-    private func logSearchPage(_ requestCount: Int, pageSize: Int, collector: RecommendationsCollector<Playlist>) {
+    /// Debug builds only: one line per search page with the requests made, the matches found so far and the names
+    /// in the page, to see why they match or not.
+    private func logSearchPage(_ requestCount: Int, page: [Playlist], collector: RecommendationsCollector<Playlist>) {
         #if DEBUG
-        debugPrint("[Playlists] request \(requestCount): \(pageSize) results, "
+        debugPrint("[Playlists] request \(requestCount): \(page.count) results, "
             + "\(collector.readCount) read, \(collector.items.count) matches")
+        debugPrint("[Playlists] names: \(page.map(\.name).joined(separator: " | "))")
         #endif
     }
 

@@ -134,7 +134,8 @@ name, curator and artwork URL. It **never reads the songs**.
   search results read to find them (40 pages), and 20 library playlists, most recently played first.
 - **Recommended:** the catalogue search returns loose matches, so `RecommendationsCollector` keeps only the playlists
   whose name contains the term, ignoring case and accents. `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`)
-  reads the search in pages of 25 (the MusicKit maximum) and stops as soon as there are 20 matches, 1000 results
+  reads the search in pages of 25 (the MusicKit maximum), each a request with an explicit
+  `offset` because search results offer no next batch, and stops as soon as there are 20 matches, 1000 results
   have been read, or there are no more.
 - Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme `AsyncImage` cannot load).
 - Without MusicKit access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure
