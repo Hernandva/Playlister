@@ -64,7 +64,7 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 |---|---|---|
 | `Authorization` | `AuthorizationServiceProtocol` / `AuthorizationRepository` | `Sources/Networking/Repositories/Authorization/` |
 | `Login` | `LoginServiceProtocol` / `LoginRepository` | `Sources/Networking/Repositories/Login/` |
-| `Provider` | `ProviderRepositoryProtocol` | `Sources/Networking/Repositories/Provider` |
+| `Provider` | `ProviderRepositoryProtocol` / `ProviderRepository` | `Sources/Networking/Repositories/Provider/` |
 <!-- codegen:repository-registry:end -->
 
 ### Authorization (no HTTP)
@@ -83,3 +83,13 @@ Every provider service is `internal`, refines the public `AuthorizationServicePr
 checks the MusicKit authorisation, validates the session by fetching the storefront and requires a
 subscription that can play the catalogue) and is registered in `LoginRepository.init()`.
 Failures are thrown as `LoginError`; a provider without a service throws `LoginError.unsupportedProvider`.
+
+### Provider (no HTTP)
+
+`ProviderRepository` follows the same shape as `LoginRepository`: `fetch(_:)` takes a
+`ProviderRequestProtocol` (the `MusicProvider` the user signed in with) and forwards it to the internal
+service of that provider, which returns a `ProviderResponseDAO` seen by the app as `ProviderResponseProtocol`
+(the last played playlist as `ProviderPlaylistProtocol`: name, song count and up to four covers). Every provider
+service is `internal`, refines the internal `ProviderServiceProtocol` (e.g. `AppleMusicProviderServiceProtocol`,
+which reads MusicKit's recently played containers) and is registered in `ProviderRepository.init()`.
+Failures are thrown as `ProviderError`; a provider without a service throws `ProviderError.unsupportedProvider`.

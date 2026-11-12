@@ -2,40 +2,33 @@ import Foundation
 
 /// Public API of the Provider repository. Features depend on this protocol, never on the concrete class.
 public protocol ProviderRepositoryProtocol: Sendable {
-    /// Calls one of the services in `ProviderRepository.configuration.serviceNames`.
-    func fetch(
-        _ request: some ProviderRequestProtocol,
-        serviceName: String
-    ) async throws -> any ProviderResponseProtocol
+    /// Reads the data of the music service in `request`. Throws a `ProviderError` when it cannot be read.
+    func fetch(_ request: some ProviderRequestProtocol) async throws -> any ProviderResponseProtocol
 }
 
-/// Talks to the Provider services.
-/// Flow: ProviderRequestProtocol -> ProviderRequestDAO -> ProviderResponseDAO -> ProviderResponseProtocol.
+/// Data of a music service, read by the internal service of each provider. Internal: the app only sees
+/// `ProviderRepositoryProtocol`.
+protocol ProviderServiceProtocol: Sendable {
+    func fetch(_ request: some ProviderRequestProtocol) async throws -> ProviderResponseDAO
+}
+
+/// Public entry point of the music services' data: forwards each request to the service of its provider.
 public final class ProviderRepository: ProviderRepositoryProtocol {
-    /// Fill in the base URL and the names of the services this repository consumes.
-    public static let configuration = RepositoryConfiguration(
-        baseURL: "",
-        serviceNames: []
-    )
+    private let services: [MusicProvider: any ProviderServiceProtocol]
 
-    private let client: NetworkClient
-    private let configuration: RepositoryConfiguration
-
-    public init(
-        client: NetworkClient = .shared,
-        configuration: RepositoryConfiguration = ProviderRepository.configuration
-    ) {
-        self.client = client
-        self.configuration = configuration
+    public convenience init() {
+        self.init(services: [.appleMusic: AppleMusicProviderService()])
     }
 
-    public func fetch(
-        _ request: some ProviderRequestProtocol,
-        serviceName: String
-    ) async throws -> any ProviderResponseProtocol {
-        let url = try configuration.url(for: serviceName)
-        let requestDAO = ProviderRequestDAO(request)
-        let responseDAO: ProviderResponseDAO = try await client.request(url, method: .get, body: requestDAO)
-        return responseDAO
+    /// Lets tests inject fake services.
+    init(services: [MusicProvider: any ProviderServiceProtocol]) {
+        self.services = services
+    }
+
+    public func fetch(_ request: some ProviderRequestProtocol) async throws -> any ProviderResponseProtocol {
+        guard let service = services[request.provider] else {
+            throw ProviderError.unsupportedProvider(request.provider)
+        }
+        return try await service.fetch(request)
     }
 }
