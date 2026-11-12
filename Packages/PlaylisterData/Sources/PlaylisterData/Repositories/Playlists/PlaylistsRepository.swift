@@ -12,7 +12,7 @@ public protocol PlaylistsRepositoryProtocol: Sendable {
 /// -> PlaylistsResponseProtocol.
 public final class PlaylistsRepository: PlaylistsRepositoryProtocol {
     /// How many playlists each call returns, and how far the catalogue search goes to find the recommended ones.
-    static let limits = PlaylistsLimits(recommendations: 20, recommendationsSearch: 100, library: 20)
+    static let limits = PlaylistsLimits(recommendations: 20, recommendationsSearch: 1000, library: 20)
 
     private let services: [MusicProvider: any PlaylistsServiceProtocol]
 

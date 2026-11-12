@@ -40,7 +40,7 @@ struct PlaylistsRepositoryTests {
         let expected = PlaylistsRequestDAO(
             provider: .appleMusic,
             recommendationsTerm: "Hitster",
-            limits: PlaylistsLimits(recommendations: 20, recommendationsSearch: 100, library: 20)
+            limits: PlaylistsLimits(recommendations: 20, recommendationsSearch: 1000, library: 20)
         )
         #expect(service.receivedRequest == expected)
         #expect(result.provider == .appleMusic)

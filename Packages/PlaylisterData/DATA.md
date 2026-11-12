@@ -130,12 +130,12 @@ registered in `PlaylistsRepository.init()`. It returns a `PlaylistsResponseProto
 `library` playlists, each a `PlaylistsItemProtocol` with only what the service returns for the playlist itself: id,
 name, curator and artwork URL. It **never reads the songs**.
 
-- **Limits** live in `PlaylistsRepository.limits` (`PlaylistsLimits`): 20 recommended playlists, at most 100 catalogue
-  search results read to find them, and 20 library playlists, most recently played first.
+- **Limits** live in `PlaylistsRepository.limits` (`PlaylistsLimits`): 20 recommended playlists, at most 1000 catalogue
+  search results read to find them (40 pages), and 20 library playlists, most recently played first.
 - **Recommended:** the catalogue search returns loose matches, so `RecommendationsCollector` keeps only the playlists
   whose name contains the term, ignoring case and accents. `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`)
-  reads the search in pages of 25 (the MusicKit maximum) until there are 20 matches, 100 results have been read, or
-  there are no more.
+  reads the search in pages of 25 (the MusicKit maximum) and stops as soon as there are 20 matches, 1000 results
+  have been read, or there are no more.
 - Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme `AsyncImage` cannot load).
 - Without MusicKit access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure
   `PlaylistsError.unavailable`, and a provider without a service throws `PlaylistsError.unsupportedProvider`.
