@@ -67,8 +67,9 @@ struct PlaylistSelectorView: View {
         }
     }
 
+    /// Hidden when there are no recommended playlists, or none match the search.
     @ViewBuilder private var recommendedSection: some View {
-        if !viewModel.recommended.isEmpty || !viewModel.isSearching {
+        if !viewModel.recommended.isEmpty {
             VStack(alignment: .leading, spacing: DSSpacing.space3) {
                 HStack(alignment: .firstTextBaseline) {
                     DSText(style: .sectionTitle)
@@ -77,12 +78,7 @@ struct PlaylistSelectorView: View {
                     Spacer()
                     DSText(viewModel.recommendedCountText, style: .subheadline, color: DSColor.textSecondary)
                 }
-                if viewModel.recommended.isEmpty {
-                    DSText(style: .subheadline, color: DSColor.textSecondary)
-                        .localized("playlistSelector.recommended.empty")
-                } else {
-                    carousel(viewModel.recommended, cardSize: Self.recommendedCardSize)
-                }
+                carousel(viewModel.recommended, cardSize: Self.recommendedCardSize)
             }
         }
     }

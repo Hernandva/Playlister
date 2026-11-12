@@ -613,23 +613,6 @@
         }
       }
     },
-    "playlistSelector.recommended.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No recommended playlists found."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se encontraron listas recomendadas."
-          }
-        }
-      }
-    },
     "playlistSelector.recommended.header" : {
       "extractionState" : "manual",
       "localizations" : {
