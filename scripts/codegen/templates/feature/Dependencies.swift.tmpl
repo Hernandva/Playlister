@@ -5,11 +5,11 @@ import Foundation
 final class {{Feature}}Dependencies {
     init() {}
 
-    func makeUseCase() -> any {{Feature}}UseCaseProtocol {
-        {{Feature}}UseCase()
+    func resolveUseCase() -> any {{Feature}}UseCaseProtocol {
+        {{Feature}}UseCase(dependencies: self)
     }
 
-    func makeViewModel() -> {{Feature}}ViewModel {
-        {{Feature}}ViewModel(useCase: makeUseCase())
+    func resolveViewModel() -> {{Feature}}ViewModel {
+        {{Feature}}ViewModel(dependencies: self)
     }
 }

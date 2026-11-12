@@ -62,4 +62,23 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 <!-- codegen:repository-registry:start -->
 | Repository | Public API | Folder |
 |---|---|---|
+| `Authorization` | `AuthorizationServiceProtocol` / `AuthorizationRepository` | `Sources/Networking/Repositories/Authorization/` |
+| `Login` | `LoginServiceProtocol` / `LoginRepository` | `Sources/Networking/Repositories/Login/` |
 <!-- codegen:repository-registry:end -->
+
+### Authorization (no HTTP)
+
+`AuthorizationRepository` does not use `NetworkClient` or DAOs: it forwards
+`requestAuthorization(for: MusicProvider)` to the internal service of each provider.
+Every provider service is `internal`, refines the public `AuthorizationServiceProtocol`
+(e.g. `AppleMusicAuthorizationServiceProtocol`, backed by MusicKit) and is registered in
+`AuthorizationRepository.init()`. A provider without a service throws `AuthorizationError.unsupportedProvider`.
+
+### Login (no HTTP)
+
+`LoginRepository` follows the same shape as `AuthorizationRepository`: it forwards
+`login(with: MusicProvider)` to the internal service of each provider. Every provider service is
+`internal`, refines the public `LoginServiceProtocol` (e.g. `AppleMusicLoginServiceProtocol`, which
+checks the MusicKit authorisation, validates the session by fetching the storefront and requires a
+subscription that can play the catalogue) and is registered in `LoginRepository.init()`.
+Failures are thrown as `LoginError`; a provider without a service throws `LoginError.unsupportedProvider`.

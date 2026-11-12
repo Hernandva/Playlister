@@ -41,6 +41,9 @@ and the `<feature>.title` key in `Localizable.xcstrings`. It regenerates the Xco
   One `.primary` button per screen at most.
 - **Text:** localise with `.localized("<feature>.<element>")` and add every new key to
   `Playlister/Resources/Localizable.xcstrings` (Xcode does not extract keys passed as values).
+- **Initialisers:** `View`, `ViewModel` and `UseCase` take only `init(dependencies: <Feature>Dependencies)` and resolve
+  the rest inside it with the container's `resolve…()` functions. A new dependency is a `private let` in
+  `<Feature>Dependencies` plus a `resolve<Name>()` function (see "Initialisers: only the container" in `FEATURES.md`).
 - **ViewModel:** `@MainActor @Observable`, state `idle / loading / loaded(ViewData) / failed`. Depends on the use case protocol.
 - **UseCase:** calls the repository's public protocol and maps the response protocol into `ViewData`.
 - **Navigation:** open child features with `NavigationLink(value: <Feature>Coordinator.Route.<child>)`.

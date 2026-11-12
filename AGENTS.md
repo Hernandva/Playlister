@@ -22,7 +22,9 @@ Always use the generators to create features and repositories, so the structure 
 
 - SwiftUI only. Feature views compose `PlaylisterUI` components and never hard-code colors, fonts or spacing.
 - Features reach `Networking` only through a repository's public protocol, from the feature's use case.
-- New dependencies are injected through the feature's `<Feature>Dependencies`.
+- New dependencies are injected through the feature's `<Feature>Dependencies`: a `private let` plus a `resolve<Name>()` function.
+- Every function of a `<Feature>Dependencies` that hands out a dependency is named `resolve<Name>()` (`resolveUseCase()`, `resolveViewModel()`, `resolveRepository()`). Never use the `make` prefix.
+- `View`, `ViewModel` and `UseCase` receive only `init(dependencies: <Feature>Dependencies)` and resolve the rest inside it.
 - SwiftLint runs on every build (`scripts/lint.sh`), and the build fails above **3 violations**.
 
 ## SwiftLint check for new code

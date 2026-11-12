@@ -7,9 +7,10 @@ struct HomeView: View {
     private static let maxContentWidth: CGFloat = 480
 
     @State private var viewModel: HomeViewModel
+    @Environment(\.openURL) private var openURL
 
     init(dependencies: HomeDependencies) {
-        _viewModel = State(initialValue: dependencies.makeViewModel())
+        _viewModel = State(initialValue: dependencies.resolveViewModel())
     }
 
     var body: some View {
@@ -33,6 +34,12 @@ struct HomeView: View {
         .toolbar(.hidden, for: .navigationBar)
         .preferredColorScheme(.dark)
         .task { await viewModel.load() }
+        .sheet(item: $viewModel.settingsSheetProvider) { provider in
+            settingsSheet(for: provider)
+        }
+        .sheet(item: $viewModel.loginErrorSheet) { sheet in
+            loginErrorSheet(for: sheet)
+        }
     }
 
     private var hero: some View {
@@ -52,33 +59,81 @@ struct HomeView: View {
 
     private var signIn: some View {
         VStack(spacing: DSSpacing.space3) {
-            Button {
-                viewModel.signIn(with: .spotify)
-            } label: {
-                // Placeholder symbol: replace it with the logo from Spotify's brand kit.
-                Label("home.signIn.spotify", systemImage: "dot.radiowaves.left.and.right")
+            switch viewModel.state {
+            case .idle, .loading:
+                loading
+            case .authorizationLoaded, .providerStartedLoaded, .failed:
+                signInButtons
             }
-            .buttonStyle(DSButtonStyle(style: .spotify))
-
-            Button {
-                viewModel.signIn(with: .appleMusic)
-            } label: {
-                // Placeholder symbol: replace it with the logo from Apple Music's brand kit.
-                Label("home.signIn.appleMusic", systemImage: "music.note")
-            }
-            .buttonStyle(DSButtonStyle(style: .appleMusic))
-
-            if case .failed(let message) = viewModel.state {
-                DSText(message, style: .footnote, color: DSColor.destructive)
-                    .multilineTextAlignment(.center)
-            }
-
             DSText(style: .footnote)
                 .localized("home.signIn.footnote")
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, DSSpacing.space2)
                 .padding(.top, DSSpacing.space2)
         }
+    }
+
+    /// Shown while the authorisations load, in place of the sign-in buttons.
+    /// Takes the height of the two buttons so the layout does not jump when they appear.
+    private var loading: some View {
+        VStack(spacing: DSSpacing.space3) {
+            ProgressView()
+                .tint(DSColor.textSecondary)
+            DSText(style: .footnote, color: DSColor.textSecondary)
+                .localized("home.loading")
+        }
+        .frame(maxWidth: .infinity, minHeight: DSButtonStyle.capsuleHeight * 2 + DSSpacing.space3)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// Bottom sheet shown when `provider` has no authorisation: leads to the app's page in Settings,
+    /// where the user can allow access (for Apple Music, "Media & Apple Music").
+    private func settingsSheet(for provider: HomeViewModel.Provider) -> some View {
+        DSBottomSheet(
+            title: viewModel.settingsSheetTitle(for: provider),
+            message: viewModel.settingsSheetMessage(for: provider),
+            primaryAction: .init(String(localized: "home.settingsSheet.openSettings")) {
+                viewModel.dismissSettingsSheet()
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(url)
+                }
+            },
+            secondaryAction: .init(String(localized: "home.settingsSheet.notNow"), style: .plain) {
+                viewModel.dismissSettingsSheet()
+            }
+        )
+    }
+
+    /// Bottom sheet shown when signing in with a service fails: the error and a button that closes it.
+    private func loginErrorSheet(for sheet: HomeViewModel.LoginErrorSheet) -> some View {
+        DSBottomSheet(
+            title: viewModel.loginErrorTitle(for: sheet),
+            message: viewModel.loginErrorMessage(for: sheet),
+            primaryAction: .init(String(localized: "home.loginError.accept")) {
+                viewModel.dismissLoginErrorSheet()
+            }
+        )
+    }
+
+    private var signInButtons: some View {
+        VStack(spacing: DSSpacing.space3) {
+            Button {
+                viewModel.didTapSignIn(with: .spotify)
+            } label: {
+                // Placeholder symbol: replace it with the logo from Spotify's brand kit.
+                Label(viewModel.signInTitle(for: .spotify), systemImage: "dot.radiowaves.left.and.right")
+            }
+            .buttonStyle(DSButtonStyle(style: .spotify))
+
+            Button {
+                viewModel.didTapSignIn(with: .appleMusic)
+            } label: {
+                // Placeholder symbol: replace it with the logo from Apple Music's brand kit.
+                Label(viewModel.signInTitle(for: .appleMusic), systemImage: "music.note")
+            }
+            .buttonStyle(DSButtonStyle(style: .appleMusic))
+        }
+        .disabled(viewModel.startingProvider != nil)
     }
 }
 

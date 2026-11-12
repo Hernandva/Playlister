@@ -15,8 +15,11 @@ struct {{Feature}}UseCase: {{Feature}}UseCaseProtocol {
 
     private let repository: any {{Repo}}RepositoryProtocol
 
-    init(repository: any {{Repo}}RepositoryProtocol) {
-        self.repository = repository
+    /// Receives only the container and resolves what it needs from it.
+    /// `{{Feature}}Dependencies` lives on the main actor, so this init does too.
+    @MainActor
+    init(dependencies: {{Feature}}Dependencies) {
+        self.repository = dependencies.resolveRepository()
     }
 
     func execute() async throws -> {{Feature}}ViewData {

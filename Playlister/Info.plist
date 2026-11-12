@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Playlister uses your Apple Music account to play the songs of each game.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Unbounded-SemiBold.ttf</string>

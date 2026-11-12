@@ -4,8 +4,9 @@ import SwiftUI
 struct {{Feature}}View: View {
     @State private var viewModel: {{Feature}}ViewModel
 
-    init(viewModel: {{Feature}}ViewModel) {
-        _viewModel = State(initialValue: viewModel)
+    /// Receives only the container and resolves the view model from it.
+    init(dependencies: {{Feature}}Dependencies) {
+        _viewModel = State(initialValue: dependencies.resolveViewModel())
     }
 
     var body: some View {

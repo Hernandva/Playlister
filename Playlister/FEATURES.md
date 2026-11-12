@@ -32,11 +32,42 @@ Features/Profile/
 | Type | Responsibility | Rules |
 |---|---|---|
 | `<Feature>Coordinator` | Initialises the view through `<Feature>Dependencies` and declares the routes (`Route` enum) to the features that can be opened from it. | Conforms to `Coordinator`. Only coordinators create other coordinators. |
-| `<Feature>Dependencies` | Builds the use case, the view model and injects the repository. | The only place where concrete types are created. Takes protocols in its `init` so tests can inject fakes. |
+| `<Feature>Dependencies` | Builds the use case, the view model and injects the repository. | The only place where concrete types are created. Keeps each dependency as a `private let` and exposes it through a `resolve<Name>()` function (`resolveRepository()`, `resolveViewData()`, `resolveUseCase()`, `resolveViewModel()`). |
 | `<Feature>View` | Renders state. Adds PlaylisterUI components and localises text with `.localized("key")`. | No business logic, no networking, no hard-coded colors or fonts. |
 | `<Feature>ViewModel` | Owns the screen state (`idle`, `loading`, `loaded(ViewData)`, `failed`). | Depends on `<Feature>UseCaseProtocol`, never on a repository. |
 | `<Feature>ViewData` | Display model. Maps the repository's public **response protocol** into the fields the view needs. | Value type, `Equatable` and `Sendable`. Never exposes Networking types to the view. |
 | `<Feature>UseCase` | Calls the repository through its **public API** and turns the response protocol into `ViewData`. | Depends on `<Name>RepositoryProtocol` from `Networking`. |
+
+### Initialisers: only the container
+
+`<Feature>View`, `<Feature>ViewModel` and `<Feature>UseCase` receive **only** `dependencies: <Feature>Dependencies`
+in their `init`, and resolve everything else inside it through the container's `resolve…()` functions.
+They never take a use case, repository, view model or view data as an `init` parameter.
+
+```swift
+// View
+init(dependencies: ProfileDependencies) {
+    _viewModel = State(initialValue: dependencies.resolveViewModel())
+}
+
+// ViewModel
+init(dependencies: ProfileDependencies) {
+    self.useCase = dependencies.resolveUseCase()
+}
+
+// UseCase (a Sendable struct: it stores what it resolves, not the container)
+@MainActor
+init(dependencies: ProfileDependencies) {
+    self.repository = dependencies.resolveRepository()
+}
+```
+
+- Naming: every function of the container that hands out a dependency is `resolve<Name>()`. Never `make<Name>()`.
+- To add a dependency: store it as a `private let` in `<Feature>Dependencies`, add `resolve<Name>()`, and resolve it
+  in the `init(dependencies:)` that needs it.
+- The coordinator starts the view with `<Feature>View(dependencies: dependencies)`, and the container builds the
+  others with `<Feature>ViewModel(dependencies: self)` and `<Feature>UseCase(dependencies: self)`.
+- The use case `init` is `@MainActor` because the container is.
 
 ### Data flow
 
@@ -74,7 +105,7 @@ adds the route to the parent coordinator and updates this file.
 <!-- codegen:feature-registry:start -->
 | Feature | Opened from | Repository |
 |---|---|---|
-| `Home` | — (root) | — |
+| `Home` | — (root) | `Authorization`, `Login` |
 <!-- codegen:feature-registry:end -->
 
 ## App map

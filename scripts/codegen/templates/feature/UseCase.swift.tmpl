@@ -5,9 +5,14 @@ protocol {{Feature}}UseCaseProtocol: Sendable {
 }
 
 /// Business logic of {{Feature}}.
-/// When the feature needs remote data, inject a repository from Networking through
-/// {{Feature}}Dependencies and map its public response protocol into {{Feature}}ViewData.
+/// When the feature needs remote data, add a `resolve<Name>()` function to {{Feature}}Dependencies,
+/// resolve it in `init(dependencies:)` and map its public response protocol into {{Feature}}ViewData.
 struct {{Feature}}UseCase: {{Feature}}UseCaseProtocol {
+    /// Receives only the container and resolves what it needs from it.
+    /// `{{Feature}}Dependencies` lives on the main actor, so this init does too.
+    @MainActor
+    init(dependencies: {{Feature}}Dependencies) {}
+
     func execute() async throws -> {{Feature}}ViewData {
         {{Feature}}ViewData()
     }

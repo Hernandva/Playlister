@@ -1,13 +1,13 @@
 name: Playlister
 options:
-  bundleIdPrefix: com.company
+  bundleIdPrefix: dev.hdvillamil
   createIntermediateGroups: true
   deploymentTarget:
     iOS: "18.0"
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: QBYF67CS24
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
@@ -39,7 +39,7 @@ targets:
       - package: PlaylisterUI
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.company.playlister
+        PRODUCT_BUNDLE_IDENTIFIER: dev.hdvillamil.playlister
         INFOPLIST_KEY_CFBundleDisplayName: "Playlister"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Playlister/Info.plist
