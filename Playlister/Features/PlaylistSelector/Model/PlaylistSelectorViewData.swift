@@ -41,6 +41,9 @@ struct PlaylistSelectorViewData: Equatable, Sendable {
     var library: [Playlist] = []
     /// Pages of `SearchByTermUseCase` for the term in «Search playlists», or `nil` while it is empty.
     var search: SearchResults?
+    /// Results of `PlaylistCustomArtworkUseCase`, by playlist identifier: covers of random songs for the
+    /// playlists that have no artwork of their own.
+    var customArtworks: [String: [URL]] = [:]
 
     init(provider: MusicProvider) {
         self.providerName = Self.displayName(of: provider)

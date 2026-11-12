@@ -2,40 +2,29 @@ import Foundation
 
 /// Public API of the Song repository. Features depend on this protocol, never on the concrete class.
 public protocol SongRepositoryProtocol: Sendable {
-    /// Calls one of the services in `SongRepository.configuration.serviceNames`.
-    func fetch(
-        _ request: some SongRequestProtocol,
-        serviceName: String
-    ) async throws -> any SongResponseProtocol
+    /// Up to `request.count` random songs of a playlist, each with web artwork and, when the playlist allows it,
+    /// from a different album. Reads only the first batch of the playlist's songs. Throws `SongError`.
+    func fetchRandomSongs(_ request: some SongRequestProtocol) async throws -> any SongResponseProtocol
 }
 
-/// Talks to the Song services.
-/// Flow: SongRequestProtocol -> SongRequestDAO -> SongResponseDAO -> SongResponseProtocol.
+/// Public entry point of the songs: forwards each request to the service of its provider.
+/// Flow: SongRequestProtocol -> SongRequestDAO -> provider service -> SongResponseDAO -> SongResponseProtocol.
 public final class SongRepository: SongRepositoryProtocol {
-    /// Fill in the base URL and the names of the services this repository consumes.
-    public static let configuration = RepositoryConfiguration(
-        baseURL: "",
-        serviceNames: []
-    )
+    private let services: [MusicProvider: any SongServiceProtocol]
 
-    private let client: NetworkClient
-    private let configuration: RepositoryConfiguration
-
-    public init(
-        client: NetworkClient = .shared,
-        configuration: RepositoryConfiguration = SongRepository.configuration
-    ) {
-        self.client = client
-        self.configuration = configuration
+    public convenience init() {
+        self.init(services: [.appleMusic: AppleMusicSongService()])
     }
 
-    public func fetch(
-        _ request: some SongRequestProtocol,
-        serviceName: String
-    ) async throws -> any SongResponseProtocol {
-        let url = try configuration.url(for: serviceName)
-        let requestDAO = SongRequestDAO(request)
-        let responseDAO: SongResponseDAO = try await client.request(url, method: .get, body: requestDAO)
-        return responseDAO
+    /// Lets tests inject fake services.
+    init(services: [MusicProvider: any SongServiceProtocol]) {
+        self.services = services
+    }
+
+    public func fetchRandomSongs(_ request: some SongRequestProtocol) async throws -> any SongResponseProtocol {
+        guard let service = services[request.provider] else {
+            throw SongError.unsupportedProvider(request.provider)
+        }
+        return try await service.fetchRandomSongs(SongRequestDAO(request))
     }
 }

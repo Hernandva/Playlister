@@ -7,6 +7,7 @@ final class PlaylistSelectorDependencies {
     private let provider: MusicProvider
     private let selectPlaylist: @MainActor (PlaylistSelectorViewData.Playlist) -> Void
     private let repository: any PlaylistsRepositoryProtocol
+    private let songRepository: any SongRepositoryProtocol
 
     /// - Parameters:
     ///   - provider: The music service the user signed in with.
@@ -14,11 +15,13 @@ final class PlaylistSelectorDependencies {
     init(
         provider: MusicProvider,
         selectPlaylist: @escaping @MainActor (PlaylistSelectorViewData.Playlist) -> Void,
-        repository: any PlaylistsRepositoryProtocol = PlaylistsRepository()
+        repository: any PlaylistsRepositoryProtocol = PlaylistsRepository(),
+        songRepository: any SongRepositoryProtocol = SongRepository()
     ) {
         self.provider = provider
         self.selectPlaylist = selectPlaylist
         self.repository = repository
+        self.songRepository = songRepository
     }
 
     /// The music service the user signed in with.
@@ -35,6 +38,11 @@ final class PlaylistSelectorDependencies {
         repository
     }
 
+    /// Random songs of a playlist, for the artwork of playlists without one.
+    func resolveSongRepository() -> any SongRepositoryProtocol {
+        songRepository
+    }
+
     func resolveMyPlaylistUseCase() -> any MyPlaylistUseCaseProtocol {
         MyPlaylistUseCase(dependencies: self)
     }
@@ -45,6 +53,10 @@ final class PlaylistSelectorDependencies {
 
     func resolveSearchByTermUseCase() -> any SearchByTermUseCaseProtocol {
         SearchByTermUseCase(dependencies: self)
+    }
+
+    func resolvePlaylistCustomArtworkUseCase() -> any PlaylistCustomArtworkUseCaseProtocol {
+        PlaylistCustomArtworkUseCase(dependencies: self)
     }
 
     func resolveViewModel() -> PlaylistSelectorViewModel {

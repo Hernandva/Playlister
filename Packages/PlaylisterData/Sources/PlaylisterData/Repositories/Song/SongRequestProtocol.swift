@@ -1,5 +1,11 @@
 import Foundation
 
-/// Public data the app must provide to call the Song repository.
-/// Declare here the fields the services need; SongRequestDAO turns them into the wire format.
-public protocol SongRequestProtocol: Sendable {}
+/// Public data the app must provide to read random songs of a playlist.
+public protocol SongRequestProtocol: Sendable {
+    /// Music service the playlist belongs to.
+    var provider: MusicProvider { get }
+    /// Identifier of the playlist in its music service, as the Playlists repository returned it.
+    var playlistID: String { get }
+    /// Songs returned at most.
+    var count: Int { get }
+}

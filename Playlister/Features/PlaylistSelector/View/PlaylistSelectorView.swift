@@ -4,7 +4,8 @@ import SwiftUI
 
 /// Playlist selector: a search field, the playlists found with it, the «Hitster» playlists and the user's playlists.
 /// Every section loads on its own, in parallel, and disappears when it has no playlists. The search results load
-/// 25 more each time the user scrolls to the last one. Tapping a playlist asks to confirm it; once confirmed,
+/// 25 more each time the user scrolls to the last one. A playlist without artwork shows the covers of four random
+/// songs. Tapping a playlist asks to confirm it; once confirmed,
 /// ProviderStarter shows it and the selector closes.
 struct PlaylistSelectorView: View {
     /// Card sides of the design system: 200 pt for «Hitster», 150 pt for the search and «Your playlists».
@@ -62,6 +63,8 @@ struct PlaylistSelectorView: View {
             playlists: viewModel.searchResults,
             cardSize: Self.listCardSize,
             subtitle: viewModel.subtitle(for:),
+            covers: viewModel.covers(for:),
+            onCardAppear: { await viewModel.loadCustomArtworkIfNeeded(for: $0) },
             onSelect: viewModel.didTap,
             onRetry: { Task { await viewModel.search() } },
             tail: { loadMoreResults }
@@ -94,6 +97,8 @@ struct PlaylistSelectorView: View {
             playlists: viewModel.hitster,
             cardSize: Self.hitsterCardSize,
             subtitle: viewModel.subtitle(for:),
+            covers: viewModel.covers(for:),
+            onCardAppear: { await viewModel.loadCustomArtworkIfNeeded(for: $0) },
             onSelect: viewModel.didTap,
             onRetry: { Task { await viewModel.loadHitster() } },
             tail: { EmptyView() }
@@ -107,6 +112,8 @@ struct PlaylistSelectorView: View {
             playlists: viewModel.library,
             cardSize: Self.listCardSize,
             subtitle: viewModel.subtitle(for:),
+            covers: viewModel.covers(for:),
+            onCardAppear: { await viewModel.loadCustomArtworkIfNeeded(for: $0) },
             onSelect: viewModel.didTap,
             onRetry: { Task { await viewModel.loadLibrary() } },
             tail: { EmptyView() }

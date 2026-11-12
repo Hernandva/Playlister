@@ -152,7 +152,7 @@ adds the route to the parent coordinator and updates this file.
 | `Home` | — (root) | `Authorization`, `Login` |
 | `ProviderStarter` | Home | `LastPlaylistRepository` |
 | `Settings` | ProviderStarter | `SettingsRepository` |
-| `PlaylistSelector` | ProviderStarter | `PlaylistsRepository` |
+| `PlaylistSelector` | ProviderStarter | `PlaylistsRepository`, `SongRepository` |
 <!-- codegen:feature-registry:end -->
 
 ## App map

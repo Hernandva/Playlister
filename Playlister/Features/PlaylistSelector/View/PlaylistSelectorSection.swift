@@ -14,6 +14,10 @@ struct PlaylistSelectorSection<Tail: View>: View {
     let playlists: [Playlist]
     let cardSize: CGFloat
     let subtitle: (Playlist) -> String
+    /// Covers of a card, which may differ from the playlist's own artwork.
+    let covers: (Playlist) -> [URL]
+    /// Runs while a card is on screen, e.g. to load the artwork of a playlist without one.
+    let onCardAppear: @MainActor @Sendable (Playlist) async -> Void
     let onSelect: @MainActor (Playlist) -> Void
     let onRetry: @MainActor @Sendable () -> Void
     @ViewBuilder let tail: () -> Tail
@@ -76,12 +80,13 @@ struct PlaylistSelectorSection<Tail: View>: View {
                         DSPlaylistCard(
                             playlist.name,
                             subtitle: subtitle(playlist),
-                            covers: playlist.covers,
+                            covers: covers(playlist),
                             size: cardSize
                         )
                     }
                     .buttonStyle(.plain)
                     .accessibilityHint(String(localized: "playlistSelector.card.hint"))
+                    .task { await onCardAppear(playlist) }
                 }
                 tail()
             }

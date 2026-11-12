@@ -79,7 +79,7 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 | `LastPlaylist` | `LastPlaylistRepositoryProtocol` / `LastPlaylistRepository` | `Sources/PlaylisterData/Repositories/LastPlaylist/` |
 | `Settings` | `SettingsRepositoryProtocol` / `SettingsRepository` | `Sources/PlaylisterData/Repositories/Settings/` |
 | `Playlists` | `PlaylistsRepositoryProtocol` / `PlaylistsRepository` | `Sources/PlaylisterData/Repositories/Playlists/` |
-| `Song` | `SongRepositoryProtocol` | `Sources/PlaylisterData/Repositories/Song` |
+| `Song` | `SongRepositoryProtocol` / `SongRepository` | `Sources/PlaylisterData/Repositories/Song/` |
 <!-- codegen:repository-registry:end -->
 
 ### Authorization (no HTTP)
@@ -142,3 +142,19 @@ URL) and **never reads the songs**. Each call is one MusicKit request, so the ap
 - Without MusicKit access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure
   `PlaylistsError.unavailable`, a cancelled call rethrows `CancellationError`, and a provider without a service throws
   `PlaylistsError.unsupportedProvider`.
+
+### Song (MusicKit, no HTTP)
+
+`SongRepository` follows the same shape as `PlaylistsRepository`: `fetchRandomSongs(_:)` takes a
+`SongRequestProtocol` (provider, `playlistID` and `count`) and forwards it, as the internal `SongRequestDAO`, to the
+internal `SongServiceProtocol` of that provider, registered in `SongRepository.init()`. It returns a
+`SongResponseProtocol` with up to `count` random `SongItemProtocol`s (id, title, artist and web artwork URL).
+
+- `AppleMusicSongService` (in `Remote/AppleMusic/`) finds the playlist in the library when its id starts with `p.`,
+  else in the catalogue, and reads only the **first batch** of its songs (one request for the playlist, one for its
+  songs).
+- `RandomSongPicker` picks the songs at random among those with web artwork, at most one per album, so a cover mosaic
+  shows four different covers. With fewer songs or albums it returns fewer songs.
+- Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme `AsyncImage` cannot load).
+- Without MusicKit access it throws `SongError.notAuthorized`, an unknown playlist `SongError.playlistNotFound`, any
+  other MusicKit failure `SongError.unavailable`, and a provider without a service `SongError.unsupportedProvider`.

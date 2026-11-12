@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PlaylisterData
 
 /// State of the selector. Each section (search, «Hitster», «Your playlists») loads on its own and has its own
 /// state, so none waits for the others and the screen never blocks.
@@ -36,17 +37,24 @@ final class PlaylistSelectorViewModel {
     /// Set once the user selected a playlist: the view closes once the sheet has closed.
     private(set) var wantsToClose = false
 
+    /// Playlists whose custom artwork is loading or loaded, so each one is asked for once.
+    private var customArtworkRequests: Set<String> = []
+
     private let myPlaylistUseCase: any MyPlaylistUseCaseProtocol
     private let hitsterPlayListUseCase: any HitsterPlayListUseCaseProtocol
     private let searchByTermUseCase: any SearchByTermUseCaseProtocol
+    private let playlistCustomArtworkUseCase: any PlaylistCustomArtworkUseCaseProtocol
+    private let provider: MusicProvider
     private let selectPlaylist: @MainActor (Playlist) -> Void
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: PlaylistSelectorDependencies) {
-        self.viewData = PlaylistSelectorViewData(provider: dependencies.resolveProvider())
+        self.provider = dependencies.resolveProvider()
+        self.viewData = PlaylistSelectorViewData(provider: provider)
         self.myPlaylistUseCase = dependencies.resolveMyPlaylistUseCase()
         self.hitsterPlayListUseCase = dependencies.resolveHitsterPlayListUseCase()
         self.searchByTermUseCase = dependencies.resolveSearchByTermUseCase()
+        self.playlistCustomArtworkUseCase = dependencies.resolvePlaylistCustomArtworkUseCase()
         self.selectPlaylist = dependencies.resolveSelectPlaylist()
     }
 
@@ -103,6 +111,12 @@ final class PlaylistSelectorViewModel {
         isSearching
             ? String(localized: "playlistSelector.search.empty")
             : String(localized: "playlistSelector.empty \(viewData.providerName)")
+    }
+
+    /// Covers of the card: the playlist's artwork, or, when it has none, the covers of four of its songs once
+    /// they load.
+    func covers(for playlist: Playlist) -> [URL] {
+        playlist.covers.isEmpty ? viewData.customArtworks[playlist.id] ?? [] : playlist.covers
     }
 
     /// Text under the playlist name: its curator, when the music service gives one.
@@ -185,6 +199,18 @@ final class PlaylistSelectorViewModel {
         }
     }
 
+    /// Called when a card appears: a playlist without artwork asks for the covers of four random songs, once.
+    /// If it fails or the card disappears first, it asks again the next time the card appears.
+    func loadCustomArtworkIfNeeded(for playlist: Playlist) async {
+        guard playlist.covers.isEmpty, customArtworkRequests.insert(playlist.id).inserted else { return }
+        do {
+            let covers = try await playlistCustomArtworkUseCase.execute(playlistID: playlist.id, provider: provider)
+            viewData.customArtworks[playlist.id] = covers
+        } catch {
+            customArtworkRequests.remove(playlist.id)
+        }
+    }
+
     // MARK: Selection
 
     /// Message of the confirmation sheet: the curator and the music service (once if they match), then the question.
@@ -207,7 +233,13 @@ final class PlaylistSelectorViewModel {
     /// «Select playlist»: hands the playlist to the feature that opened the selector and asks the view to close.
     func confirmSelection() {
         guard let playlist = pendingPlaylist else { return }
-        selectPlaylist(playlist)
+        // ProviderStarter shows the same covers as the card, the custom ones included.
+        selectPlaylist(PlaylistSelectorViewData.Playlist(
+            id: playlist.id,
+            name: playlist.name,
+            curatorName: playlist.curatorName,
+            covers: covers(for: playlist)
+        ))
         wantsToClose = true
         pendingPlaylist = nil
     }
