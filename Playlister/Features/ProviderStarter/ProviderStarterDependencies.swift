@@ -5,10 +5,10 @@ import Networking
 @MainActor
 final class ProviderStarterDependencies {
     private let provider: MusicProvider
-    private let repository: any ProviderRepositoryProtocol
+    private let repository: any LastPlaylistRepositoryProtocol
 
     /// - Parameter provider: The music service the user signed in with in Home.
-    init(provider: MusicProvider, repository: any ProviderRepositoryProtocol = ProviderRepository()) {
+    init(provider: MusicProvider, repository: any LastPlaylistRepositoryProtocol = LastPlaylistRepository()) {
         self.provider = provider
         self.repository = repository
     }
@@ -18,12 +18,12 @@ final class ProviderStarterDependencies {
         provider
     }
 
-    func resolveRepository() -> any ProviderRepositoryProtocol {
+    func resolveRepository() -> any LastPlaylistRepositoryProtocol {
         repository
     }
 
-    func resolveUseCase() -> any ProviderStarterUseCaseProtocol {
-        ProviderStarterUseCase(dependencies: self)
+    func resolveLastPlaylistUseCase() -> any LastPlaylistUseCaseProtocol {
+        LastPlaylistUseCase(dependencies: self)
     }
 
     func resolveViewModel() -> ProviderStarterViewModel {

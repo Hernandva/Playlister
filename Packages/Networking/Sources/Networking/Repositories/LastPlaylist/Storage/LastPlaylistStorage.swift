@@ -1,15 +1,15 @@
 import Foundation
 
 /// Local storage of the Provider repository: one last playlist per music service. Internal.
-protocol ProviderStorageProtocol: Sendable {
+protocol LastPlaylistStorageProtocol: Sendable {
     /// The stored playlist of `provider`, or `nil` when there is none or it cannot be read.
-    func lastPlaylist(for provider: MusicProvider) -> ProviderPlaylistDAO?
-    func saveLastPlaylist(_ playlist: ProviderPlaylistDAO, for provider: MusicProvider) throws
+    func lastPlaylist(for provider: MusicProvider) -> LastPlaylistItemDAO?
+    func saveLastPlaylist(_ playlist: LastPlaylistItemDAO, for provider: MusicProvider) throws
 }
 
 /// Keeps each provider's last playlist as JSON in `UserDefaults`, under its own key.
-struct ProviderUserDefaultsStorage: ProviderStorageProtocol {
-    private static let keyPrefix = "networking.provider.lastPlaylist."
+struct LastPlaylistUserDefaultsStorage: LastPlaylistStorageProtocol {
+    private static let keyPrefix = "networking.lastPlaylist."
 
     /// `UserDefaults` is not `Sendable`, so the storage keeps the suite name and opens it on each access.
     /// `nil` uses the standard defaults.
@@ -23,17 +23,17 @@ struct ProviderUserDefaultsStorage: ProviderStorageProtocol {
         suiteName.flatMap(UserDefaults.init(suiteName:)) ?? .standard
     }
 
-    func lastPlaylist(for provider: MusicProvider) -> ProviderPlaylistDAO? {
+    func lastPlaylist(for provider: MusicProvider) -> LastPlaylistItemDAO? {
         guard let data = defaults.data(forKey: Self.key(for: provider)) else { return nil }
-        return try? JSONDecoder().decode(ProviderPlaylistDAO.self, from: data)
+        return try? JSONDecoder().decode(LastPlaylistItemDAO.self, from: data)
     }
 
-    func saveLastPlaylist(_ playlist: ProviderPlaylistDAO, for provider: MusicProvider) throws {
+    func saveLastPlaylist(_ playlist: LastPlaylistItemDAO, for provider: MusicProvider) throws {
         let data: Data
         do {
             data = try JSONEncoder().encode(playlist)
         } catch {
-            throw ProviderError.storageFailed
+            throw LastPlaylistError.storageFailed
         }
         defaults.set(data, forKey: Self.key(for: provider))
     }

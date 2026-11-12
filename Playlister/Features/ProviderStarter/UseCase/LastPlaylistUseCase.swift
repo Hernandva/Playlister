@@ -1,22 +1,22 @@
 import Foundation
 import Networking
 
-protocol ProviderStarterUseCaseProtocol: Sendable {
+protocol LastPlaylistUseCaseProtocol: Sendable {
     /// Returns the last playlist saved for the music service the user signed in with, or `nil` when there is none.
     /// The view model adds it to its `ProviderStarterViewData`.
     func execute() async throws -> ProviderStarterViewData.Playlist?
 }
 
 /// Request sent to the Provider repository: the music service the user signed in with in Home.
-struct ProviderStarterRequest: ProviderRequestProtocol {
+struct LastPlaylistRequest: LastPlaylistRequestProtocol {
     let provider: MusicProvider
 }
 
 /// Business logic of ProviderStarter: calls the Provider repository public API and returns only the data
 /// of its response, mapped out of the Networking types.
-struct ProviderStarterUseCase: ProviderStarterUseCaseProtocol {
+struct LastPlaylistUseCase: LastPlaylistUseCaseProtocol {
     private let provider: MusicProvider
-    private let repository: any ProviderRepositoryProtocol
+    private let repository: any LastPlaylistRepositoryProtocol
 
     /// Receives only the container and resolves what it needs from it.
     /// `ProviderStarterDependencies` lives on the main actor, so this init does too.
@@ -27,13 +27,13 @@ struct ProviderStarterUseCase: ProviderStarterUseCaseProtocol {
     }
 
     func execute() async throws -> ProviderStarterViewData.Playlist? {
-        let response = try await repository.fetch(ProviderStarterRequest(provider: provider))
+        let response = try await repository.fetch(LastPlaylistRequest(provider: provider))
         return response.lastPlaylist.map(Self.playlist(from:))
     }
 }
 
-private extension ProviderStarterUseCase {
-    static func playlist(from playlist: any ProviderPlaylistProtocol) -> ProviderStarterViewData.Playlist {
+private extension LastPlaylistUseCase {
+    static func playlist(from playlist: any LastPlaylistItemProtocol) -> ProviderStarterViewData.Playlist {
         ProviderStarterViewData.Playlist(
             id: playlist.id,
             name: playlist.name,

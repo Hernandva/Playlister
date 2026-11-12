@@ -35,6 +35,6 @@ struct ProviderStarterViewData: Equatable, Sendable {
 
     /// Known before anything loads: it comes from Home.
     var provider: Provider
-    /// Result of `ProviderStarterUseCase`. `nil` until it loads, or when no playlist has been chosen yet.
+    /// Result of `LastPlaylistUseCase`. `nil` until it loads, or when no playlist has been chosen yet.
     var lastPlaylist: Playlist?
 }

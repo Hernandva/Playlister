@@ -15,13 +15,13 @@ final class ProviderStarterViewModel {
     /// Data of the screen. Each use case result updates only its own field.
     private(set) var viewData: ProviderStarterViewData
 
-    private let useCase: any ProviderStarterUseCaseProtocol
+    private let lastPlaylistUseCase: any LastPlaylistUseCaseProtocol
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: ProviderStarterDependencies) {
         let provider = ProviderStarterViewData.Provider(dependencies.resolveProvider())
         self.viewData = ProviderStarterViewData(provider: provider)
-        self.useCase = dependencies.resolveUseCase()
+        self.lastPlaylistUseCase = dependencies.resolveLastPlaylistUseCase()
     }
 
     /// The music service the user signed in with, known before its data loads.
@@ -52,7 +52,7 @@ final class ProviderStarterViewModel {
     func load() async {
         state = .loading
         do {
-            viewData.lastPlaylist = try await useCase.execute()
+            viewData.lastPlaylist = try await lastPlaylistUseCase.execute()
             state = .loaded
         } catch {
             state = .failed(String(localized: "providerStarter.error \(provider.displayName)"))

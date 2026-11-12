@@ -2,12 +2,12 @@ import Foundation
 @testable import Networking
 import Testing
 
-private struct FakeProviderRequest: ProviderRequestProtocol {
+private struct FakeLastPlaylistRequest: LastPlaylistRequestProtocol {
     let provider: MusicProvider
 }
 
-struct ProviderRepositoryTests {
-    private static let playlist = ProviderPlaylistDAO(
+struct LastPlaylistRepositoryTests {
+    private static let playlist = LastPlaylistItemDAO(
         id: "pl.123",
         name: "Hitster España",
         songCount: 312,
@@ -15,15 +15,15 @@ struct ProviderRepositoryTests {
     )
 
     /// A repository on its own empty `UserDefaults` suite, so tests never share data.
-    private static func makeRepository() -> ProviderRepository {
-        let suiteName = "ProviderRepositoryTests.\(UUID().uuidString)"
-        return ProviderRepository(storage: ProviderUserDefaultsStorage(suiteName: suiteName))
+    private static func makeRepository() -> LastPlaylistRepository {
+        let suiteName = "LastPlaylistRepositoryTests.\(UUID().uuidString)"
+        return LastPlaylistRepository(storage: LastPlaylistUserDefaultsStorage(suiteName: suiteName))
     }
 
     @Test func returnsNoPlaylistWhenNoneWasSaved() async throws {
         let repository = Self.makeRepository()
 
-        let response = try await repository.fetch(FakeProviderRequest(provider: .appleMusic))
+        let response = try await repository.fetch(FakeLastPlaylistRequest(provider: .appleMusic))
 
         #expect(response.provider == .appleMusic)
         #expect(response.lastPlaylist == nil)
@@ -33,7 +33,7 @@ struct ProviderRepositoryTests {
         let repository = Self.makeRepository()
 
         try await repository.saveLastPlaylist(Self.playlist, for: .appleMusic)
-        let response = try await repository.fetch(FakeProviderRequest(provider: .appleMusic))
+        let response = try await repository.fetch(FakeLastPlaylistRequest(provider: .appleMusic))
 
         #expect(response.lastPlaylist?.id == "pl.123")
         #expect(response.lastPlaylist?.name == "Hitster España")
@@ -45,18 +45,18 @@ struct ProviderRepositoryTests {
         let repository = Self.makeRepository()
 
         try await repository.saveLastPlaylist(Self.playlist, for: .appleMusic)
-        let response = try await repository.fetch(FakeProviderRequest(provider: .spotify))
+        let response = try await repository.fetch(FakeLastPlaylistRequest(provider: .spotify))
 
         #expect(response.lastPlaylist == nil)
     }
 
     @Test func replacesThePreviousPlaylist() async throws {
         let repository = Self.makeRepository()
-        let newer = ProviderPlaylistDAO(id: "pl.456", name: "Hitster 80s", songCount: 95, coverURLs: [])
+        let newer = LastPlaylistItemDAO(id: "pl.456", name: "Hitster 80s", songCount: 95, coverURLs: [])
 
         try await repository.saveLastPlaylist(Self.playlist, for: .spotify)
         try await repository.saveLastPlaylist(newer, for: .spotify)
-        let response = try await repository.fetch(FakeProviderRequest(provider: .spotify))
+        let response = try await repository.fetch(FakeLastPlaylistRequest(provider: .spotify))
 
         #expect(response.lastPlaylist?.id == "pl.456")
     }
