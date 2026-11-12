@@ -17,7 +17,7 @@ struct {{Feature}}View: View {
             case .idle, .loading:
                 ProgressView()
             case .loaded:
-                // Compose the screen with PlaylisterUI components fed by {{Feature}}ViewData.
+                // Compose the screen with PlaylisterUI components fed by `viewModel.viewData`.
                 EmptyView()
             case .failed(let message):
                 DSText(message, style: .footnote, color: DSColor.destructive)

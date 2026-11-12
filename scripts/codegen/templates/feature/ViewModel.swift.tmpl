@@ -7,11 +7,13 @@ final class {{Feature}}ViewModel {
     enum State: Equatable {
         case idle
         case loading
-        case loaded({{Feature}}ViewData)
+        case loaded
         case failed(String)
     }
 
     private(set) var state: State = .idle
+    /// Data of the screen. Each use case result updates only its own field.
+    private(set) var viewData = {{Feature}}ViewData()
 
     private let useCase: any {{Feature}}UseCaseProtocol
 
@@ -23,7 +25,8 @@ final class {{Feature}}ViewModel {
     func load() async {
         state = .loading
         do {
-            state = .loaded(try await useCase.execute())
+            viewData.content = try await useCase.execute()
+            state = .loaded
         } catch {
             state = .failed(error.localizedDescription)
         }

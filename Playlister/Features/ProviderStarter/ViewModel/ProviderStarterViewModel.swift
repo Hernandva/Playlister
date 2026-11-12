@@ -7,20 +7,26 @@ final class ProviderStarterViewModel {
     enum State: Equatable {
         case idle
         case loading
-        case loaded(ProviderStarterViewData)
+        case loaded
         case failed(String)
     }
 
     private(set) var state: State = .idle
-    /// The music service the user signed in with, known before its data loads.
-    let provider: ProviderStarterViewData.Provider
+    /// Data of the screen. Each use case result updates only its own field.
+    private(set) var viewData: ProviderStarterViewData
 
     private let useCase: any ProviderStarterUseCaseProtocol
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: ProviderStarterDependencies) {
-        self.provider = ProviderStarterViewData.Provider(dependencies.resolveProvider())
+        let provider = ProviderStarterViewData.Provider(dependencies.resolveProvider())
+        self.viewData = ProviderStarterViewData(provider: provider)
         self.useCase = dependencies.resolveUseCase()
+    }
+
+    /// The music service the user signed in with, known before its data loads.
+    var provider: ProviderStarterViewData.Provider {
+        viewData.provider
     }
 
     /// Text of the badge at the top: «Spotify connected».
@@ -30,14 +36,12 @@ final class ProviderStarterViewModel {
 
     /// The playlist the game starts with, or `nil` while it loads or when there is none.
     var lastPlaylist: ProviderStarterViewData.Playlist? {
-        guard case .loaded(let viewData) = state else { return nil }
-        return viewData.lastPlaylist
+        state == .loaded ? viewData.lastPlaylist : nil
     }
 
     /// `true` once the data loaded and no playlist has been chosen yet with this music service.
     var needsPlaylist: Bool {
-        guard case .loaded(let viewData) = state else { return false }
-        return viewData.lastPlaylist == nil
+        state == .loaded && viewData.lastPlaylist == nil
     }
 
     /// Song count under the playlist name: «312 songs».
@@ -48,7 +52,8 @@ final class ProviderStarterViewModel {
     func load() async {
         state = .loading
         do {
-            state = .loaded(try await useCase.execute())
+            viewData.lastPlaylist = try await useCase.execute()
+            state = .loaded
         } catch {
             state = .failed(String(localized: "providerStarter.error \(provider.displayName)"))
         }

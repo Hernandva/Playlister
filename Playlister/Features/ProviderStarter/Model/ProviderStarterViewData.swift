@@ -1,7 +1,7 @@
 import Foundation
 import Networking
 
-/// Display-ready data of ProviderStarter, built from the Provider repository's public response protocol.
+/// Display-ready data of ProviderStarter. The view model owns it and adds each use case result to its own field.
 struct ProviderStarterViewData: Equatable, Sendable {
     /// Music service the user signed in with.
     enum Provider: Equatable, Sendable {
@@ -33,14 +33,8 @@ struct ProviderStarterViewData: Equatable, Sendable {
         let covers: [URL]
     }
 
-    let provider: Provider
-    /// `nil` when the user has not chosen a playlist with this music service yet.
-    let lastPlaylist: Playlist?
-
-    init(response: any ProviderResponseProtocol) {
-        self.provider = Provider(response.provider)
-        self.lastPlaylist = response.lastPlaylist.map { playlist in
-            Playlist(id: playlist.id, name: playlist.name, songCount: playlist.songCount, covers: playlist.coverURLs)
-        }
-    }
+    /// Known before anything loads: it comes from Home.
+    var provider: Provider
+    /// Result of `ProviderStarterUseCase`. `nil` until it loads, or when no playlist has been chosen yet.
+    var lastPlaylist: Playlist?
 }

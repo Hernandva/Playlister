@@ -44,8 +44,10 @@ and the `<feature>.title` key in `Localizable.xcstrings`. It regenerates the Xco
 - **Initialisers:** `View`, `ViewModel` and `UseCase` take only `init(dependencies: <Feature>Dependencies)` and resolve
   the rest inside it with the container's `resolve…()` functions. A new dependency is a `private let` in
   `<Feature>Dependencies` plus a `resolve<Name>()` function (see "Initialisers: only the container" in `FEATURES.md`).
-- **ViewModel:** `@MainActor @Observable`, state `idle / loading / loaded(ViewData) / failed`. Depends on the use case protocol.
-- **UseCase:** calls the repository's public protocol and maps the response protocol into `ViewData`.
+- **ViewModel:** `@MainActor @Observable`, state `idle / loading / loaded / failed`, and `private(set) var viewData`.
+  Adds each use case result to its own field of `viewData`. Depends on the use case protocol.
+- **UseCase:** calls the repository's public protocol and returns only the data of the response, mapped into a
+  ViewData field type. It never builds or returns the whole ViewData (see "ViewData lives in the view model" in `FEATURES.md`).
 - **Navigation:** open child features with `NavigationLink(value: <Feature>Coordinator.Route.<child>)`.
 
 ## 5. Lint and commit
