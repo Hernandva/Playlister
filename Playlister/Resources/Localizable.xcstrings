@@ -545,6 +545,23 @@
         }
       }
     },
+    "playlistSelector.empty %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There are no playlists to show in %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay listas para mostrar en %@."
+          }
+        }
+      }
+    },
     "playlistSelector.error %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -575,23 +592,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toca una lista para elegirla"
-          }
-        }
-      }
-    },
-    "playlistSelector.library.empty %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You don't have any playlists in %@ yet."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aún no tienes listas en %@."
           }
         }
       }

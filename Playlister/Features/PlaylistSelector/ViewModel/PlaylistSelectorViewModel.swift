@@ -54,9 +54,9 @@ final class PlaylistSelectorViewModel {
         recommended.count.formatted()
     }
 
-    /// Shown in «Your playlists» when the user has none in the music service.
-    var emptyLibraryMessage: String {
-        String(localized: "playlistSelector.library.empty \(viewData.providerName)")
+    /// Shown instead of both sections when there are neither recommended nor own playlists.
+    var emptyMessage: String {
+        String(localized: "playlistSelector.empty \(viewData.providerName)")
     }
 
     /// Text under the playlist name: its curator, when the music service gives one.

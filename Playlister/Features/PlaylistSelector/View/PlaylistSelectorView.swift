@@ -55,9 +55,13 @@ struct PlaylistSelectorView: View {
     }
 
     @ViewBuilder private var loadedContent: some View {
-        if viewModel.isSearching, viewModel.recommended.isEmpty, viewModel.library.isEmpty {
-            DSText(style: .subheadline, color: DSColor.textSecondary)
-                .localized("playlistSelector.search.empty")
+        if viewModel.recommended.isEmpty, viewModel.library.isEmpty {
+            if viewModel.isSearching {
+                DSText(style: .subheadline, color: DSColor.textSecondary)
+                    .localized("playlistSelector.search.empty")
+            } else {
+                DSText(viewModel.emptyMessage, style: .subheadline, color: DSColor.textSecondary)
+            }
         } else {
             recommendedSection
             librarySection
@@ -83,17 +87,14 @@ struct PlaylistSelectorView: View {
         }
     }
 
+    /// Hidden when the user has no playlists, or none match the search.
     @ViewBuilder private var librarySection: some View {
-        if !viewModel.library.isEmpty || !viewModel.isSearching {
+        if !viewModel.library.isEmpty {
             VStack(alignment: .leading, spacing: DSSpacing.space3) {
                 DSText(style: .sectionTitle)
                     .localized("playlistSelector.library.header")
                     .accessibilityAddTraits(.isHeader)
-                if viewModel.library.isEmpty {
-                    DSText(viewModel.emptyLibraryMessage, style: .subheadline, color: DSColor.textSecondary)
-                } else {
-                    carousel(viewModel.library, cardSize: Self.libraryCardSize)
-                }
+                carousel(viewModel.library, cardSize: Self.libraryCardSize)
             }
         }
     }
