@@ -37,13 +37,29 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
         var request = MusicCatalogSearchRequest(term: term, types: [Playlist.self])
         request.limit = Self.searchPageSize
         var page = try await request.response().playlists
+        var requestCount = 1
         collector.add(Array(page))
+        logSearchPage(requestCount, pageSize: page.count, collector: collector)
         while !collector.isComplete, page.hasNextBatch,
               let next = try await page.nextBatch(limit: Self.searchPageSize), !next.isEmpty {
+            requestCount += 1
             collector.add(Array(next))
+            logSearchPage(requestCount, pageSize: next.count, collector: collector)
             page = next
         }
+        #if DEBUG
+        debugPrint("[Playlists] search «\(term)» done: \(requestCount) requests, "
+            + "\(collector.readCount) results read, \(collector.items.count) matches")
+        #endif
         return collector.items
+    }
+
+    /// Debug builds only: one line per search page with the requests made and the matches found so far.
+    private func logSearchPage(_ requestCount: Int, pageSize: Int, collector: RecommendationsCollector<Playlist>) {
+        #if DEBUG
+        debugPrint("[Playlists] request \(requestCount): \(pageSize) results, "
+            + "\(collector.readCount) read, \(collector.items.count) matches")
+        #endif
     }
 
     private func libraryPlaylists(limit: Int) async throws -> [Playlist] {
