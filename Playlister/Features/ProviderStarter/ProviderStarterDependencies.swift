@@ -26,6 +26,10 @@ final class ProviderStarterDependencies {
         LastPlaylistUseCase(dependencies: self)
     }
 
+    func resolveSaveLastPlaylistUseCase() -> any SaveLastPlaylistUseCaseProtocol {
+        SaveLastPlaylistUseCase(dependencies: self)
+    }
+
     func resolveViewModel() -> ProviderStarterViewModel {
         ProviderStarterViewModel(dependencies: self)
     }

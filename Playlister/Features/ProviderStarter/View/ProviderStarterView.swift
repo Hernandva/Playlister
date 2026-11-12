@@ -23,7 +23,7 @@ struct ProviderStarterView: View {
                 VStack(alignment: .leading, spacing: DSSpacing.space6) {
                     header
                     greeting
-                    lastPlaylist
+                    selectedPlaylist
                     Spacer(minLength: DSSpacing.space6)
                     play
                     Spacer(minLength: DSSpacing.space6)
@@ -73,15 +73,17 @@ struct ProviderStarterView: View {
         }
     }
 
-    @ViewBuilder private var lastPlaylist: some View {
+    @ViewBuilder private var selectedPlaylist: some View {
         if viewModel.needsPlaylist {
             selectPlaylistCard
         } else {
             VStack(alignment: .leading, spacing: DSSpacing.space2) {
                 DSSectionHeader()
-                    .localized("providerStarter.lastPlaylist.header")
+                    .localized(viewModel.isShowingSelection
+                        ? "providerStarter.selectedPlaylist.header.selected"
+                        : "providerStarter.selectedPlaylist.header.last")
                 DSCard {
-                    lastPlaylistContent
+                    selectedPlaylistContent
                         .frame(maxWidth: .infinity, minHeight: Self.coverSide, alignment: .leading)
                 }
             }
@@ -109,14 +111,14 @@ struct ProviderStarterView: View {
         }
     }
 
-    @ViewBuilder private var lastPlaylistContent: some View {
+    @ViewBuilder private var selectedPlaylistContent: some View {
         switch viewModel.state {
         case .idle, .loading:
             ProgressView()
                 .tint(DSColor.textSecondary)
                 .frame(maxWidth: .infinity)
         case .loaded:
-            if let playlist = viewModel.lastPlaylist {
+            if let playlist = viewModel.selectedPlaylist {
                 playlistRow(playlist)
             }
         case .failed(let message):
@@ -147,13 +149,18 @@ struct ProviderStarterView: View {
 
     private var play: some View {
         VStack(spacing: DSSpacing.space3) {
-            // Starts the game with the last playlist once the Game feature exists.
-            DSIconButton(systemImage: "play.fill", style: .play, diameter: Self.playDiameter) {}
-                .localized("providerStarter.play.accessibility")
-                .disabled(viewModel.lastPlaylist == nil)
+            DSIconButton(systemImage: "play.fill", style: .play, diameter: Self.playDiameter) {
+                Task { await viewModel.didTapPlay() }
+            }
+            .localized("providerStarter.play.accessibility")
+            .disabled(viewModel.selectedPlaylist == nil || viewModel.isStartingGame)
             DSText(style: .sectionTitle)
                 .localized("providerStarter.play")
                 .accessibilityHidden(true)
+            if let message = viewModel.playErrorMessage {
+                DSText(message, style: .footnote, color: DSColor.destructive)
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity)
     }

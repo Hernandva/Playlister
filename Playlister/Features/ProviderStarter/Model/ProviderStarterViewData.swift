@@ -24,7 +24,7 @@ struct ProviderStarterViewData: Equatable, Sendable {
         }
     }
 
-    /// The playlist played last, shown in the «Last playlist» card.
+    /// A playlist shown in the selected playlist card.
     struct Playlist: Equatable, Sendable {
         /// Identifier of the playlist in its music service.
         let id: String
@@ -35,6 +35,9 @@ struct ProviderStarterViewData: Equatable, Sendable {
 
     /// Known before anything loads: it comes from Home.
     var provider: Provider
-    /// Result of `LastPlaylistUseCase`. `nil` until it loads, or when no playlist has been chosen yet.
+    /// Result of `LastPlaylistUseCase`. `nil` until it loads, or when no playlist has been played yet.
     var lastPlaylist: Playlist?
+    /// Playlist chosen in the playlist selector. When there is one, it is shown and played instead of
+    /// `lastPlaylist`, and Play saves it as the new last playlist.
+    var selectedPlaylist: Playlist?
 }
