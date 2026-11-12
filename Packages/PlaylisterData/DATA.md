@@ -128,8 +128,9 @@ setting keeps the rest. Write failures are thrown as `SettingsError.storageFaile
 forwards it, as the internal `PlaylistsRequestDAO`, to the internal `PlaylistsServiceProtocol` of that provider,
 registered in `PlaylistsRepository.init()`. It returns a `PlaylistsResponseProtocol` with the `recommended` playlists
 (catalogue search) and the `library` playlists of the user, each a `PlaylistsItemProtocol` with only what the service
-returns for the playlist itself: id, name, curator and artwork URL. It **never reads the songs**, so a list costs two
-requests: `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`) reads up to 12 catalogue playlists and the 50 most
+returns for the playlist itself: id, name, curator and artwork URL. The catalogue search also returns loose
+matches; the feature keeps only the playlists whose name contains the term. It **never reads the songs**, so a list costs two
+requests: `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`) reads up to 20 catalogue playlists and the 50 most
 recently played library playlists. Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme
 `AsyncImage` cannot load). Without MusicKit access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure
 `PlaylistsError.unavailable`, and a provider without a service throws `PlaylistsError.unsupportedProvider`.
