@@ -3,7 +3,7 @@
   "slug": "playlister",
   "appDirectory": "Playlister",
   "rootFeature": "Home",
-  "networkingSources": "Packages/Networking/Sources/Networking",
+  "dataSources": "Packages/PlaylisterData/Sources/PlaylisterData",
   "designSystemPackage": "Packages/PlaylisterUI",
   "platforms": [
     "iphone",

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Data of a music service. Internal to Networking: the app only sees LastPlaylistResponseProtocol.
+/// Data of a music service. Internal to PlaylisterData: the app only sees LastPlaylistResponseProtocol.
 struct LastPlaylistResponseDAO: Sendable, LastPlaylistResponseProtocol {
     let provider: MusicProvider
     let playlist: LastPlaylistItemDAO?

@@ -2,22 +2,22 @@
 import PackageDescription
 
 let package = Package(
-    name: "Networking",
+    name: "PlaylisterData",
     platforms: [.iOS("18.0"), .macOS("15.0")],
     products: [
-        .library(name: "Networking", targets: ["Networking"])
+        .library(name: "PlaylisterData", targets: ["PlaylisterData"])
     ],
     dependencies: [
         .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.10.0")
     ],
     targets: [
         .target(
-            name: "Networking",
+            name: "PlaylisterData",
             dependencies: [.product(name: "Alamofire", package: "Alamofire")]
         ),
         .testTarget(
-            name: "NetworkingTests",
-            dependencies: ["Networking"]
+            name: "PlaylisterDataTests",
+            dependencies: ["PlaylisterData"]
         )
     ],
     swiftLanguageModes: [.v6]

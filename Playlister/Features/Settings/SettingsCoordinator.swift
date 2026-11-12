@@ -1,4 +1,4 @@
-import Networking
+import PlaylisterData
 import SwiftUI
 
 /// Entry point of the Settings feature: playback, game mode, Bingo categories and account.

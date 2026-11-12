@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 
 protocol {{Feature}}UseCaseProtocol: Sendable {
     /// Returns only the data of the response. The view model adds it to its `{{Feature}}ViewData`.
@@ -10,7 +10,7 @@ protocol {{Feature}}UseCaseProtocol: Sendable {
 struct {{Feature}}Request: {{Repo}}RequestProtocol {}
 
 /// Business logic of {{Feature}}: calls the {{Repo}} repository public API and returns only the data of its
-/// response, mapped out of the Networking types.
+/// response, mapped out of the PlaylisterData types.
 struct {{Feature}}UseCase: {{Feature}}UseCaseProtocol {
     /// One of the service names declared in `{{Repo}}Repository.configuration.serviceNames`.
     private let serviceName = ""

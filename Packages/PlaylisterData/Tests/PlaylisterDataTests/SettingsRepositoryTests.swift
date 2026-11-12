@@ -1,8 +1,10 @@
 import Foundation
-@testable import Networking
+@testable import PlaylisterData
 import Testing
 
-private struct FakeSettingsRequest: SettingsRequestProtocol {}
+private struct FakeSettingsRequest: SettingsRequestProtocol {
+    let provider: MusicProvider
+}
 
 struct SettingsRepositoryTests {
     private static let custom = GameSettingsDAO(
@@ -21,7 +23,7 @@ struct SettingsRepositoryTests {
     }
 
     @Test func returnsTheDefaultsWhenNoneWereSaved() async throws {
-        let response = try await Self.makeRepository().fetch(FakeSettingsRequest())
+        let response = try await Self.makeRepository().fetch(FakeSettingsRequest(provider: .appleMusic))
 
         #expect(GameSettingsDAO(response) == GameSettingsDAO.defaults)
     }
@@ -29,18 +31,28 @@ struct SettingsRepositoryTests {
     @Test func returnsTheSavedSettings() async throws {
         let repository = Self.makeRepository()
 
-        try await repository.saveSettings(Self.custom)
-        let response = try await repository.fetch(FakeSettingsRequest())
+        try await repository.saveSettings(Self.custom, for: .appleMusic)
+        let response = try await repository.fetch(FakeSettingsRequest(provider: .appleMusic))
 
         #expect(GameSettingsDAO(response) == Self.custom)
+    }
+
+    @Test func keepsEachProviderSettingsApart() async throws {
+        let repository = Self.makeRepository()
+
+        try await repository.saveSettings(Self.custom, for: .appleMusic)
+        let response = try await repository.fetch(FakeSettingsRequest(provider: .spotify))
+
+        #expect(GameSettingsDAO(response) == GameSettingsDAO.defaults)
     }
 
     @Test func fillsMissingFieldsWithTheDefaults() async throws {
         let suiteName = "SettingsRepositoryTests.\(UUID().uuidString)"
         let stored = Data(#"{"gameMode":"bingo","clipSeconds":30}"#.utf8)
-        UserDefaults(suiteName: suiteName)?.set(stored, forKey: SettingsUserDefaultsStorage.key)
+        UserDefaults(suiteName: suiteName)?.set(stored, forKey: SettingsUserDefaultsStorage.key(for: .spotify))
 
-        let response = try await Self.makeRepository(suiteName: suiteName).fetch(FakeSettingsRequest())
+        let repository = Self.makeRepository(suiteName: suiteName)
+        let response = try await repository.fetch(FakeSettingsRequest(provider: .spotify))
 
         #expect(response.gameMode == .bingo)
         #expect(response.clipSeconds == 30)

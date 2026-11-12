@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 
 protocol LastPlaylistUseCaseProtocol: Sendable {
     /// Returns the last playlist saved for the music service the user signed in with, or `nil` when there is none.
@@ -13,7 +13,7 @@ struct LastPlaylistRequest: LastPlaylistRequestProtocol {
 }
 
 /// Business logic of ProviderStarter: calls the Provider repository public API and returns only the data
-/// of its response, mapped out of the Networking types.
+/// of its response, mapped out of the PlaylisterData types.
 struct LastPlaylistUseCase: LastPlaylistUseCaseProtocol {
     private let provider: MusicProvider
     private let repository: any LastPlaylistRepositoryProtocol

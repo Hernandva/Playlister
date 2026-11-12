@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 
 /// Dependency injection container of Home: the only place where its concrete types are built.
 @MainActor
@@ -24,12 +24,12 @@ final class HomeDependencies {
         coordinator
     }
 
-    /// Authorisation of the music services, from Networking.
+    /// Authorisation of the music services, from PlaylisterData.
     func resolveAuthorization() -> any AuthorizationServiceProtocol {
         authorization
     }
 
-    /// Login in the music services, from Networking.
+    /// Login in the music services, from PlaylisterData.
     func resolveLogin() -> any LoginServiceProtocol {
         login
     }

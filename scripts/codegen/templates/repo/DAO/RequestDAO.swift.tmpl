@@ -1,6 +1,6 @@
 import Foundation
 
-/// Wire format of the {{Repo}} request. Internal to Networking: never exposed to the app.
+/// Wire format of the {{Repo}} request. Internal to PlaylisterData: never exposed to the app.
 struct {{Repo}}RequestDAO: Encodable, Sendable {
     init(_ request: some {{Repo}}RequestProtocol) {
         // Copy the fields of the request protocol into encodable properties.

@@ -1,24 +1,26 @@
 import Foundation
-import Networking
+import PlaylisterData
 import PlaylisterUI
 
 protocol SaveSettingsUseCaseProtocol: Sendable {
-    /// Stores `game` as the game settings, replacing the previous ones.
+    /// Stores `game` as the game settings of the music service the user signed in with, replacing the previous ones.
     func execute(game: SettingsViewData.Game) async throws
 }
 
 /// Saves the game settings through the Settings repository public API.
 struct SaveSettingsUseCase: SaveSettingsUseCaseProtocol {
+    private let provider: MusicProvider
     private let repository: any SettingsRepositoryProtocol
 
     /// Receives only the container and resolves what it needs from it.
     @MainActor
     init(dependencies: SettingsDependencies) {
+        self.provider = dependencies.resolveProvider()
         self.repository = dependencies.resolveRepository()
     }
 
     func execute(game: SettingsViewData.Game) async throws {
-        try await repository.saveSettings(SavedSettings(game))
+        try await repository.saveSettings(SavedSettings(game), for: provider)
     }
 }
 

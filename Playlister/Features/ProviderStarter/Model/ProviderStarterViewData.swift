@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 
 /// Display-ready data of ProviderStarter. The view model owns it and adds each use case result to its own field.
 struct ProviderStarterViewData: Equatable, Sendable {

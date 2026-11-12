@@ -12,8 +12,8 @@ settings:
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
 packages:
-  Networking:
-    path: Packages/Networking
+  PlaylisterData:
+    path: Packages/PlaylisterData
   PlaylisterUI:
     path: Packages/PlaylisterUI
 targets:
@@ -35,7 +35,7 @@ targets:
           - "Resources/Fonts/Unbounded-Medium.ttf"
           - "Resources/Fonts/Unbounded-Regular.ttf"
     dependencies:
-      - package: Networking
+      - package: PlaylisterData
       - package: PlaylisterUI
     settings:
       base:

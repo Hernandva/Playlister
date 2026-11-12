@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 
 protocol AuthorizationUseCaseProtocol: Sendable {
     /// Signs in with every `MusicProvider`, one after another, and returns the state of each one.

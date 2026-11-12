@@ -1,11 +1,11 @@
 import Foundation
 
-/// Stored format of the game settings. Internal to Networking: the app only sees SettingsResponseProtocol.
+/// Stored format of the game settings. Internal to PlaylisterData: the app only sees SettingsResponseProtocol.
 struct GameSettingsDAO: Codable, Sendable, Equatable, SettingsResponseProtocol {
-    /// Settings of a first launch: 20-second clips from a random point, classic mode, every category on.
+    /// Settings of a first launch: 30-second clips from a random point, classic mode, every category on.
     static let defaults = GameSettingsDAO(
         playbackMode: .clip,
-        clipSeconds: 20,
+        clipSeconds: 30,
         clipStart: .random,
         gameMode: .classic,
         bingoLevel: .beginner,

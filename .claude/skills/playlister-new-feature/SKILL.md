@@ -17,7 +17,7 @@ Read `Playlister/FEATURES.md` (anatomy, data flow, navigation) and `Packages/Pla
 |---|---|---|
 | Feature name | `--name` | PascalCase or words (`PlaylistSelector`, "playlist selector"). |
 | Parent feature | `--parent` | The existing feature that opens it. See the registry in `FEATURES.md`. |
-| Repository | `--repository` | Optional. A `Networking` repository the use case consumes. If it does not exist yet, create it first with the `playlister-new-repo` skill. |
+| Repository | `--repository` | Optional. A `PlaylisterData` repository the use case consumes. If it does not exist yet, create it first with the `playlister-new-repo` skill. |
 
 ## 2. Check the working tree
 

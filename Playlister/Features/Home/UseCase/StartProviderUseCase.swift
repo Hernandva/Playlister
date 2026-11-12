@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 
 protocol StartProviderUseCaseProtocol: Sendable {
     /// Signs in with `provider`. Throws a `HomeViewData.LoginFailure` when the session cannot be started.

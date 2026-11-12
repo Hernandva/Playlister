@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Create a new repository in the Networking package following NETWORKING.md.
+"""Create a new repository in the PlaylisterData package following DATA.md.
 
 Usage:
     python3 scripts/codegen/new_repo.py --name Users
 
-Creates Sources/Networking/Repositories/<Name>/ with the public repository class and API protocol,
+Creates Sources/PlaylisterData/Repositories/<Name>/ with the public repository class and API protocol,
 the public request/response protocols and the internal DAOs. The configuration is left empty
-(baseURL "" and serviceNames []). Then it registers the repository in NETWORKING.md.
+(baseURL "" and serviceNames []). Then it registers the repository in DATA.md.
 """
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ def main() -> int:
 
     config = load_config()
     name = pascal_case(re.sub(r"\s*[Rr]epository$", "", args.name.strip()))
-    sources = ROOT / config["networkingSources"]
+    sources = ROOT / config["dataSources"]
     repo_dir = sources / "Repositories" / name
     if repo_dir.exists():
         raise CodegenError(f"Repository '{name}' already exists.")
@@ -43,16 +43,16 @@ def main() -> int:
         write_new(path, render(TEMPLATES / "repo" / template_name, {"Repo": name}))
         created.append(str(path.relative_to(ROOT)))
 
-    networking_md = sources.parent.parent / "NETWORKING.md"
+    data_md = sources.parent.parent / "DATA.md"
     folder = repo_dir.relative_to(sources.parent.parent)
-    append_in_section(networking_md, "repository-registry",
+    append_in_section(data_md, "repository-registry",
                       f"| `{name}` | `{name}RepositoryProtocol` | `{folder}` |")
 
     print(f"Repository {name} created.")
     print("Files:\n  " + "\n  ".join(created))
     print(f"Next: fill in baseURL and serviceNames in {name}Repository.configuration, and the fields of "
           f"{name}RequestProtocol / {name}ResponseProtocol and their DAOs.")
-    print(f"Updated: {networking_md.relative_to(ROOT)}")
+    print(f"Updated: {data_md.relative_to(ROOT)}")
     return 0
 
 

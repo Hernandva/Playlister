@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 import PlaylisterUI
 
 /// Display-ready data of Settings. The view model owns it as a variable and adds each use case result

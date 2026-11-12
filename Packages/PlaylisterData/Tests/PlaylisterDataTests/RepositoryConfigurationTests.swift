@@ -1,5 +1,5 @@
 import Foundation
-@testable import Networking
+@testable import PlaylisterData
 import Testing
 
 struct RepositoryConfigurationTests {

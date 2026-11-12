@@ -9,7 +9,7 @@ protocol LastPlaylistStorageProtocol: Sendable {
 
 /// Keeps each provider's last playlist as JSON in `UserDefaults`, under its own key.
 struct LastPlaylistUserDefaultsStorage: LastPlaylistStorageProtocol {
-    private static let keyPrefix = "networking.lastPlaylist."
+    private static let keyPrefix = "playlisterData.lastPlaylist."
 
     /// `UserDefaults` is not `Sendable`, so the storage keeps the suite name and opens it on each access.
     /// `nil` uses the standard defaults.

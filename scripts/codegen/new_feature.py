@@ -67,7 +67,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--name", required=True, help="Feature name, e.g. Profile or 'user settings'")
     parser.add_argument("--parent", help="Existing feature that opens the new one")
-    parser.add_argument("--repository", help="Networking repository the use case consumes (optional)")
+    parser.add_argument("--repository", help="PlaylisterData repository the use case consumes (optional)")
     parser.add_argument("--root", action="store_true", help="Create the root feature (no parent, no branch)")
     parser.add_argument("--no-branch", action="store_true", help="Do not create a git branch")
     parser.add_argument("--no-xcodegen", action="store_true", help="Do not regenerate the Xcode project")
@@ -96,9 +96,9 @@ def main() -> int:
     repository = None
     if args.repository:
         repository = pascal_case(re.sub(r"Repository$", "", args.repository))
-        repo_dir = ROOT / config["networkingSources"] / "Repositories" / repository
+        repo_dir = ROOT / config["dataSources"] / "Repositories" / repository
         if not repo_dir.exists():
-            raise CodegenError(f"Repository '{repository}' does not exist in Networking. Create it first with new_repo.py.")
+            raise CodegenError(f"Repository '{repository}' does not exist in PlaylisterData. Create it first with new_repo.py.")
 
     branch = None
     if not args.root and not args.no_branch:

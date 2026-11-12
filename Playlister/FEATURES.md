@@ -10,7 +10,7 @@ Do not remove the `codegen` markers: the generator writes between them.
 - UI: SwiftUI only. Views compose components from the `PlaylisterUI` package; they never style raw controls.
 - Language: Swift 6 language mode, strict concurrency. View models are `@MainActor @Observable`.
 - Architecture: MVVM, feature based. One folder per feature under `Playlister/Features/`.
-- Data: features never talk to Alamofire or DAOs. They reach the `Networking` package only through a
+- Data: features never talk to Alamofire or DAOs. They reach the `PlaylisterData` package only through a
   repository's public API (`<Name>RepositoryProtocol`) and its public request/response protocols.
 
 ## Anatomy of a feature
@@ -35,8 +35,8 @@ Features/Profile/
 | `<Feature>Dependencies` | Builds the use case, the view model and injects the repository. | The only place where concrete types are created. Keeps each dependency as a `private let` and exposes it through a `resolve<Name>()` function (`resolveRepository()`, `resolveUseCase()`, `resolveViewModel()`). It never builds the ViewData. |
 | `<Feature>View` | Renders state. Adds PlaylisterUI components and localises text with `.localized("key")`. | No business logic, no networking, no hard-coded colors or fonts. |
 | `<Feature>ViewModel` | Owns the screen state (`idle`, `loading`, `loaded`, `failed`) and the `viewData` variable. Adds each use case result to its own field of `viewData`. | Depends on `<Feature>UseCaseProtocol`, never on a repository. `private(set) var viewData`; the state never carries the ViewData. |
-| `<Feature>ViewData` | Display model held by the view model. One field (and, if needed, one nested type) per use case result. | Value type, `Equatable` and `Sendable`, with `var` fields. Never maps response protocols and never exposes Networking types to the view. |
-| `<Feature>UseCase` | Calls the repository through its **public API** and returns **only the data of the response**, mapped out of the Networking types into a ViewData field type. | Depends on `<Name>RepositoryProtocol` from `Networking`. Never builds or returns the whole ViewData. |
+| `<Feature>ViewData` | Display model held by the view model. One field (and, if needed, one nested type) per use case result. | Value type, `Equatable` and `Sendable`, with `var` fields. Never maps response protocols and never exposes PlaylisterData types to the view. |
+| `<Feature>UseCase` | Calls the repository through its **public API** and returns **only the data of the response**, mapped out of the PlaylisterData types into a ViewData field type. | Depends on `<Name>RepositoryProtocol` from `PlaylisterData`. Never builds or returns the whole ViewData. |
 
 ### Initialisers: only the container
 
@@ -72,7 +72,7 @@ init(dependencies: ProfileDependencies) {
 ### Data flow
 
 ```
-View ──▶ ViewModel ──▶ UseCase ──▶ <Name>RepositoryProtocol (Networking public API)
+View ──▶ ViewModel ──▶ UseCase ──▶ <Name>RepositoryProtocol (PlaylisterData public API)
                                         │
 View ◀── ViewModel.viewData ◀── response data ◀── <Name>ResponseProtocol
             (adds it to a field)   (use case maps it)
@@ -89,7 +89,7 @@ struct ProfileViewData: Equatable, Sendable {
     var user: User?
 }
 
-// UseCase: returns only the data of the response, mapped out of Networking
+// UseCase: returns only the data of the response, mapped out of PlaylisterData
 func execute() async throws -> ProfileViewData.User {
     let response = try await repository.fetch(ProfileRequest(), serviceName: serviceName)
     return ProfileViewData.User(name: response.name)

@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 import PlaylisterUI
 
 protocol SettingsUseCaseProtocol: Sendable {
@@ -7,23 +7,27 @@ protocol SettingsUseCaseProtocol: Sendable {
     func execute() async throws -> SettingsViewData.Game
 }
 
-/// Request sent to the Settings repository. The settings are the same for every music service.
-struct SettingsRequest: SettingsRequestProtocol {}
+/// Request sent to the Settings repository: the music service the user signed in with, which has its own settings.
+struct SettingsRequest: SettingsRequestProtocol {
+    let provider: MusicProvider
+}
 
-/// Business logic of Settings: reads the game settings through the Settings repository public API and returns
-/// them mapped out of the Networking types.
+/// Business logic of Settings: reads the game settings of the signed-in music service through the Settings repository public API and returns
+/// them mapped out of the PlaylisterData types.
 struct SettingsUseCase: SettingsUseCaseProtocol {
+    private let provider: MusicProvider
     private let repository: any SettingsRepositoryProtocol
 
     /// Receives only the container and resolves what it needs from it.
     /// `SettingsDependencies` lives on the main actor, so this init does too.
     @MainActor
     init(dependencies: SettingsDependencies) {
+        self.provider = dependencies.resolveProvider()
         self.repository = dependencies.resolveRepository()
     }
 
     func execute() async throws -> SettingsViewData.Game {
-        let response = try await repository.fetch(SettingsRequest())
+        let response = try await repository.fetch(SettingsRequest(provider: provider))
         return Self.game(from: response)
     }
 }

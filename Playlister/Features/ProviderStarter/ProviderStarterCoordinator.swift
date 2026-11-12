@@ -1,4 +1,4 @@
-import Networking
+import PlaylisterData
 import SwiftUI
 
 /// Entry point of the ProviderStarter feature: Home with a session, opened once the user signed in.

@@ -1,4 +1,4 @@
-import Networking
+import PlaylisterData
 import PlaylisterUI
 import SwiftUI
 

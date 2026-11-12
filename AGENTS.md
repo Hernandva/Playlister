@@ -6,7 +6,7 @@ Read the configuration file of the area you are working on before you change it,
 | Area | Path | Configuration |
 |---|---|---|
 | App scenes (features) | `Playlister/` | `Playlister/FEATURES.md`: feature anatomy, data flow, navigation and the app map |
-| Repositories and APIs | `Packages/Networking/` | `Packages/Networking/NETWORKING.md`: repositories, protocols, DAOs, Alamofire |
+| Data layer: repositories, APIs and local storage | `Packages/PlaylisterData/` | `Packages/PlaylisterData/DATA.md`: repositories, protocols, DAOs, Alamofire, local storage |
 | Design system and UI components | `Packages/PlaylisterUI/` | `Packages/PlaylisterUI/DESIGN_SYSTEM.md`: tokens, components, `.localized(_:)` |
 
 ## Skills
@@ -21,7 +21,7 @@ Always use the generators to create features and repositories, so the structure 
 ## Rules
 
 - SwiftUI only. Feature views compose `PlaylisterUI` components and never hard-code colors, fonts or spacing.
-- Features reach `Networking` only through a repository's public protocol, from the feature's use case.
+- Features reach `PlaylisterData` only through a repository's public protocol, from the feature's use case.
 - New dependencies are injected through the feature's `<Feature>Dependencies`: a `private let` plus a `resolve<Name>()` function.
 - Every function of a `<Feature>Dependencies` that hands out a dependency is named `resolve<Name>()` (`resolveUseCase()`, `resolveViewModel()`, `resolveRepository()`). Never use the `make` prefix.
 - `View`, `ViewModel` and `UseCase` receive only `init(dependencies: <Feature>Dependencies)` and resolve the rest inside it.
@@ -55,5 +55,5 @@ Every time you add a variable, constant, property, function or method, check tha
 ```bash
 xcodegen generate                      # creates Playlister.xcodeproj from project.yml (it is not committed)
 open Playlister.xcodeproj
-(cd Packages/Networking && swift test)  # package tests
+(cd Packages/PlaylisterData && swift test)  # package tests
 ```

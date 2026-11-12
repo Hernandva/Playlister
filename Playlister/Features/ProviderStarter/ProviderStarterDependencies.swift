@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 
 /// Dependency injection container of ProviderStarter: the only place where its concrete types are built.
 @MainActor

@@ -1,5 +1,5 @@
 import Foundation
-import Networking
+import PlaylisterData
 
 protocol SaveLastPlaylistUseCaseProtocol: Sendable {
     /// Stores `playlist` as the last playlist of the music service the user signed in with.
