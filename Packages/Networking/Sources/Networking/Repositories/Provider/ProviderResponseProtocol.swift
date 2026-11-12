@@ -1,16 +1,14 @@
 import Foundation
 
 public enum ProviderError: Error, Equatable, Sendable {
-    /// There is no provider service for this music service yet.
-    case unsupportedProvider(MusicProvider)
-    /// The user has not authorised Playlister to use the music service.
-    case notAuthorized
-    /// The music service could not be reached.
-    case unavailable
+    /// The playlist could not be written to the local storage.
+    case storageFailed
 }
 
-/// A playlist of the music service, as the app may show it.
+/// A playlist of a music service, as the app stores and shows it.
 public protocol ProviderPlaylistProtocol: Sendable {
+    /// Identifier of the playlist in its music service.
+    var id: String { get }
     var name: String { get }
     /// Number of songs in the playlist.
     var songCount: Int { get }
@@ -20,8 +18,8 @@ public protocol ProviderPlaylistProtocol: Sendable {
 
 /// Public data the Provider repository returns to the app.
 public protocol ProviderResponseProtocol: Sendable {
-    /// Music service the data comes from.
+    /// Music service the data belongs to.
     var provider: MusicProvider { get }
-    /// The playlist the user played last in the music service, or `nil` when there is none.
+    /// The last playlist played with this music service, or `nil` when none has been chosen yet.
     var lastPlaylist: (any ProviderPlaylistProtocol)? { get }
 }

@@ -84,12 +84,13 @@ checks the MusicKit authorisation, validates the session by fetching the storefr
 subscription that can play the catalogue) and is registered in `LoginRepository.init()`.
 Failures are thrown as `LoginError`; a provider without a service throws `LoginError.unsupportedProvider`.
 
-### Provider (no HTTP)
+### Provider (local storage, no HTTP)
 
-`ProviderRepository` follows the same shape as `LoginRepository`: `fetch(_:)` takes a
-`ProviderRequestProtocol` (the `MusicProvider` the user signed in with) and forwards it to the internal
-service of that provider, which returns a `ProviderResponseDAO` seen by the app as `ProviderResponseProtocol`
-(the last played playlist as `ProviderPlaylistProtocol`: name, song count and up to four covers). Every provider
-service is `internal`, refines the internal `ProviderServiceProtocol` (e.g. `AppleMusicProviderServiceProtocol`,
-which reads MusicKit's recently played containers) and is registered in `ProviderRepository.init()`.
-Failures are thrown as `ProviderError`; a provider without a service throws `ProviderError.unsupportedProvider`.
+`ProviderRepository` keeps the last playlist played with each `MusicProvider` on the device.
+`fetch(_:)` takes a `ProviderRequestProtocol` (the provider the user signed in with) and returns a
+`ProviderResponseProtocol` whose `lastPlaylist` (`ProviderPlaylistProtocol`: id, name, song count and up to
+four covers) is `nil` until one is saved. `saveLastPlaylist(_:for:)` stores a playlist for a provider and
+replaces the previous one; each provider has its own entry. The internal `ProviderStorageProtocol` is backed by
+`ProviderUserDefaultsStorage`, which writes the `Codable` `ProviderPlaylistDAO` as JSON under
+`networking.provider.lastPlaylist.<provider>`. Do not change those keys: saved playlists would be lost.
+Write failures are thrown as `ProviderError.storageFailed`; unreadable data reads as no playlist.

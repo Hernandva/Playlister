@@ -375,23 +375,6 @@
         }
       }
     },
-    "providerStarter.lastPlaylist.empty" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You haven't played a playlist yet. Choose one to start."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aún no has jugado ninguna lista. Elige una para empezar."
-          }
-        }
-      }
-    },
     "providerStarter.lastPlaylist.header" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -497,6 +480,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reintentar"
+          }
+        }
+      }
+    },
+    "providerStarter.selectPlaylist.action" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose playlist"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir lista"
+          }
+        }
+      }
+    },
+    "providerStarter.selectPlaylist.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You need a playlist to start playing."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Necesitas una lista para empezar a jugar."
+          }
+        }
+      }
+    },
+    "providerStarter.selectPlaylist.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a playlist"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una lista"
           }
         }
       }

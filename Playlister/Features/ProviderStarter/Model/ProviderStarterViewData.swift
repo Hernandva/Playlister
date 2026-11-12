@@ -26,19 +26,21 @@ struct ProviderStarterViewData: Equatable, Sendable {
 
     /// The playlist played last, shown in the «Last playlist» card.
     struct Playlist: Equatable, Sendable {
+        /// Identifier of the playlist in its music service.
+        let id: String
         let name: String
         let songCount: Int
         let covers: [URL]
     }
 
     let provider: Provider
-    /// `nil` when the user has not played any playlist yet.
+    /// `nil` when the user has not chosen a playlist with this music service yet.
     let lastPlaylist: Playlist?
 
     init(response: any ProviderResponseProtocol) {
         self.provider = Provider(response.provider)
         self.lastPlaylist = response.lastPlaylist.map { playlist in
-            Playlist(name: playlist.name, songCount: playlist.songCount, covers: playlist.coverURLs)
+            Playlist(id: playlist.id, name: playlist.name, songCount: playlist.songCount, covers: playlist.coverURLs)
         }
     }
 }

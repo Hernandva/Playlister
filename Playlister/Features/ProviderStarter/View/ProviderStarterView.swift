@@ -3,6 +3,7 @@ import PlaylisterUI
 import SwiftUI
 
 /// Home with a session: the connected service, the last playlist, the Play button and «Choose another playlist».
+/// With no playlist chosen yet, a card invites the user to choose one before playing.
 struct ProviderStarterView: View {
     /// Keeps the column readable on iPad.
     private static let maxContentWidth: CGFloat = 480
@@ -26,7 +27,9 @@ struct ProviderStarterView: View {
                     Spacer(minLength: DSSpacing.space6)
                     play
                     Spacer(minLength: DSSpacing.space6)
-                    choosePlaylist
+                    if !viewModel.needsPlaylist {
+                        choosePlaylist
+                    }
                 }
                 .padding(.horizontal, DSSpacing.space4)
                 .padding(.top, DSSpacing.space2)
@@ -70,13 +73,38 @@ struct ProviderStarterView: View {
         }
     }
 
-    private var lastPlaylist: some View {
-        VStack(alignment: .leading, spacing: DSSpacing.space2) {
-            DSSectionHeader()
-                .localized("providerStarter.lastPlaylist.header")
-            DSCard {
-                lastPlaylistContent
-                    .frame(maxWidth: .infinity, minHeight: Self.coverSide, alignment: .leading)
+    @ViewBuilder private var lastPlaylist: some View {
+        if viewModel.needsPlaylist {
+            selectPlaylistCard
+        } else {
+            VStack(alignment: .leading, spacing: DSSpacing.space2) {
+                DSSectionHeader()
+                    .localized("providerStarter.lastPlaylist.header")
+                DSCard {
+                    lastPlaylistContent
+                        .frame(maxWidth: .infinity, minHeight: Self.coverSide, alignment: .leading)
+                }
+            }
+        }
+    }
+
+    /// Shown while no playlist has been chosen with this music service: Play stays disabled until there is one.
+    private var selectPlaylistCard: some View {
+        DSCard {
+            HStack(spacing: DSSpacing.space4) {
+                DSCoverMosaic(covers: [])
+                    .frame(width: Self.coverSide, height: Self.coverSide)
+                    .clipShape(RoundedRectangle(cornerRadius: DSRadius.radiusCard, style: .continuous))
+                VStack(alignment: .leading, spacing: DSSpacing.space2) {
+                    DSText(style: .headline)
+                        .localized("providerStarter.selectPlaylist.title")
+                    DSText(style: .subheadline)
+                        .localized("providerStarter.selectPlaylist.message")
+                    // Opens the playlist selector once the PlaylistSelector feature exists.
+                    DSButton(style: .plain) {}
+                        .localized("providerStarter.selectPlaylist.action")
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
@@ -90,9 +118,6 @@ struct ProviderStarterView: View {
         case .loaded:
             if let playlist = viewModel.lastPlaylist {
                 playlistRow(playlist)
-            } else {
-                DSText(style: .footnote)
-                    .localized("providerStarter.lastPlaylist.empty")
             }
         case .failed(let message):
             VStack(alignment: .leading, spacing: DSSpacing.space3) {

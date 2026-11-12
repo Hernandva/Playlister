@@ -34,6 +34,12 @@ final class ProviderStarterViewModel {
         return viewData.lastPlaylist
     }
 
+    /// `true` once the data loaded and no playlist has been chosen yet with this music service.
+    var needsPlaylist: Bool {
+        guard case .loaded(let viewData) = state else { return false }
+        return viewData.lastPlaylist == nil
+    }
+
     /// Song count under the playlist name: «312 songs».
     func songCountText(for playlist: ProviderStarterViewData.Playlist) -> String {
         String(localized: "providerStarter.lastPlaylist.songs \(playlist.songCount)")

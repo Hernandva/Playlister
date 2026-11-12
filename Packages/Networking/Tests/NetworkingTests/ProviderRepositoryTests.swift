@@ -6,44 +6,58 @@ private struct FakeProviderRequest: ProviderRequestProtocol {
     let provider: MusicProvider
 }
 
-private struct FakeProviderService: ProviderServiceProtocol {
-    let result: Result<ProviderResponseDAO, ProviderError>
-
-    func fetch(_ request: some ProviderRequestProtocol) async throws -> ProviderResponseDAO {
-        try result.get()
-    }
-}
-
 struct ProviderRepositoryTests {
     private static let playlist = ProviderPlaylistDAO(
+        id: "pl.123",
         name: "Hitster España",
         songCount: 312,
         coverURLs: [URL(string: "https://example.com/cover.jpg")].compactMap { $0 }
     )
 
-    @Test func returnsTheResponseOfTheProviderService() async throws {
-        let response = ProviderResponseDAO(provider: .appleMusic, playlist: Self.playlist)
-        let repository = ProviderRepository(services: [.appleMusic: FakeProviderService(result: .success(response))])
-
-        let result = try await repository.fetch(FakeProviderRequest(provider: .appleMusic))
-
-        #expect(result.provider == .appleMusic)
-        #expect(result.lastPlaylist?.name == "Hitster España")
-        #expect(result.lastPlaylist?.songCount == 312)
+    /// A repository on its own empty `UserDefaults` suite, so tests never share data.
+    private static func makeRepository() -> ProviderRepository {
+        let suiteName = "ProviderRepositoryTests.\(UUID().uuidString)"
+        return ProviderRepository(storage: ProviderUserDefaultsStorage(suiteName: suiteName))
     }
 
-    @Test func forwardsTheErrorOfTheProviderService() async {
-        let service = FakeProviderService(result: .failure(.notAuthorized))
-        let repository = ProviderRepository(services: [.appleMusic: service])
-        await #expect(throws: ProviderError.notAuthorized) {
-            try await repository.fetch(FakeProviderRequest(provider: .appleMusic))
-        }
+    @Test func returnsNoPlaylistWhenNoneWasSaved() async throws {
+        let repository = Self.makeRepository()
+
+        let response = try await repository.fetch(FakeProviderRequest(provider: .appleMusic))
+
+        #expect(response.provider == .appleMusic)
+        #expect(response.lastPlaylist == nil)
     }
 
-    @Test func rejectsAProviderWithoutService() async {
-        let repository = ProviderRepository(services: [:])
-        await #expect(throws: ProviderError.unsupportedProvider(.spotify)) {
-            try await repository.fetch(FakeProviderRequest(provider: .spotify))
-        }
+    @Test func returnsTheSavedPlaylistOfTheProvider() async throws {
+        let repository = Self.makeRepository()
+
+        try await repository.saveLastPlaylist(Self.playlist, for: .appleMusic)
+        let response = try await repository.fetch(FakeProviderRequest(provider: .appleMusic))
+
+        #expect(response.lastPlaylist?.id == "pl.123")
+        #expect(response.lastPlaylist?.name == "Hitster España")
+        #expect(response.lastPlaylist?.songCount == 312)
+        #expect(response.lastPlaylist?.coverURLs == Self.playlist.coverURLs)
+    }
+
+    @Test func keepsEachProviderPlaylistApart() async throws {
+        let repository = Self.makeRepository()
+
+        try await repository.saveLastPlaylist(Self.playlist, for: .appleMusic)
+        let response = try await repository.fetch(FakeProviderRequest(provider: .spotify))
+
+        #expect(response.lastPlaylist == nil)
+    }
+
+    @Test func replacesThePreviousPlaylist() async throws {
+        let repository = Self.makeRepository()
+        let newer = ProviderPlaylistDAO(id: "pl.456", name: "Hitster 80s", songCount: 95, coverURLs: [])
+
+        try await repository.saveLastPlaylist(Self.playlist, for: .spotify)
+        try await repository.saveLastPlaylist(newer, for: .spotify)
+        let response = try await repository.fetch(FakeProviderRequest(provider: .spotify))
+
+        #expect(response.lastPlaylist?.id == "pl.456")
     }
 }
