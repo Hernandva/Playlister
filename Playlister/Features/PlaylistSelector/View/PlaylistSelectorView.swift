@@ -57,18 +57,15 @@ struct PlaylistSelectorView: View {
 
     /// Catalogue playlists found with the search term. A loader after the last one asks for the next page.
     private var searchSection: some View {
-        PlaylistSelectorSection(
-            titleKey: "playlistSelector.search.header",
-            state: viewModel.searchState,
-            playlists: viewModel.searchResults,
+        DSPlaylistSection(
+            texts(title: "playlistSelector.search.header"),
+            state: DSSectionState(viewModel.searchState),
+            items: items(viewModel.searchResults),
             cardSize: Self.listCardSize,
-            subtitle: viewModel.subtitle(for:),
-            covers: viewModel.covers(for:),
-            onCardAppear: { await viewModel.loadCustomArtworkIfNeeded(for: $0) },
-            onSelect: viewModel.didTap,
-            onRetry: { Task { await viewModel.search() } },
-            tail: { loadMoreResults }
-        )
+            actions: actions(for: viewModel.searchResults) { await viewModel.search() }
+        ) {
+            loadMoreResults
+        }
     }
 
     @ViewBuilder private var loadMoreResults: some View {
@@ -90,33 +87,72 @@ struct PlaylistSelectorView: View {
     }
 
     private var hitsterSection: some View {
-        PlaylistSelectorSection(
-            titleKey: "playlistSelector.recommended.header",
-            count: viewModel.hitsterCountText,
-            state: viewModel.hitsterState,
-            playlists: viewModel.hitster,
+        DSPlaylistSection(
+            texts(title: "playlistSelector.recommended.header", count: viewModel.hitsterCountText),
+            state: DSSectionState(viewModel.hitsterState),
+            items: items(viewModel.hitster),
             cardSize: Self.hitsterCardSize,
-            subtitle: viewModel.subtitle(for:),
-            covers: viewModel.covers(for:),
-            onCardAppear: { await viewModel.loadCustomArtworkIfNeeded(for: $0) },
-            onSelect: viewModel.didTap,
-            onRetry: { Task { await viewModel.loadHitster() } },
-            tail: { EmptyView() }
+            actions: actions(for: viewModel.hitster) { await viewModel.loadHitster() }
         )
     }
 
     private var librarySection: some View {
-        PlaylistSelectorSection(
-            titleKey: "playlistSelector.library.header",
-            state: viewModel.libraryState,
-            playlists: viewModel.library,
+        DSPlaylistSection(
+            texts(title: "playlistSelector.library.header"),
+            state: DSSectionState(viewModel.libraryState),
+            items: items(viewModel.library),
             cardSize: Self.listCardSize,
-            subtitle: viewModel.subtitle(for:),
-            covers: viewModel.covers(for:),
-            onCardAppear: { await viewModel.loadCustomArtworkIfNeeded(for: $0) },
-            onSelect: viewModel.didTap,
-            onRetry: { Task { await viewModel.loadLibrary() } },
-            tail: { EmptyView() }
+            actions: actions(for: viewModel.library) { await viewModel.loadLibrary() }
+        )
+    }
+
+    // MARK: Sections
+
+    /// Localised texts of a section: its title, the error and «Try again» shared by every section.
+    private func texts(title key: String.LocalizationValue, count: String? = nil) -> DSPlaylistSectionTexts {
+        DSPlaylistSectionTexts(
+            title: String(localized: key),
+            count: count,
+            errorMessage: String(localized: "playlistSelector.section.error"),
+            retry: String(localized: "playlistSelector.retry"),
+            cardHint: String(localized: "playlistSelector.card.hint")
+        )
+    }
+
+    /// What each card shows: the name, the curator and the covers, custom ones included.
+    private func items(_ playlists: [PlaylistSelectorViewData.Playlist]) -> [DSPlaylistSectionItem] {
+        playlists.map { playlist in
+            DSPlaylistSectionItem(
+                id: playlist.id,
+                name: playlist.name,
+                subtitle: viewModel.subtitle(for: playlist),
+                covers: viewModel.covers(for: playlist)
+            )
+        }
+    }
+
+    /// Tapping a card asks to confirm its playlist, a card on screen loads its custom artwork when it needs one,
+    /// and «Try again» runs `retry`.
+    private func actions(
+        for playlists: [PlaylistSelectorViewData.Playlist],
+        retry: @escaping @MainActor @Sendable () async -> Void
+    ) -> DSPlaylistSectionActions {
+        let viewModel = viewModel
+        let playlistsByID = [String: PlaylistSelectorViewData.Playlist](
+            playlists.map { ($0.id, $0) }
+        ) { first, _ in first }
+        return DSPlaylistSectionActions(
+            select: { item in
+                if let playlist = playlistsByID[item.id] {
+                    viewModel.didTap(playlist)
+                }
+            },
+            retry: { Task { await retry() } },
+            cardAppear: { item in
+                if let playlist = playlistsByID[item.id] {
+                    await viewModel.loadCustomArtworkIfNeeded(for: playlist)
+                }
+            }
         )
     }
 
@@ -144,5 +180,17 @@ struct PlaylistSelectorView: View {
 #Preview {
     NavigationStack {
         PlaylistSelectorCoordinator(provider: .appleMusic, selectPlaylist: { _ in }).start()
+    }
+}
+
+private extension DSSectionState {
+    /// The design system's state of a section of the view model.
+    init(_ state: PlaylistSelectorViewModel.SectionState) {
+        switch state {
+        case .idle: self = .idle
+        case .loading: self = .loading
+        case .loaded: self = .loaded
+        case .failed: self = .failed
+        }
     }
 }
