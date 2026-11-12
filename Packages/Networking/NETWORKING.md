@@ -64,6 +64,7 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 |---|---|---|
 | `Authorization` | `AuthorizationServiceProtocol` / `AuthorizationRepository` | `Sources/Networking/Repositories/Authorization/` |
 | `Login` | `LoginServiceProtocol` / `LoginRepository` | `Sources/Networking/Repositories/Login/` |
+| `Provider` | `ProviderRepositoryProtocol` | `Sources/Networking/Repositories/Provider` |
 <!-- codegen:repository-registry:end -->
 
 ### Authorization (no HTTP)
