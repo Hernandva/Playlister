@@ -20,12 +20,15 @@ public protocol PlaylistsItemProtocol: Sendable {
     var artworkURL: URL? { get }
 }
 
-/// Public data the Playlists repository returns to the app.
+/// Playlists the Playlists repository returns to the app.
 public protocol PlaylistsResponseProtocol: Sendable {
     /// Music service the playlists belong to.
     var provider: MusicProvider { get }
-    /// Catalogue playlists of the request's `recommendedPlaylistIDs` that still exist, in the same order.
-    var recommended: [any PlaylistsItemProtocol] { get }
-    /// Playlists in the user's library.
-    var library: [any PlaylistsItemProtocol] { get }
+    var playlists: [any PlaylistsItemProtocol] { get }
+}
+
+/// One page of a playlists search.
+public protocol PlaylistsSearchResponseProtocol: PlaylistsResponseProtocol {
+    /// `true` when the page was full, so the next one may hold more playlists.
+    var hasMore: Bool { get }
 }

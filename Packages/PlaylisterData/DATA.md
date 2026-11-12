@@ -123,18 +123,21 @@ setting keeps the rest. Write failures are thrown as `SettingsError.storageFaile
 
 ### Playlists (MusicKit, no HTTP)
 
-`PlaylistsRepository` follows the same shape as `LoginRepository`: `fetch(_:)` takes a `PlaylistsRequestProtocol`
-(the provider the user signed in with and the `recommendedPlaylistIDs`) and forwards it, as the internal
-`PlaylistsRequestDAO` with `PlaylistsRepository.libraryLimit`, to the internal `PlaylistsServiceProtocol` of that
-provider, registered in `PlaylistsRepository.init()`. It returns a `PlaylistsResponseProtocol` with the `recommended`
-and the `library` playlists, each a `PlaylistsItemProtocol` with only what the service returns for the playlist
-itself: id, name, curator and artwork URL. It **never reads the songs**.
+`PlaylistsRepository` follows the same shape as `LoginRepository`: each call is forwarded, as an internal DAO, to the
+internal `PlaylistsServiceProtocol` of its provider, registered in `PlaylistsRepository.init()`. Every call returns
+`PlaylistsItemProtocol`s with only what the service returns for the playlist itself (id, name, curator and artwork
+URL) and **never reads the songs**. Each call is one MusicKit request, so the app can run them in parallel.
 
-- **Recommended:** read by catalogue identifier, never searched (the public catalogue search barely returns playlists
-  shared by users, such as the «Hitster» ones). `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`) reads every id
-  in **one** `MusicCatalogResourceRequest` and keeps the order of the ids. Ids that are not in the catalogue (deleted
-  or no longer shared) are left out without failing. The ids live in the feature (`PlaylistsUseCase`).
-- **Library:** the `PlaylistsRepository.libraryLimit` (20) most recently played playlists.
+| Call | Request | Returns |
+|---|---|---|
+| `fetchLibrary(_:)` | `LibraryPlaylistsRequestProtocol` (provider) | The `PlaylistsRepository.libraryLimit` (20) most recently played library playlists. |
+| `fetchRecommended(_:)` | `RecommendedPlaylistsRequestProtocol` (provider, `playlistIDs`) | Every catalogue playlist of the ids in **one** `MusicCatalogResourceRequest`, in the order of the ids. Ids not in the catalogue (deleted or no longer shared) are left out without failing. |
+| `search(_:)` | `PlaylistsSearchRequestProtocol` (provider, `term`, `offset`) | One page of `PlaylistsRepository.searchPageSize` (25) catalogue playlists, without top results, as a `PlaylistsSearchResponseProtocol` whose `hasMore` is `true` when the page was full. An empty term returns no playlists. |
+
+- The recommended ids live in the feature (`HitsterPlayListUseCase`). They are read by id, never searched: the public
+  catalogue search barely returns playlists shared by users, such as the «Hitster» ones.
+- The catalogue search seems to stop at about 100 results: past them, pages come back empty and `hasMore` is `false`.
 - Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme `AsyncImage` cannot load).
 - Without MusicKit access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure
-  `PlaylistsError.unavailable`, and a provider without a service throws `PlaylistsError.unsupportedProvider`.
+  `PlaylistsError.unavailable`, a cancelled call rethrows `CancellationError`, and a provider without a service throws
+  `PlaylistsError.unsupportedProvider`.

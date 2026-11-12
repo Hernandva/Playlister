@@ -35,8 +35,16 @@ final class PlaylistSelectorDependencies {
         repository
     }
 
-    func resolvePlaylistsUseCase() -> any PlaylistsUseCaseProtocol {
-        PlaylistsUseCase(dependencies: self)
+    func resolveMyPlaylistUseCase() -> any MyPlaylistUseCaseProtocol {
+        MyPlaylistUseCase(dependencies: self)
+    }
+
+    func resolveHitsterPlayListUseCase() -> any HitsterPlayListUseCaseProtocol {
+        HitsterPlayListUseCase(dependencies: self)
+    }
+
+    func resolveSearchByTermUseCase() -> any SearchByTermUseCaseProtocol {
+        SearchByTermUseCase(dependencies: self)
     }
 
     func resolveViewModel() -> PlaylistSelectorViewModel {

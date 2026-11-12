@@ -2,13 +2,14 @@ import PlaylisterData
 import PlaylisterUI
 import SwiftUI
 
-/// Playlist selector: a search field, the «Hitster» playlists of the catalogue and the user's playlists.
-/// Cards show only the playlist's artwork, name and curator. Tapping one asks to confirm it; once confirmed,
+/// Playlist selector: a search field, the playlists found with it, the «Hitster» playlists and the user's playlists.
+/// Every section loads on its own, in parallel, and disappears when it has no playlists. The search results load
+/// 25 more each time the user scrolls to the last one. Tapping a playlist asks to confirm it; once confirmed,
 /// ProviderStarter shows it and the selector closes.
 struct PlaylistSelectorView: View {
-    /// Card sides of the design system: 200 pt in the recommended carousel, 150 pt in «Your playlists».
-    private static let recommendedCardSize: CGFloat = 200
-    private static let libraryCardSize: CGFloat = 150
+    /// Card sides of the design system: 200 pt for «Hitster», 150 pt for the search and «Your playlists».
+    private static let hitsterCardSize: CGFloat = 200
+    private static let listCardSize: CGFloat = 150
 
     @State private var viewModel: PlaylistSelectorViewModel
     @Environment(\.dismiss) private var dismiss
@@ -30,98 +31,86 @@ struct PlaylistSelectorView: View {
         .toolbar(.visible, for: .navigationBar)
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
+        .task(id: viewModel.searchText) { await viewModel.search() }
         .sheet(item: $viewModel.pendingPlaylist, onDismiss: closeIfSelected) { playlist in
             confirmationSheet(for: playlist)
         }
     }
 
     @ViewBuilder private var content: some View {
-        switch viewModel.state {
-        case .idle, .loading:
+        if viewModel.isEmpty {
+            DSText(viewModel.emptyMessage, style: .subheadline, color: DSColor.textSecondary)
+        } else {
+            if viewModel.isSearching {
+                searchSection
+            }
+            hitsterSection
+            librarySection
+            if viewModel.hasPlaylists {
+                DSText(style: .footnote, color: DSColor.textSecondary)
+                    .localized("playlistSelector.hint")
+                    .frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    /// Catalogue playlists found with the search term. A loader after the last one asks for the next page.
+    private var searchSection: some View {
+        PlaylistSelectorSection(
+            titleKey: "playlistSelector.search.header",
+            state: viewModel.searchState,
+            playlists: viewModel.searchResults,
+            cardSize: Self.listCardSize,
+            subtitle: viewModel.subtitle(for:),
+            onSelect: viewModel.didTap,
+            onRetry: { Task { await viewModel.search() } },
+            tail: { loadMoreResults }
+        )
+    }
+
+    @ViewBuilder private var loadMoreResults: some View {
+        if viewModel.loadMoreResultsFailed {
+            Button {
+                Task { await viewModel.loadMoreResults() }
+            } label: {
+                Image(systemName: "arrow.clockwise")
+            }
+            .buttonStyle(DSIconButtonStyle(diameter: DSSpacing.tapMin))
+            .accessibilityLabel(String(localized: "playlistSelector.search.loadMore"))
+            .frame(height: Self.listCardSize)
+        } else if viewModel.canLoadMoreResults {
             ProgressView()
                 .tint(DSColor.textSecondary)
-                .frame(maxWidth: .infinity)
-        case .loaded:
-            loadedContent
-        case .failed(let message):
-            VStack(alignment: .leading, spacing: DSSpacing.space3) {
-                DSText(message, style: .footnote, color: DSColor.destructive)
-                DSButton(style: .plain) {
-                    Task { await viewModel.load() }
-                }
-                .localized("playlistSelector.retry")
-            }
+                .frame(width: DSSpacing.tapMin, height: Self.listCardSize)
+                .task(id: viewModel.searchResults.count) { await viewModel.loadMoreResults() }
         }
     }
 
-    @ViewBuilder private var loadedContent: some View {
-        if viewModel.recommended.isEmpty, viewModel.library.isEmpty {
-            if viewModel.isSearching {
-                DSText(style: .subheadline, color: DSColor.textSecondary)
-                    .localized("playlistSelector.search.empty")
-            } else {
-                DSText(viewModel.emptyMessage, style: .subheadline, color: DSColor.textSecondary)
-            }
-        } else {
-            recommendedSection
-            librarySection
-            DSText(style: .footnote, color: DSColor.textSecondary)
-                .localized("playlistSelector.hint")
-                .frame(maxWidth: .infinity)
-        }
+    private var hitsterSection: some View {
+        PlaylistSelectorSection(
+            titleKey: "playlistSelector.recommended.header",
+            count: viewModel.hitsterCountText,
+            state: viewModel.hitsterState,
+            playlists: viewModel.hitster,
+            cardSize: Self.hitsterCardSize,
+            subtitle: viewModel.subtitle(for:),
+            onSelect: viewModel.didTap,
+            onRetry: { Task { await viewModel.loadHitster() } },
+            tail: { EmptyView() }
+        )
     }
 
-    /// Hidden when there are no recommended playlists, or none match the search.
-    @ViewBuilder private var recommendedSection: some View {
-        if !viewModel.recommended.isEmpty {
-            VStack(alignment: .leading, spacing: DSSpacing.space3) {
-                HStack(alignment: .firstTextBaseline) {
-                    DSText(style: .sectionTitle)
-                        .localized("playlistSelector.recommended.header")
-                        .accessibilityAddTraits(.isHeader)
-                    Spacer()
-                    DSText(viewModel.recommendedCountText, style: .subheadline, color: DSColor.textSecondary)
-                }
-                carousel(viewModel.recommended, cardSize: Self.recommendedCardSize)
-            }
-        }
-    }
-
-    /// Hidden when the user has no playlists, or none match the search.
-    @ViewBuilder private var librarySection: some View {
-        if !viewModel.library.isEmpty {
-            VStack(alignment: .leading, spacing: DSSpacing.space3) {
-                DSText(style: .sectionTitle)
-                    .localized("playlistSelector.library.header")
-                    .accessibilityAddTraits(.isHeader)
-                carousel(viewModel.library, cardSize: Self.libraryCardSize)
-            }
-        }
-    }
-
-    /// Horizontal row of playlist cards that runs to the screen edges.
-    private func carousel(_ playlists: [PlaylistSelectorViewData.Playlist], cardSize: CGFloat) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(alignment: .top, spacing: DSSpacing.space3) {
-                ForEach(playlists) { playlist in
-                    Button {
-                        viewModel.didTap(playlist)
-                    } label: {
-                        DSPlaylistCard(
-                            playlist.name,
-                            subtitle: viewModel.subtitle(for: playlist),
-                            covers: playlist.covers,
-                            size: cardSize
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityHint(String(localized: "playlistSelector.card.hint"))
-                }
-            }
-            .padding(.horizontal, DSSpacing.space4)
-        }
-        .scrollClipDisabled()
-        .padding(.horizontal, -DSSpacing.space4)
+    private var librarySection: some View {
+        PlaylistSelectorSection(
+            titleKey: "playlistSelector.library.header",
+            state: viewModel.libraryState,
+            playlists: viewModel.library,
+            cardSize: Self.listCardSize,
+            subtitle: viewModel.subtitle(for:),
+            onSelect: viewModel.didTap,
+            onRetry: { Task { await viewModel.loadLibrary() } },
+            tail: { EmptyView() }
+        )
     }
 
     private func confirmationSheet(for playlist: PlaylistSelectorViewData.Playlist) -> some View {

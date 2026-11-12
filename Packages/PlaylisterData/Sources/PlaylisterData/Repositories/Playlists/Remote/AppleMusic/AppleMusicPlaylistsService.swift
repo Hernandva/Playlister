@@ -2,53 +2,80 @@ import Foundation
 import MusicKit
 
 /// Apple Music playlists. Internal: the app only sees `PlaylistsRepositoryProtocol`.
-/// Wraps MusicKit: reads the recommended playlists by identifier and the library, and never reads the songs.
+/// Wraps MusicKit: reads the library, the recommended playlists by identifier and one page of a catalogue search,
+/// each with a single request, and never reads the songs.
 struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
     /// Side, in pixels, of the artwork URLs.
     private static let artworkSide = 400
 
-    func fetch(_ request: PlaylistsRequestDAO) async throws -> PlaylistsResponseDAO {
-        guard request.provider == .appleMusic else {
-            throw PlaylistsError.unsupportedProvider(request.provider)
+    func fetchLibrary(_ request: LibraryPlaylistsRequestDAO) async throws -> PlaylistsResponseDAO {
+        try checkAccess(for: request.provider)
+        return try await mappingErrors {
+            var libraryRequest = MusicLibraryRequest<Playlist>()
+            libraryRequest.limit = request.limit
+            libraryRequest.sort(by: \.lastPlayedDate, ascending: false)
+            let playlists = try await libraryRequest.response().items
+            return PlaylistsResponseDAO(provider: .appleMusic, items: playlists.map(Self.item(from:)))
+        }
+    }
+
+    /// Reads every recommended playlist in one request, keeping the order of the ids. Playlists that are not in the
+    /// catalogue (deleted or no longer shared) are left out without failing.
+    func fetchRecommended(_ request: RecommendedPlaylistsRequestDAO) async throws -> PlaylistsResponseDAO {
+        try checkAccess(for: request.provider)
+        guard !request.playlistIDs.isEmpty else {
+            return PlaylistsResponseDAO(provider: .appleMusic, items: [])
+        }
+        return try await mappingErrors {
+            let itemIDs = request.playlistIDs.map { MusicItemID($0) }
+            let catalogRequest = MusicCatalogResourceRequest<Playlist>(matching: \.id, memberOf: itemIDs)
+            let found = try await catalogRequest.response().items
+            let playlistsByID = [String: Playlist](found.map { ($0.id.rawValue, $0) }) { first, _ in first }
+            let playlists = request.playlistIDs.compactMap { playlistsByID[$0] }
+            return PlaylistsResponseDAO(provider: .appleMusic, items: playlists.map(Self.item(from:)))
+        }
+    }
+
+    /// One page of the catalogue search, without top results. A full page means there may be more.
+    func search(_ request: PlaylistsSearchRequestDAO) async throws -> PlaylistsSearchResponseDAO {
+        try checkAccess(for: request.provider)
+        let term = request.term.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !term.isEmpty else {
+            return PlaylistsSearchResponseDAO(provider: .appleMusic, items: [], hasMore: false)
+        }
+        return try await mappingErrors {
+            var searchRequest = MusicCatalogSearchRequest(term: term, types: [Playlist.self])
+            searchRequest.limit = request.limit
+            searchRequest.offset = request.offset
+            searchRequest.includeTopResults = false
+            let playlists = try await searchRequest.response().playlists
+            return PlaylistsSearchResponseDAO(
+                provider: .appleMusic,
+                items: playlists.map(Self.item(from:)),
+                hasMore: playlists.count >= request.limit
+            )
+        }
+    }
+
+    private func checkAccess(for provider: MusicProvider) throws {
+        guard provider == .appleMusic else {
+            throw PlaylistsError.unsupportedProvider(provider)
         }
         guard MusicAuthorization.currentStatus == .authorized else {
             throw PlaylistsError.notAuthorized
         }
+    }
+
+    /// Turns every MusicKit failure into `PlaylistsError.unavailable`, but lets a cancellation through:
+    /// the app cancels searches the user has already typed past.
+    private func mappingErrors<Result: Sendable>(_ work: () async throws -> Result) async throws -> Result {
         do {
-            async let recommended = recommendedPlaylists(ids: request.recommendedPlaylistIDs)
-            async let library = libraryPlaylists(limit: request.libraryLimit)
-            return try await PlaylistsResponseDAO(
-                provider: .appleMusic,
-                recommendedItems: recommended.map(Self.item(from:)),
-                libraryItems: library.map(Self.item(from:))
-            )
+            return try await work()
+        } catch is CancellationError {
+            throw CancellationError()
         } catch {
             throw PlaylistsError.unavailable
         }
-    }
-
-    /// Reads every recommended playlist in one request, keeping the order of `ids`. Playlists that are not in the
-    /// catalogue (deleted or no longer shared) are left out without failing.
-    private func recommendedPlaylists(ids: [String]) async throws -> [Playlist] {
-        guard !ids.isEmpty else { return [] }
-        let itemIDs = ids.map { MusicItemID($0) }
-        let request = MusicCatalogResourceRequest<Playlist>(matching: \.id, memberOf: itemIDs)
-        let found = try await request.response().items
-        let playlistsByID = [String: Playlist](found.map { ($0.id.rawValue, $0) }) { first, _ in first }
-        let playlists = ids.compactMap { playlistsByID[$0] }
-        #if DEBUG
-        let missing = ids.filter { playlistsByID[$0] == nil }
-        debugPrint("[Playlists] recommended: 1 request, \(ids.count) ids, \(playlists.count) found, "
-            + "missing: \(missing.isEmpty ? "none" : missing.joined(separator: ", "))")
-        #endif
-        return playlists
-    }
-
-    private func libraryPlaylists(limit: Int) async throws -> [Playlist] {
-        var request = MusicLibraryRequest<Playlist>()
-        request.limit = limit
-        request.sort(by: \.lastPlayedDate, ascending: false)
-        return try await Array(request.response().items)
     }
 
     private static func item(from playlist: Playlist) -> PlaylistsItemDAO {

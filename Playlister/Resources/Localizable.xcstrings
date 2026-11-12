@@ -562,23 +562,6 @@
         }
       }
     },
-    "playlistSelector.error %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your %@ playlists couldn't be loaded."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se pudieron cargar tus listas de %@."
-          }
-        }
-      }
-    },
     "playlistSelector.hint" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -677,6 +660,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ninguna lista coincide con tu búsqueda."
+          }
+        }
+      }
+    },
+    "playlistSelector.search.header" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search results"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultados de la búsqueda"
+          }
+        }
+      }
+    },
+    "playlistSelector.search.loadMore" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load more playlists"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargar más listas"
+          }
+        }
+      }
+    },
+    "playlistSelector.section.error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These playlists couldn't be loaded."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron cargar estas listas."
           }
         }
       }

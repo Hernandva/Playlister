@@ -16,18 +16,31 @@ struct PlaylistSelectorViewData: Equatable, Sendable {
         let covers: [URL]
     }
 
-    /// Result of `PlaylistsUseCase`.
-    struct Playlists: Equatable, Sendable {
-        /// «Hitster» playlists of the catalogue.
-        var recommended: [Playlist]
-        /// Playlists in the user's library.
-        var library: [Playlist]
+    /// Result of `SearchByTermUseCase`: one page of a search.
+    struct SearchPage: Equatable, Sendable {
+        let playlists: [Playlist]
+        /// Where the next page starts.
+        let nextOffset: Int
+        /// `true` when the next page may hold more playlists.
+        let hasMore: Bool
+    }
+
+    /// Every page loaded so far for the current search term.
+    struct SearchResults: Equatable, Sendable {
+        let term: String
+        var playlists: [Playlist] = []
+        var nextOffset = 0
+        var hasMore = false
     }
 
     /// Brand name of the music service the user signed in with. Known before anything loads.
     var providerName: String
-    /// Result of `PlaylistsUseCase`, or `nil` until it loads.
-    var playlists: Playlists?
+    /// Result of `HitsterPlayListUseCase`.
+    var hitster: [Playlist] = []
+    /// Result of `MyPlaylistUseCase`.
+    var library: [Playlist] = []
+    /// Pages of `SearchByTermUseCase` for the term in «Search playlists», or `nil` while it is empty.
+    var search: SearchResults?
 
     init(provider: MusicProvider) {
         self.providerName = Self.displayName(of: provider)

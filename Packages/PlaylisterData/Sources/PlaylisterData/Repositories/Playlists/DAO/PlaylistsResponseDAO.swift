@@ -3,11 +3,18 @@ import Foundation
 /// Playlists of a music service. Internal to PlaylisterData: the app only sees PlaylistsResponseProtocol.
 struct PlaylistsResponseDAO: Sendable, Equatable, PlaylistsResponseProtocol {
     let provider: MusicProvider
-    let recommendedItems: [PlaylistsItemDAO]
-    let libraryItems: [PlaylistsItemDAO]
+    let items: [PlaylistsItemDAO]
 
-    var recommended: [any PlaylistsItemProtocol] { recommendedItems }
-    var library: [any PlaylistsItemProtocol] { libraryItems }
+    var playlists: [any PlaylistsItemProtocol] { items }
+}
+
+/// One page of a search. Internal to PlaylisterData: the app only sees PlaylistsSearchResponseProtocol.
+struct PlaylistsSearchResponseDAO: Sendable, Equatable, PlaylistsSearchResponseProtocol {
+    let provider: MusicProvider
+    let items: [PlaylistsItemDAO]
+    let hasMore: Bool
+
+    var playlists: [any PlaylistsItemProtocol] { items }
 }
 
 /// A playlist of a music service. Internal: the app only sees PlaylistsItemProtocol.

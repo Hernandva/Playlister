@@ -2,66 +2,105 @@
 import Foundation
 import Testing
 
-private struct PlaylistsRequest: PlaylistsRequestProtocol {
+private struct LibraryRequest: LibraryPlaylistsRequestProtocol {
     let provider: MusicProvider
-    let recommendedPlaylistIDs: [String]
 }
 
-private final class FakePlaylistsService: PlaylistsServiceProtocol, @unchecked Sendable {
-    let result: Result<PlaylistsResponseDAO, PlaylistsError>
-    private(set) var receivedRequest: PlaylistsRequestDAO?
+private struct RecommendedRequest: RecommendedPlaylistsRequestProtocol {
+    let provider: MusicProvider
+    let playlistIDs: [String]
+}
 
-    init(result: Result<PlaylistsResponseDAO, PlaylistsError>) {
-        self.result = result
+private struct SearchRequest: PlaylistsSearchRequestProtocol {
+    let provider: MusicProvider
+    let term: String
+    let offset: Int
+}
+
+/// Records what it receives and answers with fixed results, or with `error` when there is one.
+private final class FakePlaylistsService: PlaylistsServiceProtocol, @unchecked Sendable {
+    let items: [PlaylistsItemDAO]
+    let error: PlaylistsError?
+    private(set) var libraryRequest: LibraryPlaylistsRequestDAO?
+    private(set) var recommendedRequest: RecommendedPlaylistsRequestDAO?
+    private(set) var searchRequest: PlaylistsSearchRequestDAO?
+
+    init(items: [PlaylistsItemDAO] = [], error: PlaylistsError? = nil) {
+        self.items = items
+        self.error = error
     }
 
-    func fetch(_ request: PlaylistsRequestDAO) async throws -> PlaylistsResponseDAO {
-        receivedRequest = request
-        return try result.get()
+    func fetchLibrary(_ request: LibraryPlaylistsRequestDAO) async throws -> PlaylistsResponseDAO {
+        libraryRequest = request
+        if let error { throw error }
+        return PlaylistsResponseDAO(provider: request.provider, items: items)
+    }
+
+    func fetchRecommended(_ request: RecommendedPlaylistsRequestDAO) async throws -> PlaylistsResponseDAO {
+        recommendedRequest = request
+        if let error { throw error }
+        return PlaylistsResponseDAO(provider: request.provider, items: items)
+    }
+
+    func search(_ request: PlaylistsSearchRequestDAO) async throws -> PlaylistsSearchResponseDAO {
+        searchRequest = request
+        if let error { throw error }
+        return PlaylistsSearchResponseDAO(provider: request.provider, items: items, hasMore: true)
     }
 }
 
 struct PlaylistsRepositoryTests {
-    private static let playlistIDs = ["pl.u-DdANxEPFj4Jyvq"]
-    private static let request = PlaylistsRequest(provider: .appleMusic, recommendedPlaylistIDs: playlistIDs)
     private static let playlist = PlaylistsItemDAO(
-        id: "pl.1",
-        name: "Hitster España",
-        curatorName: "Apple Music",
+        id: "pl.u-DdANxEPFj4Jyvq",
+        name: "Hitster",
+        curatorName: nil,
         artworkURL: URL(string: "https://example.com/cover.jpg")
     )
 
-    @Test func forwardsTheRequestToTheProviderService() async throws {
-        let response = PlaylistsResponseDAO(provider: .appleMusic, recommendedItems: [Self.playlist], libraryItems: [])
-        let service = FakePlaylistsService(result: .success(response))
+    @Test func readsTheLibraryWithItsLimit() async throws {
+        let service = FakePlaylistsService(items: [Self.playlist])
         let repository = PlaylistsRepository(services: [.appleMusic: service])
 
-        let result = try await repository.fetch(Self.request)
+        let response = try await repository.fetchLibrary(LibraryRequest(provider: .appleMusic))
 
-        let expected = PlaylistsRequestDAO(
-            provider: .appleMusic,
-            recommendedPlaylistIDs: Self.playlistIDs,
-            libraryLimit: 20
-        )
-        #expect(service.receivedRequest == expected)
-        #expect(result.provider == .appleMusic)
-        #expect(result.recommended.map(\.name) == ["Hitster España"])
-        #expect(result.recommended.first?.curatorName == "Apple Music")
-        #expect(result.library.isEmpty)
+        #expect(service.libraryRequest == LibraryPlaylistsRequestDAO(provider: .appleMusic, limit: 20))
+        #expect(response.playlists.map(\.name) == ["Hitster"])
+    }
+
+    @Test func readsTheRecommendedPlaylistsByID() async throws {
+        let service = FakePlaylistsService(items: [Self.playlist])
+        let repository = PlaylistsRepository(services: [.appleMusic: service])
+        let ids = ["pl.u-DdANxEPFj4Jyvq"]
+
+        let request = RecommendedRequest(provider: .appleMusic, playlistIDs: ids)
+        let response = try await repository.fetchRecommended(request)
+
+        #expect(service.recommendedRequest == RecommendedPlaylistsRequestDAO(provider: .appleMusic, playlistIDs: ids))
+        #expect(response.playlists.map(\.id) == ids)
+    }
+
+    @Test func searchesOnePageWithItsSize() async throws {
+        let service = FakePlaylistsService(items: [Self.playlist])
+        let repository = PlaylistsRepository(services: [.appleMusic: service])
+
+        let response = try await repository.search(SearchRequest(provider: .appleMusic, term: "rock", offset: 25))
+
+        let expected = PlaylistsSearchRequestDAO(provider: .appleMusic, term: "rock", offset: 25, limit: 25)
+        #expect(service.searchRequest == expected)
+        #expect(response.hasMore)
     }
 
     @Test func forwardsTheErrorOfTheProviderService() async {
-        let service = FakePlaylistsService(result: .failure(.notAuthorized))
-        let repository = PlaylistsRepository(services: [.appleMusic: service])
+        let repository = PlaylistsRepository(services: [.appleMusic: FakePlaylistsService(error: .notAuthorized)])
         await #expect(throws: PlaylistsError.notAuthorized) {
-            try await repository.fetch(Self.request)
+            try await repository.fetchLibrary(LibraryRequest(provider: .appleMusic))
         }
     }
 
     @Test func rejectsAProviderWithoutService() async {
         let repository = PlaylistsRepository(services: [:])
         await #expect(throws: PlaylistsError.unsupportedProvider(.spotify)) {
-            try await repository.fetch(PlaylistsRequest(provider: .spotify, recommendedPlaylistIDs: Self.playlistIDs))
+            try await repository.search(SearchRequest(provider: .spotify, term: "rock", offset: 0))
         }
     }
 }
