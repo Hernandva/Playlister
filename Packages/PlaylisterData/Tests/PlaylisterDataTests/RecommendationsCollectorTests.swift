@@ -30,4 +30,17 @@ struct RecommendationsCollectorTests {
         #expect(collector.readCount == 3)
         #expect(collector.isComplete)
     }
+
+    @Test func leavesOutResultsThatAreNotAllowedButCountsThemAsRead() {
+        let limits = PlaylistsLimits(recommendations: 20, recommendationsSearch: 100, library: 20)
+        var collector = RecommendationsCollector<String>(
+            term: "Hitster",
+            limits: limits,
+            name: { $0 },
+            isAllowed: { !$0.hasSuffix("(editorial)") }
+        )
+        collector.add(["Hitster (editorial)", "Hitster España", "Hitster Rock (editorial)"])
+        #expect(collector.items == ["Hitster España"])
+        #expect(collector.readCount == 3)
+    }
 }
