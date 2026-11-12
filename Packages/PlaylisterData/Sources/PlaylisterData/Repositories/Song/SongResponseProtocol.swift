@@ -25,7 +25,6 @@ public protocol SongItemProtocol: Sendable {
 public protocol SongResponseProtocol: Sendable {
     /// Music service the songs belong to.
     var provider: MusicProvider { get }
-    /// Random songs of the playlist; fewer than requested when the playlist has fewer songs, or some of the picked
-    /// ones have no web artwork.
+    /// Random songs of the playlist; fewer than requested when it has fewer songs with web artwork.
     var songs: [any SongItemProtocol] { get }
 }

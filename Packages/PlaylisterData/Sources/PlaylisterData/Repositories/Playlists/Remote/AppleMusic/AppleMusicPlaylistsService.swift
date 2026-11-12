@@ -2,20 +2,25 @@ import Foundation
 import MusicKit
 
 /// Apple Music playlists. Internal: the app only sees `PlaylistsRepositoryProtocol`.
-/// Wraps MusicKit: reads the library, the recommended playlists by identifier and one page of a catalogue search,
-/// each with a single request, and never reads the songs.
+/// Reads the library through the Apple Music API (`AppleMusicAPIClient`), which gives web artwork, and the
+/// recommended playlists by identifier and one page of a catalogue search through MusicKit. Each call is a single
+/// request, and none reads the songs.
 struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
     /// Side, in pixels, of the artwork URLs.
     private static let artworkSide = 400
 
+    private let client = AppleMusicAPIClient()
+
+    /// `GET /v1/me/library/playlists`, in the order the API returns them.
     func fetchLibrary(_ request: LibraryPlaylistsRequestDAO) async throws -> PlaylistsResponseDAO {
         try checkAccess(for: request.provider)
         return try await mappingErrors {
-            var libraryRequest = MusicLibraryRequest<Playlist>()
-            libraryRequest.limit = request.limit
-            libraryRequest.sort(by: \.lastPlayedDate, ascending: false)
-            let playlists = try await libraryRequest.response().items
-            return PlaylistsResponseDAO(provider: .appleMusic, items: playlists.map(Self.item(from:)))
+            let page: AppleMusicPageDAO<AppleMusicLibraryPlaylistAttributesDAO> = try await client.get(
+                "me/library/playlists",
+                query: [URLQueryItem(name: "limit", value: "\(request.limit)")]
+            )
+            let items = page.data.compactMap { PlaylistsItemDAO(libraryPlaylist: $0, artworkSide: Self.artworkSide) }
+            return PlaylistsResponseDAO(provider: .appleMusic, items: items)
         }
     }
 
@@ -87,7 +92,7 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
         )
     }
 
-    /// Only web URLs are kept: library artwork can use a MusicKit scheme that `AsyncImage` cannot load.
+    /// Only web URLs are kept: `AsyncImage` cannot load a `musicKit://` artwork.
     private static func webURL(of artwork: Artwork?) -> URL? {
         guard let url = artwork?.url(width: artworkSide, height: artworkSide),
               url.scheme == "https" || url.scheme == "http" else { return nil }

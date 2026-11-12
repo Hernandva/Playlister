@@ -2,8 +2,8 @@ import Foundation
 
 /// Public API of the Song repository. Features depend on this protocol, never on the concrete class.
 public protocol SongRepositoryProtocol: Sendable {
-    /// Up to `request.count` random songs of a playlist, those with web artwork. Reads the first batch of the
-    /// playlist's songs and looks up only the picked ones. Throws `SongError`.
+    /// Up to `request.count` random songs of a playlist, among those with web artwork. Reads only the first page of
+    /// the playlist's songs, in one request. Throws `SongError`.
     func fetchRandomSongs(_ request: some SongRequestProtocol) async throws -> any SongResponseProtocol
 }
 

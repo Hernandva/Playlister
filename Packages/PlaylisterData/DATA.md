@@ -8,6 +8,11 @@ Humans and coding agents must follow this file; the `playlister-new-repo` skill 
 ## Rules
 
 - **Alamofire** is the HTTP layer, and only `Core/Remote/NetworkClient.swift` imports it.
+- The **Apple Music API** (`https://api.music.apple.com/v1/`) is the one exception: only MusicKit can sign its
+  requests, so every call to it goes through `Core/Remote/AppleMusic/AppleMusicAPIClient.swift`, which uses
+  `MusicDataRequest`. Its responses share the DAOs of `AppleMusicAPIDAO.swift` (page, resource, artwork template).
+  Use it when MusicKit's own requests fall short, e.g. the user's library: `MusicLibraryRequest` gives `musicKit://`
+  artwork that `AsyncImage` cannot load, the API gives web artwork.
 - Each repository lives in its own folder: `Sources/PlaylisterData/Repositories/<Name>/`.
 - Data sources are split by where the data lives, both in `Core/` and inside each repository:
   - `Remote/`: whatever leaves the device, such as HTTP through `NetworkClient` or a provider SDK like MusicKit.
@@ -127,11 +132,12 @@ setting keeps the rest. Write failures are thrown as `SettingsError.storageFaile
 `PlaylistsRepository` follows the same shape as `LoginRepository`: each call is forwarded, as an internal DAO, to the
 internal `PlaylistsServiceProtocol` of its provider, registered in `PlaylistsRepository.init()`. Every call returns
 `PlaylistsItemProtocol`s with only what the service returns for the playlist itself (id, name, curator and artwork
-URL) and **never reads the songs**. Each call is one MusicKit request, so the app can run them in parallel.
+URL) and **never reads the songs**. Each call is one request (Apple Music API for the library, MusicKit for the catalogue), so the app can run them in
+parallel.
 
 | Call | Request | Returns |
 |---|---|---|
-| `fetchLibrary(_:)` | `LibraryPlaylistsRequestProtocol` (provider) | The `PlaylistsRepository.libraryLimit` (20) most recently played library playlists. |
+| `fetchLibrary(_:)` | `LibraryPlaylistsRequestProtocol` (provider) | Up to `PlaylistsRepository.libraryLimit` (20) library playlists from `GET /v1/me/library/playlists` (Apple Music API), in the order the API returns them, with their web artwork when they have one. |
 | `fetchRecommended(_:)` | `RecommendedPlaylistsRequestProtocol` (provider, `playlistIDs`) | Every catalogue playlist of the ids in **one** `MusicCatalogResourceRequest`, in the order of the ids. Ids not in the catalogue (deleted or no longer shared) are left out without failing. |
 | `search(_:)` | `PlaylistsSearchRequestProtocol` (provider, `term`, `offset`) | One page of `PlaylistsRepository.searchPageSize` (25) catalogue playlists, without top results, as a `PlaylistsSearchResponseProtocol` whose `hasMore` is `true` when the page was full. An empty term returns no playlists. |
 
@@ -150,12 +156,11 @@ URL) and **never reads the songs**. Each call is one MusicKit request, so the ap
 internal `SongServiceProtocol` of that provider, registered in `SongRepository.init()`. It returns a
 `SongResponseProtocol` with up to `count` random `SongItemProtocol`s (id, title, artist and web artwork URL).
 
-- `AppleMusicSongService` (in `Remote/AppleMusic/`) finds the playlist in the library when its id starts with `p.`,
-  else in the catalogue, and reads the **first batch** of its songs, which may come with little more than their id.
-  `RandomSongPicker` picks `count` of them at random, and **only those** are looked up by id to get their artwork:
-  library songs (ids starting with `i.`) with one `MusicLibraryRequest`, catalogue songs with one
-  `MusicCatalogResourceRequest`, at the same time. Picked songs without web artwork are left out, so it may return
-  fewer than `count`.
+- `AppleMusicSongService` (in `Remote/AppleMusic/`) reads the first page (100) of the playlist's songs through the
+  Apple Music API in **one** request: `GET /v1/me/library/playlists/{id}/tracks` when the id starts with `p.`, else
+  `GET /v1/catalog/{storefront}/playlists/{id}/tracks`. Each song already comes with its web artwork, so no song is
+  looked up again. `RandomSongPicker` then picks `count` of those with artwork at random; with fewer songs with
+  artwork it returns fewer.
 - Only `https` artwork URLs are kept (library artwork can use a MusicKit scheme `AsyncImage` cannot load).
-- Without MusicKit access it throws `SongError.notAuthorized`, an unknown playlist `SongError.playlistNotFound`, any
-  other MusicKit failure `SongError.unavailable`, and a provider without a service `SongError.unsupportedProvider`.
+- Without MusicKit access it throws `SongError.notAuthorized`, an unknown playlist (API 404)
+  `SongError.playlistNotFound`, any other failure `SongError.unavailable`, and a provider without a service `SongError.unsupportedProvider`.
