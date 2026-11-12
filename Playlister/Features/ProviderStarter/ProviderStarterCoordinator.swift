@@ -9,6 +9,7 @@ final class ProviderStarterCoordinator: Coordinator {
     enum Route: Hashable {
         /// Playback, game mode, Bingo categories and account.
         case settings
+        case playlistSelector
         // @codegen:routes
     }
 
@@ -39,6 +40,8 @@ final class ProviderStarterCoordinator: Coordinator {
                 provider: dependencies.resolveProvider(),
                 signOut: dependencies.resolveSignOut()
             ).start())
+        case .playlistSelector:
+            return AnyView(PlaylistSelectorCoordinator().start())
         // @codegen:destinations
         }
     }

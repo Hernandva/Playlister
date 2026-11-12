@@ -477,6 +477,17 @@
         }
       }
     },
+    "playlistSelector.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlist Selector"
+          }
+        }
+      }
+    },
     "providerStarter.changeProvider.hint" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -152,6 +152,7 @@ adds the route to the parent coordinator and updates this file.
 | `Home` | — (root) | `Authorization`, `Login` |
 | `ProviderStarter` | Home | `LastPlaylistRepository` |
 | `Settings` | ProviderStarter | `SettingsRepository` |
+| `PlaylistSelector` | ProviderStarter | `PlaylistsRepository` |
 <!-- codegen:feature-registry:end -->
 
 ## App map
@@ -164,5 +165,6 @@ graph TD
     Home
     Home --> ProviderStarter
     ProviderStarter --> Settings
+    ProviderStarter --> PlaylistSelector
 ```
 <!-- codegen:app-map:end -->
