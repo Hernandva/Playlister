@@ -29,7 +29,7 @@ final class PlaylistSelectorViewModel {
     /// Data of the screen. Each use case result updates only its own field.
     private(set) var viewData: PlaylistSelectorViewData
 
-    /// Text of «Search playlists». Searches the catalogue and filters «Hitster» and «Your playlists» by name.
+    /// Text of «Search playlists». Searches the catalogue; «Hitster» and «Your playlists» do not change with it.
     var searchText = ""
     /// Playlist whose confirmation sheet is shown, or `nil` when the sheet is closed.
     var pendingPlaylist: Playlist?
@@ -62,14 +62,14 @@ final class PlaylistSelectorViewModel {
         !searchTerm.isEmpty
     }
 
-    /// «Hitster» playlists that match the search.
+    /// «Hitster» playlists.
     var hitster: [Playlist] {
-        filtered(viewData.hitster)
+        viewData.hitster
     }
 
-    /// The user's playlists that match the search.
+    /// The user's playlists.
     var library: [Playlist] {
-        filtered(viewData.library)
+        viewData.library
     }
 
     /// Catalogue playlists found with the search term, every page loaded so far.
@@ -231,11 +231,5 @@ final class PlaylistSelectorViewModel {
         viewData.search?.playlists += page.playlists.filter { !shown.contains($0.id) }
         viewData.search?.nextOffset = page.nextOffset
         viewData.search?.hasMore = page.hasMore
-    }
-
-    private func filtered(_ playlists: [Playlist]) -> [Playlist] {
-        let query = searchTerm
-        guard !query.isEmpty else { return playlists }
-        return playlists.filter { $0.name.localizedStandardContains(query) }
     }
 }
