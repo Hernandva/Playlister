@@ -2,12 +2,11 @@ import Foundation
 import MusicKit
 
 /// Apple Music playlists. Internal: the app only sees `PlaylistsRepositoryProtocol`.
-/// Wraps MusicKit with two requests, the catalogue search and the library, and never reads the songs.
+/// Wraps MusicKit: pages through the catalogue search and reads the library, and never reads the songs.
+/// The limits come with the request, from `PlaylistsRepository.limits`.
 struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
-    /// Recommended playlists read from the catalogue search (MusicKit allows up to 25).
-    private static let recommendationsLimit = 20
-    /// Library playlists read, most recently played first.
-    private static let libraryLimit = 20
+    /// Results per catalogue search page: the most MusicKit allows.
+    private static let searchPageSize = 25
     /// Side, in pixels, of the artwork URLs.
     private static let artworkSide = 400
 
@@ -19,8 +18,8 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
             throw PlaylistsError.notAuthorized
         }
         do {
-            async let recommended = recommendedPlaylists(term: request.recommendationsTerm)
-            async let library = libraryPlaylists()
+            async let recommended = recommendedPlaylists(term: request.recommendationsTerm, limits: request.limits)
+            async let library = libraryPlaylists(limit: request.limits.library)
             return try await PlaylistsResponseDAO(
                 provider: .appleMusic,
                 recommendedItems: recommended.map(Self.item(from:)),
@@ -31,15 +30,25 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
         }
     }
 
-    private func recommendedPlaylists(term: String) async throws -> [Playlist] {
+    /// Reads search pages until there are enough playlists that contain the term, the search has been read as
+    /// far as `limits.recommendationsSearch`, or there are no more results.
+    private func recommendedPlaylists(term: String, limits: PlaylistsLimits) async throws -> [Playlist] {
+        var collector = RecommendationsCollector<Playlist>(term: term, limits: limits) { $0.name }
         var request = MusicCatalogSearchRequest(term: term, types: [Playlist.self])
-        request.limit = Self.recommendationsLimit
-        return try await Array(request.response().playlists)
+        request.limit = Self.searchPageSize
+        var page = try await request.response().playlists
+        collector.add(Array(page))
+        while !collector.isComplete, page.hasNextBatch,
+              let next = try await page.nextBatch(limit: Self.searchPageSize), !next.isEmpty {
+            collector.add(Array(next))
+            page = next
+        }
+        return collector.items
     }
 
-    private func libraryPlaylists() async throws -> [Playlist] {
+    private func libraryPlaylists(limit: Int) async throws -> [Playlist] {
         var request = MusicLibraryRequest<Playlist>()
-        request.limit = Self.libraryLimit
+        request.limit = limit
         request.sort(by: \.lastPlayedDate, ascending: false)
         return try await Array(request.response().items)
     }

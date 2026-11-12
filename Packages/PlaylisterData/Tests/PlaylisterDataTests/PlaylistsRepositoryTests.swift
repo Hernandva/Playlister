@@ -37,7 +37,12 @@ struct PlaylistsRepositoryTests {
 
         let result = try await repository.fetch(Self.request)
 
-        #expect(service.receivedRequest == PlaylistsRequestDAO(provider: .appleMusic, recommendationsTerm: "Hitster"))
+        let expected = PlaylistsRequestDAO(
+            provider: .appleMusic,
+            recommendationsTerm: "Hitster",
+            limits: PlaylistsLimits(recommendations: 20, recommendationsSearch: 100, library: 20)
+        )
+        #expect(service.receivedRequest == expected)
         #expect(result.provider == .appleMusic)
         #expect(result.recommended.map(\.name) == ["Hitster España"])
         #expect(result.recommended.first?.curatorName == "Apple Music")

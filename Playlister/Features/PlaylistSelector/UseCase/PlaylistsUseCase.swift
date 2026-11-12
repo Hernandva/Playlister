@@ -16,7 +16,8 @@ struct PlaylistsRequest: PlaylistsRequestProtocol {
 /// Business logic of PlaylistSelector: calls the Playlists repository public API and returns only the data of its
 /// response, mapped out of the PlaylisterData types.
 struct PlaylistsUseCase: PlaylistsUseCaseProtocol {
-    /// The recommended playlists are the «Hitster» ones of the catalogue. Brand names are not translated.
+    /// The recommended playlists are the «Hitster» ones of the catalogue: the repository returns only those whose
+    /// name contains it. Brand names are not translated.
     private static let recommendationsTerm = "Hitster"
 
     private let provider: MusicProvider
@@ -34,19 +35,13 @@ struct PlaylistsUseCase: PlaylistsUseCaseProtocol {
         let request = PlaylistsRequest(provider: provider, recommendationsTerm: Self.recommendationsTerm)
         let response = try await repository.fetch(request)
         return PlaylistSelectorViewData.Playlists(
-            recommended: Self.containingTerm(response.recommended).map(Self.playlist(from:)),
+            recommended: response.recommended.map(Self.playlist(from:)),
             library: response.library.map(Self.playlist(from:))
         )
     }
 }
 
 private extension PlaylistsUseCase {
-    /// The catalogue search also returns loose matches: only playlists whose name contains the term are
-    /// recommended, ignoring case and accents («hitster», «HITSTER España»).
-    static func containingTerm(_ items: [any PlaylistsItemProtocol]) -> [any PlaylistsItemProtocol] {
-        items.filter { $0.name.localizedStandardContains(recommendationsTerm) }
-    }
-
     static func playlist(from item: any PlaylistsItemProtocol) -> PlaylistSelectorViewData.Playlist {
         PlaylistSelectorViewData.Playlist(
             id: item.id,
