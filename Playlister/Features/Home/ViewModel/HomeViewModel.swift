@@ -30,17 +30,15 @@ final class HomeViewModel {
     private(set) var state: State = .idle
     /// The service whose settings sheet is shown, or `nil` when the sheet is closed.
     var settingsSheetProvider: Provider?
-    /// Authorisation state of every music service, written by the use case.
-    private var viewData: HomeViewData {
-        dependencies.resolveViewData()
-    }
-    private var authorizationUseCase: any AuthorizationUseCaseProtocol {
-        dependencies.resolveAuthorizationUseCase()
-    }
+    /// Data of the screen. Each use case result updates only its own field.
+    private var viewData: HomeViewData
+    private let authorizationUseCase: any AuthorizationUseCaseProtocol
     private let dependencies: HomeDependencies
 
     init(dependencies: HomeDependencies) {
         self.dependencies = dependencies
+        self.viewData = HomeViewData()
+        self.authorizationUseCase = dependencies.resolveAuthorizationUseCase()
     }
 
     /// Text of the sign-in button of `provider`: "Continue with…" once authorised, "Allow access to…" otherwise.
@@ -81,7 +79,7 @@ final class HomeViewModel {
     func load() async {
         state = .loading
         do {
-            try await authorizationUseCase.execute()
+            viewData.authorizations = try await authorizationUseCase.execute()
             state = .authorizationLoaded
         } catch {
             state = .failed(error.localizedDescription)
