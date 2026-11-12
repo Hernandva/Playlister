@@ -30,4 +30,11 @@ struct RecommendationsCollectorTests {
         #expect(collector.readCount == 3)
         #expect(collector.isComplete)
     }
+
+    @Test func ignoresTheQuotesAroundTheTerm() {
+        let limits = PlaylistsLimits(recommendations: 20, recommendationsSearch: 100, library: 20)
+        var collector = RecommendationsCollector<String>(term: "\"Hitster\"", limits: limits) { $0 }
+        collector.add(["Hitster España", "Fiesta"])
+        #expect(collector.items == ["Hitster España"])
+    }
 }

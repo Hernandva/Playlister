@@ -133,7 +133,8 @@ name, curator and artwork URL. It **never reads the songs**.
 - **Limits** live in `PlaylistsRepository.limits` (`PlaylistsLimits`): 20 recommended playlists, at most 1000 catalogue
   search results read to find them (40 pages), and 20 library playlists, most recently played first.
 - **Recommended:** the catalogue search returns loose matches, so `RecommendationsCollector` keeps only the playlists
-  whose name contains the term, ignoring case and accents. The search asks for no top results
+  whose name contains the term, ignoring case, accents and the quotes around the term (the app sends «"Hitster"»
+  in quotes; the quotes reach the search as is). The search asks for no top results
   (`includeTopResults = false`). `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`)
   reads the search in pages of 25 (the MusicKit maximum), each a request with an explicit
   `offset` because search results offer no next batch, and stops as soon as there are 20 matches, 1000 results

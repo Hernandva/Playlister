@@ -17,8 +17,8 @@ struct PlaylistsRequest: PlaylistsRequestProtocol {
 /// response, mapped out of the PlaylisterData types.
 struct PlaylistsUseCase: PlaylistsUseCaseProtocol {
     /// The recommended playlists are the «Hitster» ones of the catalogue: the repository returns only those whose
-    /// name contains it. Brand names are not translated.
-    private static let recommendationsTerm = "Hitster"
+    /// name contains it. In quotes, so the catalogue search looks for the exact word. Brand names are not translated.
+    private static let recommendationsTerm = "\"Hitster\""
 
     private let provider: MusicProvider
     private let repository: any PlaylistsRepositoryProtocol

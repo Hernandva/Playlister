@@ -1,7 +1,7 @@
 import Foundation
 
 /// Collects the recommended playlists from the pages of a catalogue search: keeps those whose name contains the
-/// term, ignoring case and accents, until it has `limits.recommendations` of them or has read
+/// term, ignoring case, accents and the quotes around the term, until it has `limits.recommendations` of them or has read
 /// `limits.recommendationsSearch` results. Internal and free of any provider SDK, so it is tested on its own.
 struct RecommendationsCollector<Item> {
     private let term: String
@@ -13,8 +13,13 @@ struct RecommendationsCollector<Item> {
     /// Search results read so far, matching or not.
     private(set) var readCount = 0
 
+    /// Quotes around the search term («"Hitster"») are for the catalogue search, not part of the names.
+    private static var quotes: CharacterSet {
+        CharacterSet(charactersIn: "\"'«»“”")
+    }
+
     init(term: String, limits: PlaylistsLimits, name: @escaping (Item) -> String) {
-        self.term = term
+        self.term = term.trimmingCharacters(in: Self.quotes.union(.whitespaces))
         self.limits = limits
         self.name = name
     }
