@@ -9,6 +9,7 @@ final class ProviderStarterCoordinator: Coordinator {
     enum Route: Hashable {
         /// Playback, game mode, Bingo categories and account.
         case settings
+        /// Recommended and own playlists, to choose the one to play.
         case playlistSelector
         // @codegen:routes
     }
@@ -41,7 +42,15 @@ final class ProviderStarterCoordinator: Coordinator {
                 signOut: dependencies.resolveSignOut()
             ).start())
         case .playlistSelector:
-            return AnyView(PlaylistSelectorCoordinator().start())
+            let selectPlaylist = dependencies.resolveSelectPlaylist()
+            return AnyView(PlaylistSelectorCoordinator(provider: dependencies.resolveProvider()) { playlist in
+                selectPlaylist(ProviderStarterViewData.Playlist(
+                    id: playlist.id,
+                    name: playlist.name,
+                    songCount: playlist.songCount,
+                    covers: playlist.covers
+                ))
+            }.start())
         // @codegen:destinations
         }
     }

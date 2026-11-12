@@ -78,7 +78,7 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 | `Login` | `LoginServiceProtocol` / `LoginRepository` | `Sources/PlaylisterData/Repositories/Login/` |
 | `LastPlaylist` | `LastPlaylistRepositoryProtocol` / `LastPlaylistRepository` | `Sources/PlaylisterData/Repositories/LastPlaylist/` |
 | `Settings` | `SettingsRepositoryProtocol` / `SettingsRepository` | `Sources/PlaylisterData/Repositories/Settings/` |
-| `Playlists` | `PlaylistsRepositoryProtocol` | `Sources/PlaylisterData/Repositories/Playlists` |
+| `Playlists` | `PlaylistsRepositoryProtocol` / `PlaylistsRepository` | `Sources/PlaylisterData/Repositories/Playlists/` |
 <!-- codegen:repository-registry:end -->
 
 ### Authorization (no HTTP)
@@ -120,3 +120,16 @@ its own entry. The internal `SettingsStorageProtocol` (in `Local/`) is backed by
 `Codable` `GameSettingsDAO` as JSON under `playlisterData.settings.<provider>`. Do not change those keys or the raw
 values of the `Settings…` enums: saved settings would be lost. A missing field reads as its default, so adding a
 setting keeps the rest. Write failures are thrown as `SettingsError.storageFailed`.
+
+### Playlists (MusicKit, no HTTP)
+
+`PlaylistsRepository` follows the same shape as `LoginRepository`: `fetch(_:)` takes a `PlaylistsRequestProtocol`
+(the provider the user signed in with and the `recommendationsTerm` searched in the catalogue, e.g. «Hitster») and
+forwards it, as the internal `PlaylistsRequestDAO`, to the internal `PlaylistsServiceProtocol` of that provider,
+registered in `PlaylistsRepository.init()`. It returns a `PlaylistsResponseProtocol` with the `recommended` playlists
+(catalogue search) and the `library` playlists of the user, each a `PlaylistsItemProtocol` (id, name, song count and
+up to four covers from different albums). `AppleMusicPlaylistsService` (in `Remote/AppleMusic/`) reads up to 12
+catalogue playlists and the 50 most recently played library playlists, and `AppleMusicPlaylistMapper` loads their
+songs (up to 1000 per playlist) to count them and pick the covers; only `https` cover URLs are kept. Without MusicKit
+access it throws `PlaylistsError.notAuthorized`, on any MusicKit failure `PlaylistsError.unavailable`, and a provider
+without a service throws `PlaylistsError.unsupportedProvider`.

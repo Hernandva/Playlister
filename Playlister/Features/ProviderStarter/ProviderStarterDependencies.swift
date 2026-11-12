@@ -7,6 +7,8 @@ final class ProviderStarterDependencies {
     private let provider: MusicProvider
     private let signOut: @MainActor () -> Void
     private let repository: any LastPlaylistRepositoryProtocol
+    /// One view model per container, so the playlist selector hands its choice to the screen on display.
+    private lazy var viewModel = ProviderStarterViewModel(dependencies: self)
 
     /// - Parameters:
     ///   - provider: The music service the user signed in with in Home.
@@ -44,6 +46,13 @@ final class ProviderStarterDependencies {
     }
 
     func resolveViewModel() -> ProviderStarterViewModel {
-        ProviderStarterViewModel(dependencies: self)
+        viewModel
+    }
+
+    /// Shows the playlist confirmed in the playlist selector in the selected playlist card.
+    func resolveSelectPlaylist() -> @MainActor (ProviderStarterViewData.Playlist) -> Void {
+        { [weak self] playlist in
+            self?.viewModel.selectPlaylist(playlist)
+        }
     }
 }

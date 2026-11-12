@@ -132,9 +132,10 @@ struct ProviderStarterView: View {
                         .localized("providerStarter.selectPlaylist.title")
                     DSText(style: .subheadline)
                         .localized("providerStarter.selectPlaylist.message")
-                    // Opens the playlist selector once the PlaylistSelector feature exists.
-                    DSButton(style: .plain) {}
-                        .localized("providerStarter.selectPlaylist.action")
+                    NavigationLink(value: ProviderStarterCoordinator.Route.playlistSelector) {
+                        Text(String(localized: "providerStarter.selectPlaylist.action"))
+                    }
+                    .buttonStyle(DSButtonStyle(style: .plain))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -196,8 +197,7 @@ struct ProviderStarterView: View {
     }
 
     private var choosePlaylist: some View {
-        // Opens the playlist selector once the PlaylistSelector feature exists.
-        Button {} label: {
+        NavigationLink(value: ProviderStarterCoordinator.Route.playlistSelector) {
             Label(
                 String(localized: "providerStarter.choosePlaylist"),
                 systemImage: "text.line.first.and.arrowtriangle.forward"

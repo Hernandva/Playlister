@@ -94,7 +94,7 @@ final class ProviderStarterViewModel {
         String(localized: "providerStarter.selectedPlaylist.songs \(playlist.songCount)")
     }
 
-    /// Called by the playlist selector, once it exists, with the playlist the user chose.
+    /// Called by the playlist selector with the playlist the user chose.
     func selectPlaylist(_ playlist: ProviderStarterViewData.Playlist) {
         viewData.selectedPlaylist = playlist
         playErrorMessage = nil
