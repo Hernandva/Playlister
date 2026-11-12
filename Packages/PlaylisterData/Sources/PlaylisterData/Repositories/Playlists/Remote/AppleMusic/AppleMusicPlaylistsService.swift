@@ -31,21 +31,17 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
     }
 
     /// Reads search pages until there are enough playlists that contain the term, the search has been read as
-    /// far as `limits.recommendationsSearch`, or a page comes back empty. Editorial playlists (made by Apple Music)
-    /// are never recommended.
+    /// far as `limits.recommendationsSearch`, or a page comes back empty.
     /// Each page is its own request with an explicit `offset`: search results do not offer a next batch.
+    /// Top results are left out, so every page holds only the search's own playlist results.
     private func recommendedPlaylists(term: String, limits: PlaylistsLimits) async throws -> [Playlist] {
-        var collector = RecommendationsCollector<Playlist>(
-            term: term,
-            limits: limits,
-            name: { $0.name },
-            isAllowed: { $0.kind != .editorial }
-        )
+        var collector = RecommendationsCollector<Playlist>(term: term, limits: limits) { $0.name }
         var requestCount = 0
         while !collector.isComplete {
             var request = MusicCatalogSearchRequest(term: term, types: [Playlist.self])
             request.limit = Self.searchPageSize
             request.offset = requestCount * Self.searchPageSize
+            request.includeTopResults = false
             let page = Array(try await request.response().playlists)
             requestCount += 1
             collector.add(page)
