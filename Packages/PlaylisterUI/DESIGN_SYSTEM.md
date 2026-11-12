@@ -37,13 +37,15 @@ They follow the component guides of the Playlister design system (Claude Design)
 | `DSButton(_:style:action:)` | Actions. `.primary` (52 pt capsule, animated gradient, `shadow-glow`, one per screen), `.secondary` (`tint-fill` + `tint-ink`), `.plain` (`bubblegum`), `.destructive`, `.spotify`, `.appleMusic`. `DSButtonStyle` for custom labels. |
 | `DSTextField(_:value:systemImage:)` | Text input on `fill`. `systemImage: "magnifyingglass"` for search. |
 | `DSListGroup { … }` | Inset grouped list: `surface-2`, `radius-list`, `hairline` between rows. |
-| `DSListRow(_:subtitle:accessory:)` | 52 pt row. Accessory `.chevron` or `.checkmark` (`bubblegum`). |
+| `DSListRow(_:subtitle:accessory:)` | 52 pt row. Accessory `.chevron`, `.checkmark` (`bubblegum`) or `.value(_:)` (`text-secondary`, e.g. «Conectado»). |
+| `DSListButtonRow(_:style:action:)` | 44 pt action row in a `DSListGroup`: `.plain` (`bubblegum`) or `.destructive` («Cerrar sesión»). |
+| `DSSlider(value:in:step:labels:)` | Slider row: title and value on top, slider between its minimum and maximum labels (`text-tertiary`), `magenta` track. `DSSlider.Labels` takes the texts localised. |
 | `DSToggle(_:isOn:)` | Switch row; the 51 × 31 switch fills with the animated gradient when on (`DSSwitchToggleStyle`). |
 | `DSSectionHeader(_:)` | Small-caps header above a `DSListGroup`. |
 | `DSBottomSheet(title:message:primaryAction:secondaryAction:)` | Bottom sheet for `.sheet(item:)` / `.sheet(isPresented:)`: `title`, `message` in `text-secondary` and one or two stacked `DSButton`s (`DSBottomSheet.Action`, `.primary` by default, `.plain` for the secondary). Sizes itself to its content, aura background, `radius-sheet` corners, drag indicator, dark scheme. Texts are passed localised. |
 | `DSStatusBadge(_:style:action:)` | Connection state capsule with a dot: `.spotify` (`spotify-green`) or `.appleMusic` (`tint-fill` + `tint-ink`). Top of Home with a session. With an `action` it is a button with a chevron and a 44 pt touch area. |
 | `DSCard { … }` | Large block on `surface-1`, `hairline` border, `radius-panel`, `space-5` padding. |
-| `DSIconButton(_:systemImage:style:diameter:action:)` | Round icon button. `.play` (96–132 pt, gradient + `magenta` pulse, only in Home), `.glass` (60 pt in game, 44 pt in nav bars), `.gradient` (Siguiente on the revealed view). The text is the accessibility label. |
+| `DSIconButton(_:systemImage:style:diameter:action:)` | Round icon button. `.play` (96–132 pt, gradient + `magenta` pulse, only in Home), `.glass` (60 pt in game, 44 pt in nav bars), `.gradient` (Siguiente on the revealed view). The text is the accessibility label. `DSIconButtonStyle(_:diameter:)` gives the same look to a `NavigationLink`. |
 | `DSSegmentedControl(selection:segments:)` | 34 pt segments on `fill`; the selected one wears the gradient and slides. Titles are passed localised. |
 | `DSPlaylistCard(_:subtitle:covers:size:)` | 2×2 mosaic of up to 4 covers (`radius-card`, `shadow-card`), name and song count. `DSCoverMosaic` and `DSCoverImage` are public too. |
 | `DSVinyl(phase:category:level:levels:diameter:)` | Game vinyl. `.playing` (1.8 s per turn, equalizer bars, pass `levels` 0…1 to bind them to audio) and `.revealed(cover:)` (6 s per turn, cover pops in). With a Bingo `category` it takes its color and shows the category name. |

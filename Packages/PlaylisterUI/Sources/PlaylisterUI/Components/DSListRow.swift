@@ -9,6 +9,8 @@ public struct DSListRow: View, DSLocalizableText {
         case chevron
         /// Selected option, in `bubblegum`.
         case checkmark
+        /// Value of a setting on the right, in `text-secondary` (e.g. «Conectado»). Passed localised.
+        case value(String)
     }
 
     /// Minimum height of a row in a grouped list.
@@ -44,7 +46,12 @@ public struct DSListRow: View, DSLocalizableText {
         .frame(minHeight: Self.minHeight)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(accessory == .checkmark ? .isSelected : [])
+        .accessibilityAddTraits(isCheckmark ? .isSelected : [])
+    }
+
+    private var isCheckmark: Bool {
+        if case .checkmark = accessory { return true }
+        return false
     }
 
     @ViewBuilder private var accessoryView: some View {
@@ -59,6 +66,10 @@ public struct DSListRow: View, DSLocalizableText {
             Image(systemName: "checkmark")
                 .font(DSFont.body.weight(.semibold))
                 .foregroundStyle(DSPalette.bubblegum)
+        case .value(let value):
+            Text(value)
+                .font(DSFont.body)
+                .foregroundStyle(DSColor.textSecondary)
         }
     }
 }
@@ -68,6 +79,7 @@ public struct DSListRow: View, DSLocalizableText {
         DSListRow("Clásico", accessory: .checkmark)
         DSListRow("Bingo")
         DSListRow("Hitster España", subtitle: "312 canciones · Spotify", accessory: .chevron)
+        DSListRow("Spotify", accessory: .value("Conectado"))
     }
     .padding(DSSpacing.space4)
     .background(DSColor.background)

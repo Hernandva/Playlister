@@ -5,17 +5,30 @@ import Networking
 @MainActor
 final class ProviderStarterDependencies {
     private let provider: MusicProvider
+    private let signOut: @MainActor () -> Void
     private let repository: any LastPlaylistRepositoryProtocol
 
-    /// - Parameter provider: The music service the user signed in with in Home.
-    init(provider: MusicProvider, repository: any LastPlaylistRepositoryProtocol = LastPlaylistRepository()) {
+    /// - Parameters:
+    ///   - provider: The music service the user signed in with in Home.
+    ///   - signOut: Goes back to Home from any screen opened from ProviderStarter (Settings › Sign out).
+    init(
+        provider: MusicProvider,
+        signOut: @escaping @MainActor () -> Void,
+        repository: any LastPlaylistRepositoryProtocol = LastPlaylistRepository()
+    ) {
         self.provider = provider
+        self.signOut = signOut
         self.repository = repository
     }
 
     /// The music service the user signed in with.
     func resolveProvider() -> MusicProvider {
         provider
+    }
+
+    /// Goes back to Home. Settings receives it for «Sign out».
+    func resolveSignOut() -> @MainActor () -> Void {
+        signOut
     }
 
     func resolveRepository() -> any LastPlaylistRepositoryProtocol {

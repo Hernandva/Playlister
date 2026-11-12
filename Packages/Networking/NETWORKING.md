@@ -65,7 +65,7 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 | `Authorization` | `AuthorizationServiceProtocol` / `AuthorizationRepository` | `Sources/Networking/Repositories/Authorization/` |
 | `Login` | `LoginServiceProtocol` / `LoginRepository` | `Sources/Networking/Repositories/Login/` |
 | `LastPlaylist` | `LastPlaylistRepositoryProtocol` / `LastPlaylistRepository` | `Sources/Networking/Repositories/LastPlaylist/` |
-| `Settings` | `SettingsRepositoryProtocol` | `Sources/Networking/Repositories/Settings` |
+| `Settings` | `SettingsRepositoryProtocol` / `SettingsRepository` | `Sources/Networking/Repositories/Settings/` |
 <!-- codegen:repository-registry:end -->
 
 ### Authorization (no HTTP)
@@ -95,3 +95,14 @@ replaces the previous one; each provider has its own entry. The internal `LastPl
 `LastPlaylistUserDefaultsStorage`, which writes the `Codable` `LastPlaylistItemDAO` as JSON under
 `networking.lastPlaylist.<provider>`. Do not change those keys: saved playlists would be lost.
 Write failures are thrown as `LastPlaylistError.storageFailed`; unreadable data reads as no playlist.
+
+### Settings (local storage, no HTTP)
+
+`SettingsRepository` keeps the game settings on the device; they are the same for every `MusicProvider`, so
+`SettingsRequestProtocol` has no fields. `fetch(_:)` returns a `SettingsResponseProtocol` (a `GameSettingsProtocol`:
+playback mode, clip length and start, game mode, Bingo level and the Bingo categories turned off per level), or the
+defaults (20-second clips from a random point, classic mode, every category on) until something is saved.
+`saveSettings(_:)` replaces them. The internal `SettingsStorageProtocol` is backed by `SettingsUserDefaultsStorage`,
+which writes the `Codable` `GameSettingsDAO` as JSON under `networking.settings`. Do not change that key or the raw
+values of the `Settings…` enums: saved settings would be lost. A missing field reads as its default, so adding a
+setting keeps the rest. Write failures are thrown as `SettingsError.storageFailed`.

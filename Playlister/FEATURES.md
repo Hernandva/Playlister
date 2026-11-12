@@ -121,6 +121,12 @@ func load() async {
   to the child's coordinator in `destination(for:)`.
 - A view opens a child feature with `NavigationLink(value: <Parent>Coordinator.Route.<child>) { ... }`.
 - The root feature is started by `App/RootView.swift` inside the `NavigationStack`.
+- `RootView` binds the `NavigationStack` to `HomeCoordinator.path` (a `NavigationPath`), so every route pushed with
+  `NavigationLink(value:)`, from any feature, lands on that one path. A coordinator that navigates from its view model
+  appends a route to it (Home after signing in), and «Sign out» resets it to go back to Home. Never push with
+  `navigationDestination(item:)` or `isPresented:`: value links pushed on top of those screens are lost.
+- A view that needs a glass icon button as a link uses `NavigationLink(value:) { Image(systemName:) }` with
+  `.buttonStyle(DSIconButtonStyle(diameter:))`, never a `DSIconButton` inside a `NavigationLink`.
 
 ### Localisation
 

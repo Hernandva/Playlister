@@ -78,9 +78,11 @@ struct ProviderStarterView: View {
             }
             .accessibilityHint(String(localized: "providerStarter.changeProvider.hint"))
             Spacer()
-            // Opens Settings once that feature exists.
-            DSIconButton(systemImage: "slider.horizontal.3", diameter: DSSpacing.tapMin) {}
-                .localized("providerStarter.settings")
+            NavigationLink(value: ProviderStarterCoordinator.Route.settings) {
+                Image(systemName: "slider.horizontal.3")
+            }
+            .buttonStyle(DSIconButtonStyle(diameter: DSSpacing.tapMin))
+            .accessibilityLabel(String(localized: "providerStarter.settings"))
         }
     }
 
@@ -207,6 +209,6 @@ struct ProviderStarterView: View {
 
 #Preview {
     NavigationStack {
-        ProviderStarterCoordinator(provider: .appleMusic).start()
+        ProviderStarterCoordinator(provider: .appleMusic, signOut: {}).start()
     }
 }

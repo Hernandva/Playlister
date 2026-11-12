@@ -39,14 +39,40 @@ public struct DSIconButton: View, DSLocalizableText {
     public var body: some View {
         Button(action: action) {
             Image(systemName: systemImage)
-                .font(.system(size: diameter * 0.38, weight: .semibold))
-                .foregroundStyle(DSPalette.textPrimary)
-                .frame(width: diameter, height: diameter)
-                .background { background }
-                .contentShape(Circle())
         }
-        .buttonStyle(DSPressStyle())
+        .buttonStyle(DSIconButtonStyle(style, diameter: diameter))
         .accessibilityLabel(text)
+    }
+}
+
+/// Look of `DSIconButton` for a label that is not a plain button, e.g. a `NavigationLink`:
+///
+///     NavigationLink(value: Route.settings) {
+///         Image(systemName: "slider.horizontal.3")
+///     }
+///     .buttonStyle(DSIconButtonStyle(diameter: DSSpacing.tapMin))
+///     .accessibilityLabel(String(localized: "providerStarter.settings"))
+public struct DSIconButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+    private let style: DSIconButton.Style
+    private let diameter: CGFloat
+
+    /// - Parameter diameter: Defaults to 96 pt for `play` and 60 pt for the others. Use 44 pt in navigation bars.
+    public init(_ style: DSIconButton.Style = .glass, diameter: CGFloat? = nil) {
+        self.style = style
+        self.diameter = diameter ?? (style == .play ? 96 : 60)
+    }
+
+    public func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: diameter * 0.38, weight: .semibold))
+            .foregroundStyle(DSPalette.textPrimary)
+            .frame(width: diameter, height: diameter)
+            .background { background }
+            .contentShape(Circle())
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+            .opacity(isEnabled ? 1 : 0.4)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 
     @ViewBuilder private var background: some View {

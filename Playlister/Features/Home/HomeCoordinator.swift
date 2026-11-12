@@ -21,8 +21,9 @@ final class HomeCoordinator: Coordinator, HomeCoordinatorProtocol {
         // @codegen:routes
     }
 
-    /// Route pushed by the view model, e.g. after signing in. `nil` while Home is on top.
-    var presentedRoute: Route?
+    /// Screens on the navigation stack above Home. `RootView` binds the stack to it, so the routes that
+    /// `NavigationLink(value:)` pushes from any feature are appended here too.
+    var path = NavigationPath()
     @ObservationIgnored private let dependencies: HomeDependencies
 
     init(dependencies: HomeDependencies = HomeDependencies()) {
@@ -35,19 +36,23 @@ final class HomeCoordinator: Coordinator, HomeCoordinatorProtocol {
             .navigationDestination(for: Route.self) { route in
                 self.destination(for: route)
             }
-            .navigationDestination(item: Bindable(self).presentedRoute) { route in
-                self.destination(for: route)
-            }
     }
 
     func openProvider(_ provider: HomeViewModel.Provider) {
-        presentedRoute = .providerStarter(Self.musicProvider(for: provider))
+        path.append(Route.providerStarter(Self.musicProvider(for: provider)))
+    }
+
+    /// Pops every screen opened after signing in, back to Home.
+    func signOut() {
+        path = NavigationPath()
     }
 
     func destination(for route: Route) -> AnyView {
         switch route {
         case .providerStarter(let provider):
-            return AnyView(ProviderStarterCoordinator(provider: provider).start())
+            return AnyView(ProviderStarterCoordinator(provider: provider, signOut: { [weak self] in
+                self?.signOut()
+            }).start())
         // @codegen:destinations
         }
     }

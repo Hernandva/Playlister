@@ -7,6 +7,7 @@ import SwiftUI
 final class ProviderStarterCoordinator: Coordinator {
     /// One case per feature that can be opened from ProviderStarter.
     enum Route: Hashable {
+        /// Playback, game mode, Bingo categories and account.
         case settings
         // @codegen:routes
     }
@@ -17,9 +18,11 @@ final class ProviderStarterCoordinator: Coordinator {
         self.dependencies = dependencies
     }
 
-    /// - Parameter provider: The music service the user signed in with in Home.
-    convenience init(provider: MusicProvider) {
-        self.init(dependencies: ProviderStarterDependencies(provider: provider))
+    /// - Parameters:
+    ///   - provider: The music service the user signed in with in Home.
+    ///   - signOut: Goes back to Home.
+    convenience init(provider: MusicProvider, signOut: @escaping @MainActor () -> Void) {
+        self.init(dependencies: ProviderStarterDependencies(provider: provider, signOut: signOut))
     }
 
     func start() -> some View {
@@ -32,7 +35,10 @@ final class ProviderStarterCoordinator: Coordinator {
     func destination(for route: Route) -> AnyView {
         switch route {
         case .settings:
-            return AnyView(SettingsCoordinator().start())
+            return AnyView(SettingsCoordinator(
+                provider: dependencies.resolveProvider(),
+                signOut: dependencies.resolveSignOut()
+            ).start())
         // @codegen:destinations
         }
     }
