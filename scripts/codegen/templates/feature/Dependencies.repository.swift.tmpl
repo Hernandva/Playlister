@@ -10,11 +10,15 @@ final class {{Feature}}Dependencies {
         self.repository = repository
     }
 
-    func makeUseCase() -> any {{Feature}}UseCaseProtocol {
-        {{Feature}}UseCase(repository: repository)
+    func resolveRepository() -> any {{Repo}}RepositoryProtocol {
+        repository
     }
 
-    func makeViewModel() -> {{Feature}}ViewModel {
-        {{Feature}}ViewModel(useCase: makeUseCase())
+    func resolveUseCase() -> any {{Feature}}UseCaseProtocol {
+        {{Feature}}UseCase(dependencies: self)
+    }
+
+    func resolveViewModel() -> {{Feature}}ViewModel {
+        {{Feature}}ViewModel(dependencies: self)
     }
 }

@@ -15,8 +15,9 @@ final class {{Feature}}ViewModel {
 
     private let useCase: any {{Feature}}UseCaseProtocol
 
-    init(useCase: any {{Feature}}UseCaseProtocol) {
-        self.useCase = useCase
+    /// Receives only the container and resolves what it needs from it.
+    init(dependencies: {{Feature}}Dependencies) {
+        self.useCase = dependencies.resolveUseCase()
     }
 
     func load() async {

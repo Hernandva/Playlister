@@ -1,19 +1,155 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "home.signIn.appleMusic" : {
+    "home.loading" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Continue with Apple Music"
+            "value" : "Loading…"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Continuar con Apple Music"
+            "value" : "Cargando…"
+          }
+        }
+      }
+    },
+    "home.settingsSheet.message %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister doesn't have access to %@. Open Playlister's settings and allow it to connect your account."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister no tiene acceso a %@. Abre los ajustes de Playlister y dale permiso para conectar tu cuenta."
+          }
+        }
+      }
+    },
+    "home.settingsSheet.notNow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not now"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora no"
+          }
+        }
+      }
+    },
+    "home.settingsSheet.openSettings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Settings"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ir a Ajustes"
+          }
+        }
+      }
+    },
+    "home.settingsSheet.title %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow access to %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da permiso a %@"
+          }
+        }
+      }
+    },
+    "home.signIn.allow %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow access to %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da permiso a %@"
+          }
+        }
+      }
+    },
+    "home.signIn.appleMusic.denied" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister doesn't have access to Apple Music. Allow it in Settings > Playlister > Media & Apple Music."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister no tiene acceso a Apple Music. Actívalo en Ajustes > Playlister > Contenido y Apple Music."
+          }
+        }
+      }
+    },
+    "home.signIn.appleMusic.restricted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music is restricted on this device."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music está restringido en este dispositivo."
+          }
+        }
+      }
+    },
+    "home.signIn.continue %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue with %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continúa con %@"
           }
         }
       }
@@ -35,19 +171,19 @@
         }
       }
     },
-    "home.signIn.spotify" : {
+    "home.signIn.unavailable" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Continue with Spotify"
+            "value" : "This service isn't available yet."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Continuar con Spotify"
+            "value" : "Este servicio aún no está disponible."
           }
         }
       }

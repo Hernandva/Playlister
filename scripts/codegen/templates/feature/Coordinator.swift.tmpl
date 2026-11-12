@@ -16,7 +16,7 @@ final class {{Feature}}Coordinator: Coordinator {
     }
 
     func start() -> some View {
-        {{Feature}}View(viewModel: dependencies.makeViewModel())
+        {{Feature}}View(dependencies: dependencies)
             .navigationDestination(for: Route.self) { route in
                 self.destination(for: route)
             }
