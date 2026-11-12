@@ -19,6 +19,10 @@ final class ProviderStarterViewModel {
     private(set) var isStartingGame = false
     /// Shown under Play when the selected playlist could not be saved.
     private(set) var playErrorMessage: String?
+    /// `true` while the sheet that offers to change the music service is shown.
+    var isChangeProviderSheetPresented = false
+    /// Set when the user chose to go back to Home: the view pops once the sheet has closed.
+    private(set) var wantsToReturnHome = false
 
     private let lastPlaylistUseCase: any LastPlaylistUseCaseProtocol
     private let saveLastPlaylistUseCase: any SaveLastPlaylistUseCaseProtocol
@@ -56,6 +60,33 @@ final class ProviderStarterViewModel {
     /// `true` once the data loaded and there is neither a selected nor a last playlist.
     var needsPlaylist: Bool {
         state == .loaded && selectedPlaylist == nil
+    }
+
+    /// Title of the sheet that offers to change the music service.
+    var changeProviderSheetTitle: String {
+        String(localized: "providerStarter.changeProvider.title")
+    }
+
+    /// Explanation of the sheet: the service in use and that Home lets the user pick another one.
+    var changeProviderSheetMessage: String {
+        String(localized: "providerStarter.changeProvider.message \(provider.displayName)")
+    }
+
+    /// The badge at the top was tapped: offers to go back to Home to change the music service.
+    func didTapProviderBadge() {
+        wantsToReturnHome = false
+        isChangeProviderSheetPresented = true
+    }
+
+    /// «Back to Home» in the sheet: closes it and asks the view to go back once it has closed.
+    func didChooseReturnHome() {
+        wantsToReturnHome = true
+        isChangeProviderSheetPresented = false
+    }
+
+    /// «Stay here» in the sheet.
+    func dismissChangeProviderSheet() {
+        isChangeProviderSheetPresented = false
     }
 
     /// Song count under the playlist name: «312 songs».

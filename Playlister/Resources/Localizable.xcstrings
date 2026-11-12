@@ -307,6 +307,91 @@
         }
       }
     },
+    "providerStarter.changeProvider.hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lets you change the music service"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite cambiar de servicio de música"
+          }
+        }
+      }
+    },
+    "providerStarter.changeProvider.message %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're playing with %@. Go back to Home to connect another music service."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estás jugando con %@. Vuelve al inicio para conectar otro servicio de música."
+          }
+        }
+      }
+    },
+    "providerStarter.changeProvider.returnHome" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to Home"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volver al inicio"
+          }
+        }
+      }
+    },
+    "providerStarter.changeProvider.stay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stay here"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quedarme aquí"
+          }
+        }
+      }
+    },
+    "providerStarter.changeProvider.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change music service?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cambiar de servicio?"
+          }
+        }
+      }
+    },
     "providerStarter.choosePlaylist" : {
       "extractionState" : "manual",
       "localizations" : {

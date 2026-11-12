@@ -11,6 +11,7 @@ struct ProviderStarterView: View {
     private static let playDiameter: CGFloat = 132
 
     @State private var viewModel: ProviderStarterViewModel
+    @Environment(\.dismiss) private var dismiss
 
     /// Receives only the container and resolves the view model from it.
     init(dependencies: ProviderStarterDependencies) {
@@ -44,11 +45,38 @@ struct ProviderStarterView: View {
         .navigationBarBackButtonHidden()
         .preferredColorScheme(.dark)
         .task { await viewModel.load() }
+        .sheet(isPresented: $viewModel.isChangeProviderSheetPresented, onDismiss: returnHomeIfRequested) {
+            changeProviderSheet
+        }
+    }
+
+    /// Goes back to Home once the sheet has closed, so both animations do not run at the same time.
+    private func returnHomeIfRequested() {
+        if viewModel.wantsToReturnHome {
+            dismiss()
+        }
+    }
+
+    /// Bottom sheet opened from the badge: back to Home to pick another music service, or stay.
+    private var changeProviderSheet: some View {
+        DSBottomSheet(
+            title: viewModel.changeProviderSheetTitle,
+            message: viewModel.changeProviderSheetMessage,
+            primaryAction: .init(String(localized: "providerStarter.changeProvider.returnHome")) {
+                viewModel.didChooseReturnHome()
+            },
+            secondaryAction: .init(String(localized: "providerStarter.changeProvider.stay"), style: .plain) {
+                viewModel.dismissChangeProviderSheet()
+            }
+        )
     }
 
     private var header: some View {
         HStack {
-            DSStatusBadge(viewModel.connectedTitle, style: badgeStyle)
+            DSStatusBadge(viewModel.connectedTitle, style: badgeStyle) {
+                viewModel.didTapProviderBadge()
+            }
+            .accessibilityHint(String(localized: "providerStarter.changeProvider.hint"))
             Spacer()
             // Opens Settings once that feature exists.
             DSIconButton(systemImage: "slider.horizontal.3", diameter: DSSpacing.tapMin) {}
