@@ -18,6 +18,91 @@
         }
       }
     },
+    "home.loginError.accept" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aceptar"
+          }
+        }
+      }
+    },
+    "home.loginError.notAuthorized %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister doesn't have access to %@. Allow it in Playlister's settings and try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister no tiene acceso a %@. Dale permiso en los ajustes de Playlister y vuelve a intentarlo."
+          }
+        }
+      }
+    },
+    "home.loginError.subscriptionRequired %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You need an active %@ subscription to play music in Playlister."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Necesitas una suscripción activa a %@ para reproducir música en Playlister."
+          }
+        }
+      }
+    },
+    "home.loginError.title %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't sign in with %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo iniciar sesión en %@"
+          }
+        }
+      }
+    },
+    "home.loginError.unavailable %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ isn't available right now. Check your connection and try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no está disponible ahora mismo. Revisa tu conexión y vuelve a intentarlo."
+          }
+        }
+      }
+    },
     "home.settingsSheet.message %@" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -37,6 +37,9 @@ struct HomeView: View {
         .sheet(item: $viewModel.settingsSheetProvider) { provider in
             settingsSheet(for: provider)
         }
+        .sheet(item: $viewModel.loginErrorSheet) { sheet in
+            loginErrorSheet(for: sheet)
+        }
     }
 
     private var hero: some View {
@@ -59,7 +62,7 @@ struct HomeView: View {
             switch viewModel.state {
             case .idle, .loading:
                 loading
-            case .authorizationLoaded, .failed:
+            case .authorizationLoaded, .providerStartedLoaded, .failed:
                 signInButtons
             }
             DSText(style: .footnote)
@@ -86,32 +89,30 @@ struct HomeView: View {
     /// Bottom sheet shown when `provider` has no authorisation: leads to the app's page in Settings,
     /// where the user can allow access (for Apple Music, "Media & Apple Music").
     private func settingsSheet(for provider: HomeViewModel.Provider) -> some View {
-        VStack(spacing: DSSpacing.space4) {
-            DSText(viewModel.settingsSheetTitle(for: provider), style: .title)
-                .accessibilityAddTraits(.isHeader)
-            DSText(viewModel.settingsSheetMessage(for: provider), style: .body, color: DSColor.textSecondary)
-            VStack(spacing: DSSpacing.space2) {
-                DSButton(style: .primary) {
-                    viewModel.dismissSettingsSheet()
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        openURL(url)
-                    }
+        DSBottomSheet(
+            title: viewModel.settingsSheetTitle(for: provider),
+            message: viewModel.settingsSheetMessage(for: provider),
+            primaryAction: .init(String(localized: "home.settingsSheet.openSettings")) {
+                viewModel.dismissSettingsSheet()
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    openURL(url)
                 }
-                .localized("home.settingsSheet.openSettings")
-                DSButton(style: .plain) {
-                    viewModel.dismissSettingsSheet()
-                }
-                .localized("home.settingsSheet.notNow")
+            },
+            secondaryAction: .init(String(localized: "home.settingsSheet.notNow"), style: .plain) {
+                viewModel.dismissSettingsSheet()
             }
-            .padding(.top, DSSpacing.space2)
-        }
-        .multilineTextAlignment(.center)
-        .padding(DSSpacing.space6)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background { DSAuraBackground() }
-        .presentationDetents([.medium])
-        .presentationDragIndicator(.visible)
-        .preferredColorScheme(.dark)
+        )
+    }
+
+    /// Bottom sheet shown when signing in with a service fails: the error and a button that closes it.
+    private func loginErrorSheet(for sheet: HomeViewModel.LoginErrorSheet) -> some View {
+        DSBottomSheet(
+            title: viewModel.loginErrorTitle(for: sheet),
+            message: viewModel.loginErrorMessage(for: sheet),
+            primaryAction: .init(String(localized: "home.loginError.accept")) {
+                viewModel.dismissLoginErrorSheet()
+            }
+        )
     }
 
     private var signInButtons: some View {
@@ -132,6 +133,7 @@ struct HomeView: View {
             }
             .buttonStyle(DSButtonStyle(style: .appleMusic))
         }
+        .disabled(viewModel.startingProvider != nil)
     }
 }
 

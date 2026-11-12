@@ -16,6 +16,16 @@ struct HomeViewData: Equatable, Sendable {
         case unavailable
     }
 
+    /// Why signing in with a music service failed. Shown in the error bottom sheet.
+    enum LoginFailure: Error, Equatable, Sendable {
+        /// Playlister has no access to the service.
+        case notAuthorized
+        /// The account has no subscription that can play the catalogue.
+        case subscriptionRequired
+        /// The service could not be reached or cannot be used yet.
+        case unavailable
+    }
+
     /// Authorisation state of one music service.
     struct ProviderAuthorization: Equatable, Sendable, Identifiable {
         let provider: HomeViewModel.Provider
