@@ -14,9 +14,11 @@ struct AppleMusicPageMetaDAO: Decodable, Sendable {
     let total: Int?
 }
 
-/// One Apple Music API resource: its `id` and its `attributes`, which the API may leave out. Internal.
+/// One Apple Music API resource: its `id`, its `type` («songs», «library-songs», «music-videos»…) and its
+/// `attributes`, which the API may leave out. Internal.
 struct AppleMusicResourceDAO<Attributes: Decodable & Sendable>: Decodable, Sendable {
     let id: String
+    let type: String?
     let attributes: Attributes?
 }
 

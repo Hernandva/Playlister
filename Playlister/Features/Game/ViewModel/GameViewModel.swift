@@ -12,12 +12,17 @@ final class GameViewModel {
         case failed(String)
     }
 
+    /// Songs in a row that cannot be played before the game gives up and shows the error.
+    private static let maxSkippedSongs = 5
+
     private(set) var state: State = .idle
     /// Data of the screen. Each use case result updates only its own field.
     private(set) var viewData: GameViewData
 
     private let provider: MusicProvider
     private let fetchSongsUseCase: any FetchGameSongsUseCaseProtocol
+    private let playSongUseCase: any PlayGameSongUseCaseProtocol
+    private let stopSongUseCase: any StopGameSongUseCaseProtocol
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: GameDependencies) {
@@ -27,6 +32,8 @@ final class GameViewModel {
         )
         self.provider = dependencies.resolveProvider()
         self.fetchSongsUseCase = dependencies.resolveFetchGameSongsUseCase()
+        self.playSongUseCase = dependencies.resolvePlayGameSongUseCase()
+        self.stopSongUseCase = dependencies.resolveStopGameSongUseCase()
     }
 
     /// Summary of the settings for the chip at the top: «Clásico · 20 s», «Clásico · Canción entera»
@@ -80,7 +87,7 @@ final class GameViewModel {
         Duration.seconds(seconds).formatted(.time(pattern: .minuteSecond))
     }
 
-    /// Reads every song of the playlist and shuffles them into the queue, so the game starts with a random one.
+    /// Reads every song of the playlist, shuffles them into the queue and plays the first one.
     func load() async {
         state = .loading
         do {
@@ -94,8 +101,48 @@ final class GameViewModel {
             state = .loaded
         } catch is CancellationError {
             state = .idle
+            return
         } catch {
             state = .failed(error.localizedDescription)
+            return
+        }
+        await playCurrentSong()
+    }
+
+    /// Stops the music when the user leaves the game.
+    func stop() async {
+        await stopSongUseCase.execute(provider: provider)
+    }
+
+    /// Plays the current song. When it cannot be played (missing or unavailable) it moves on to the next one, up to
+    /// `maxSkippedSongs` in a row; errors of the account or the service stop and are shown, since every song would
+    /// fail the same way.
+    private func playCurrentSong() async {
+        viewData.playbackError = nil
+        var skipped = 0
+        while let song = currentSong {
+            do {
+                try await playSongUseCase.execute(song: song, settings: viewData.settings, provider: provider)
+                return
+            } catch is CancellationError {
+                return
+            } catch GamePlaybackError.unavailable where skipped < Self.maxSkippedSongs {
+                skipped += 1
+                viewData.currentIndex += 1
+            } catch {
+                viewData.playbackError = Self.message(for: error as? GamePlaybackError ?? .unavailable)
+                return
+            }
+        }
+        viewData.playbackError = Self.message(for: .unavailable)
+    }
+
+    private static func message(for error: GamePlaybackError) -> String {
+        switch error {
+        case .subscriptionRequired: String(localized: "game.playback.subscriptionRequired")
+        case .notAuthorized: String(localized: "game.playback.notAuthorized")
+        case .unsupportedProvider: String(localized: "game.playback.unsupportedProvider")
+        case .unavailable: String(localized: "game.playback.unavailable")
         }
     }
 }

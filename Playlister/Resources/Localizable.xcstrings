@@ -256,6 +256,74 @@
         }
       }
     },
+    "game.playback.notAuthorized" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister doesn't have access to your music. Allow it in Settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister no tiene acceso a tu música. Permítelo en Ajustes."
+          }
+        }
+      }
+    },
+    "game.playback.subscriptionRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You need an Apple Music subscription to play the songs."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Necesitas una suscripción a Apple Music para reproducir las canciones."
+          }
+        }
+      }
+    },
+    "game.playback.unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This song couldn't be played."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha podido reproducir esta canción."
+          }
+        }
+      }
+    },
+    "game.playback.unsupportedProvider" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playing songs from this service isn't available yet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no se pueden reproducir canciones de este servicio."
+          }
+        }
+      }
+    },
     "game.playlist" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -97,4 +97,21 @@ struct AppleMusicAPIDAOTests {
         #expect(songs.last?.duration == nil)
         #expect(page.meta?.total == 312)
     }
+
+    @Test func readsTheCatalogueIdentifierOfEachSong() throws {
+        let page = try Self.decode("""
+        {"data": [
+            {"id": "1612052158", "type": "songs", "attributes": {"name": "Catalogue", "artistName": "A",
+             "playParams": {"id": "1612052158", "kind": "song"}}},
+            {"id": "i.GEGNzLYcXZqGP", "type": "library-songs", "attributes": {"name": "Library", "artistName": "B",
+             "playParams": {"id": "i.GEGNzLYcXZqGP", "kind": "song", "isLibrary": true, "catalogId": "1612052158"}}},
+            {"id": "i.2", "type": "library-songs", "attributes": {"name": "Uploaded", "artistName": "Me",
+             "playParams": {"id": "i.2", "kind": "song", "isLibrary": true}}}
+        ]}
+        """, as: AppleMusicSongAttributesDAO.self)
+
+        let songs = page.data.compactMap { PlaylistSongItemDAO(song: $0, artworkSide: 150) }
+
+        #expect(songs.map(\.catalogID) == ["1612052158", "1612052158", nil])
+    }
 }

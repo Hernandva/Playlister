@@ -2,7 +2,8 @@ import PlaylisterUI
 import SwiftUI
 
 /// «Partida · sonando»: playlist and mode on top, the spinning vinyl, the round progress and the
-/// Pause, Reveal and Next controls. The controls are not connected yet.
+/// Pause, Reveal and Next controls. The first shuffled song plays on load and stops when the view goes away;
+/// the controls and the progress are not connected yet.
 struct GameView: View {
     /// Room kept under the controls for the revealed song card, so the vinyl does not move when it appears.
     private static let revealCardHeight: CGFloat = 196
@@ -39,6 +40,9 @@ struct GameView: View {
         .preferredColorScheme(.dark)
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
+        .onDisappear {
+            Task { await viewModel.stop() }
+        }
     }
 
     private var header: some View {
@@ -64,6 +68,10 @@ struct GameView: View {
                 duration: viewModel.durationText
             )
             controls
+            if let playbackError = viewModel.viewData.playbackError {
+                DSText(playbackError, style: .footnote, color: DSColor.destructive)
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity)
     }

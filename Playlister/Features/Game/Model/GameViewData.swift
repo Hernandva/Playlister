@@ -66,6 +66,14 @@ struct GameViewData: Equatable, Sendable {
         let cover: URL?
         /// Length of the song, when the service gives it.
         let duration: TimeInterval?
+        /// Identifier of the song in the service's catalogue, `nil` for songs the user uploaded.
+        let catalogID: String?
+
+        /// Identifier the player looks the song up with: the catalogue one when there is one, because a library id
+        /// is only found when the song is in the device library.
+        var playbackID: String {
+            catalogID ?? id
+        }
     }
 
     /// Known before anything loads: it comes from ProviderStarter.
@@ -77,4 +85,6 @@ struct GameViewData: Equatable, Sendable {
     var queue: [Song]?
     /// Position in `queue` of the song that is playing.
     var currentIndex = 0
+    /// Why the current song could not be played, already localised, or `nil` while it plays.
+    var playbackError: String?
 }

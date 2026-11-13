@@ -8,6 +8,17 @@ struct AppleMusicSongAttributesDAO: Decodable, Sendable {
     let artwork: AppleMusicArtworkDAO?
     /// Length of the song, when the API gives it.
     let durationInMillis: Int?
+    /// Missing when the song cannot be played. For a library song it holds its `catalogId`.
+    let playParams: AppleMusicPlayParamsDAO?
+}
+
+/// `playParams` of a playable resource. Internal.
+struct AppleMusicPlayParamsDAO: Decodable, Sendable {
+    let id: String
+    let kind: String
+    /// Catalogue identifier of a library song, when it has a catalogue equivalent.
+    let catalogId: String?
+    let isLibrary: Bool?
 }
 
 extension SongItemDAO {
@@ -21,6 +32,7 @@ extension SongItemDAO {
 
 extension PlaylistSongItemDAO {
     private static let millisecondsPerSecond: TimeInterval = 1000
+    private static let catalogSongType = "songs"
 
     /// A song of the Apple Music API, with or without artwork, or `nil` when it has no attributes.
     init?(song resource: AppleMusicResourceDAO<AppleMusicSongAttributesDAO>, artworkSide: Int) {
@@ -30,7 +42,8 @@ extension PlaylistSongItemDAO {
             title: attributes.name,
             artistName: attributes.artistName,
             artworkURL: attributes.artwork?.url(side: artworkSide),
-            duration: attributes.durationInMillis.map { TimeInterval($0) / Self.millisecondsPerSecond }
+            duration: attributes.durationInMillis.map { TimeInterval($0) / Self.millisecondsPerSecond },
+            catalogID: resource.type == Self.catalogSongType ? resource.id : attributes.playParams?.catalogId
         )
     }
 }

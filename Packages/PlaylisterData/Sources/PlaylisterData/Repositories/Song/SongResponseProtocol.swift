@@ -39,6 +39,10 @@ public protocol PlaylistSongItemProtocol: Sendable {
     var artworkURL: URL? { get }
     /// Length of the song, when the service gives it.
     var duration: TimeInterval? { get }
+    /// Identifier of the song in the service's catalogue, when it has one. Equal to `id` for a catalogue song; for a
+    /// song of a library playlist it is the catalogue song it comes from, `nil` for songs the user uploaded.
+    /// Play the song with it when there is one: `id` alone may not be found on the device.
+    var catalogID: String? { get }
 }
 
 /// One page of the songs of a playlist, in their order.

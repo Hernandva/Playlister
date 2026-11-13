@@ -87,6 +87,7 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 | `Settings` | `SettingsRepositoryProtocol` / `SettingsRepository` | `Sources/PlaylisterData/Repositories/Settings/` |
 | `Playlists` | `PlaylistsRepositoryProtocol` / `PlaylistsRepository` | `Sources/PlaylisterData/Repositories/Playlists/` |
 | `Song` | `SongRepositoryProtocol` / `SongRepository` | `Sources/PlaylisterData/Repositories/Song/` |
+| `Player` | `PlayerRepositoryProtocol` / `PlayerRepository` | `Sources/PlaylisterData/Repositories/Player/` |
 <!-- codegen:repository-registry:end -->
 
 ### Authorization (no HTTP)
@@ -162,7 +163,8 @@ internal `SongServiceProtocol` of that provider, registered in `SongRepository.i
 
 `fetchSongs(_:)` takes a `PlaylistSongsRequestProtocol` (provider, `playlistID` and `offset`) and returns one page of
 `SongRepository.songsPageSize` (25) songs, in their order, as a `PlaylistSongsResponseProtocol`: its
-`PlaylistSongItemProtocol`s (id, title, artist, web artwork URL or `nil`, and duration when the API gives it), the
+`PlaylistSongItemProtocol`s (id, title, artist, web artwork URL or `nil`, duration when the API gives it, and
+`catalogID`: the song's own id for a catalogue song, `playParams.catalogId` for a library one, `nil` when it has none), the
 `total` songs of the playlist when the API sends `meta.total`, and `hasMore`, `true` when the API announces a `next`
 page. Songs without artwork are kept. The selector's long-press sheet reads it through `FetchSongsFromPlaylistUseCase`.
 
@@ -175,3 +177,30 @@ page. Songs without artwork are kept. The selector's long-press sheet reads it t
 - Only `https` artwork URLs are kept.
 - Without MusicKit access it throws `SongError.notAuthorized`, an unknown playlist (API 404)
   `SongError.playlistNotFound`, any other failure `SongError.unavailable`, and a provider without a service `SongError.unsupportedProvider`.
+
+### Player (MusicKit, no HTTP)
+
+`PlayerRepository` follows the same shape as `SongRepository`, with no `NetworkClient`: every call names a
+`MusicProvider` and is forwarded to the internal player of that provider, registered in `PlayerRepository.init()`.
+`play(_:)` takes a `PlayerRequestProtocol` (provider, `songID` as the Song repository returned it, and `startTime`
+in seconds), replaces whatever is playing with that song and returns a `PlayerResponseProtocol` (provider, `songID`
+and the `duration` the player knows). `pause(provider:)`, `resume(provider:)`, `stop(provider:)`,
+`playbackTime(provider:)` and `status(provider:)` (`PlaybackStatus`: `stopped`, `playing`, `paused`) drive the same
+player.
+
+- **Common contract:** `PlayerServiceProtocol` (internal) is what every provider implements: `play`, `pause`,
+  `resume`, `stop`, `playbackTime` and `status`, all `async` so each player can hop to the actor its SDK needs.
+- `AppleMusicPlayerService` (in `Remote/AppleMusic/`) plays with MusicKit's `ApplicationMusicPlayer.shared`, inside
+  the app and without touching the Music app's queue. It looks the song up first: catalogue ids with
+  `MusicCatalogResourceRequest<Song>`, library ids (`i.…`) with `MusicLibraryRequest<Song>`. Catalogue songs need
+  `MusicSubscription.current.canPlayCatalogContent`.
+- **Pass the `catalogID`** of `PlaylistSongItemProtocol` when it has one. A library id is only found when the song is
+  in the device library, and a song added to a library playlist is not always added to the library (the iPhone's
+  «Add Playlist Songs» setting), so `MusicLibraryRequest` misses it and the call throws `PlayerError.songNotFound`.
+  The library id is only needed for songs without a catalogue equivalent, e.g. uploaded ones.
+- **Spotify (pending):** add `Remote/Spotify/SpotifyPlayerService.swift` conforming to `PlayerServiceProtocol`
+  (e.g. with the Spotify iOS SDK's App Remote, which needs the Spotify app and a Premium account) and register it
+  under `.spotify` in `PlayerRepository.init()`. Until then Spotify calls throw `PlayerError.unsupportedProvider`.
+- Without MusicKit access it throws `PlayerError.notAuthorized`, without a subscription
+  `PlayerError.subscriptionRequired`, an unknown song `PlayerError.songNotFound`, a cancelled call rethrows
+  `CancellationError`, and any other failure throws `PlayerError.unavailable`.
