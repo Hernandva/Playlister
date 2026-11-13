@@ -24,8 +24,8 @@ struct ProviderStarterViewData: Equatable, Sendable {
         }
     }
 
-    /// A playlist shown in the selected playlist card.
-    struct Playlist: Equatable, Sendable {
+    /// A playlist shown in the selected playlist card. `Hashable` because the Game route carries it.
+    struct Playlist: Hashable, Sendable {
         /// Identifier of the playlist in its music service.
         let id: String
         let name: String

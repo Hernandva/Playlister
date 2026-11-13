@@ -26,6 +26,7 @@ final class ProviderStarterViewModel {
 
     private let lastPlaylistUseCase: any LastPlaylistUseCaseProtocol
     private let saveLastPlaylistUseCase: any SaveLastPlaylistUseCaseProtocol
+    private let openGame: @MainActor (ProviderStarterViewData.Playlist) -> Void
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: ProviderStarterDependencies) {
@@ -33,6 +34,7 @@ final class ProviderStarterViewModel {
         self.viewData = ProviderStarterViewData(provider: provider)
         self.lastPlaylistUseCase = dependencies.resolveLastPlaylistUseCase()
         self.saveLastPlaylistUseCase = dependencies.resolveSaveLastPlaylistUseCase()
+        self.openGame = dependencies.resolveOpenGame()
     }
 
     /// The music service the user signed in with, known before its data loads.
@@ -100,9 +102,10 @@ final class ProviderStarterViewModel {
         playErrorMessage = nil
     }
 
-    /// Play: saves the selected playlist as the last playlist, then starts the game.
+    /// Play: saves the selected playlist as the last playlist, then opens the game with it and the
+    /// music service. When the save fails, the game does not open and the error is shown under Play.
     func didTapPlay() async {
-        guard !isStartingGame, selectedPlaylist != nil else { return }
+        guard !isStartingGame, let playlist = selectedPlaylist else { return }
         if let selected = viewData.selectedPlaylist, selected != viewData.lastPlaylist {
             isStartingGame = true
             defer { isStartingGame = false }
@@ -115,7 +118,7 @@ final class ProviderStarterViewModel {
                 return
             }
         }
-        // Opens the game with `selectedPlaylist` once the Game feature exists.
+        openGame(playlist)
     }
 
     func load() async {

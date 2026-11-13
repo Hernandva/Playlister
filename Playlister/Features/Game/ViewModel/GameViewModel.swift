@@ -13,12 +13,13 @@ final class GameViewModel {
 
     private(set) var state: State = .idle
     /// Data of the screen. Each use case result updates only its own field.
-    private(set) var viewData = GameViewData()
+    private(set) var viewData: GameViewData
 
     private let useCase: any GameUseCaseProtocol
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: GameDependencies) {
+        self.viewData = GameViewData(playlist: dependencies.resolvePlaylist())
         self.useCase = dependencies.resolveUseCase()
     }
 

@@ -6,6 +6,7 @@ import PlaylisterData
 final class ProviderStarterDependencies {
     private let provider: MusicProvider
     private let signOut: @MainActor () -> Void
+    private let navigate: @MainActor (ProviderStarterCoordinator.Route) -> Void
     private let repository: any LastPlaylistRepositoryProtocol
     /// One view model per container, so the playlist selector hands its choice to the screen on display.
     private lazy var viewModel = ProviderStarterViewModel(dependencies: self)
@@ -13,13 +14,16 @@ final class ProviderStarterDependencies {
     /// - Parameters:
     ///   - provider: The music service the user signed in with in Home.
     ///   - signOut: Goes back to Home from any screen opened from ProviderStarter (Settings › Sign out).
+    ///   - navigate: Pushes a route on the app's navigation stack (Play opens the game with it).
     init(
         provider: MusicProvider,
         signOut: @escaping @MainActor () -> Void,
+        navigate: @escaping @MainActor (ProviderStarterCoordinator.Route) -> Void,
         repository: any LastPlaylistRepositoryProtocol = LastPlaylistRepository()
     ) {
         self.provider = provider
         self.signOut = signOut
+        self.navigate = navigate
         self.repository = repository
     }
 
@@ -31,6 +35,13 @@ final class ProviderStarterDependencies {
     /// Goes back to Home. Settings receives it for «Sign out».
     func resolveSignOut() -> @MainActor () -> Void {
         signOut
+    }
+
+    /// Opens the game with `playlist`. The view model calls it from Play.
+    func resolveOpenGame() -> @MainActor (ProviderStarterViewData.Playlist) -> Void {
+        { [navigate] playlist in
+            navigate(.game(playlist))
+        }
     }
 
     func resolveRepository() -> any LastPlaylistRepositoryProtocol {

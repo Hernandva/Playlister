@@ -1,3 +1,4 @@
+import PlaylisterData
 import SwiftUI
 
 /// Entry point of the Game feature.
@@ -11,8 +12,15 @@ final class GameCoordinator: Coordinator {
 
     private let dependencies: GameDependencies
 
-    init(dependencies: GameDependencies = GameDependencies()) {
+    init(dependencies: GameDependencies) {
         self.dependencies = dependencies
+    }
+
+    /// - Parameters:
+    ///   - provider: The music service the user signed in with.
+    ///   - playlist: The playlist chosen in ProviderStarter, played by the game.
+    convenience init(provider: MusicProvider, playlist: GameViewData.Playlist) {
+        self.init(dependencies: GameDependencies(provider: provider, playlist: playlist))
     }
 
     func start() -> some View {

@@ -50,9 +50,15 @@ final class HomeCoordinator: Coordinator, HomeCoordinatorProtocol {
     func destination(for route: Route) -> AnyView {
         switch route {
         case .providerStarter(let provider):
-            return AnyView(ProviderStarterCoordinator(provider: provider, signOut: { [weak self] in
-                self?.signOut()
-            }).start())
+            return AnyView(ProviderStarterCoordinator(
+                provider: provider,
+                signOut: { [weak self] in
+                    self?.signOut()
+                },
+                navigate: { [weak self] route in
+                    self?.path.append(route)
+                }
+            ).start())
         // @codegen:destinations
         }
     }

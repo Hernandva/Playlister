@@ -12,6 +12,7 @@ struct GameView: View {
     var body: some View {
         DSScreen {
             DSText(style: .largeTitle).localized("game.title")
+            DSText(viewModel.viewData.playlist.name, style: .headline)
 
             switch viewModel.state {
             case .idle, .loading:
@@ -29,6 +30,9 @@ struct GameView: View {
 
 #Preview {
     NavigationStack {
-        GameCoordinator().start()
+        GameCoordinator(
+            provider: .appleMusic,
+            playlist: GameViewData.Playlist(id: "preview", name: "Road Trip", songCount: 42, covers: [])
+        ).start()
     }
 }

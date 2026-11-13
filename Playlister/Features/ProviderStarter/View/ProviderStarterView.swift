@@ -3,7 +3,7 @@ import PlaylisterUI
 import SwiftUI
 
 /// Home with a session: the connected service, the last playlist, the Play button and «Choose another playlist».
-/// With no playlist chosen yet, a card invites the user to choose one before playing.
+/// With no playlist chosen yet, a card invites the user to choose one, and Play is hidden until there is one.
 struct ProviderStarterView: View {
     /// Keeps the column readable on iPad.
     private static let maxContentWidth: CGFloat = 480
@@ -26,8 +26,10 @@ struct ProviderStarterView: View {
                     greeting
                     selectedPlaylist
                     Spacer(minLength: DSSpacing.space6)
-                    play
-                    Spacer(minLength: DSSpacing.space6)
+                    if viewModel.selectedPlaylist != nil {
+                        play
+                        Spacer(minLength: DSSpacing.space6)
+                    }
                     if !viewModel.needsPlaylist {
                         choosePlaylist
                     }
@@ -186,7 +188,7 @@ struct ProviderStarterView: View {
                 Task { await viewModel.didTapPlay() }
             }
             .localized("providerStarter.play.accessibility")
-            .disabled(viewModel.selectedPlaylist == nil || viewModel.isStartingGame)
+            .disabled(viewModel.isStartingGame)
             DSText(style: .sectionTitle)
                 .localized("providerStarter.play")
                 .accessibilityHidden(true)
@@ -211,6 +213,6 @@ struct ProviderStarterView: View {
 
 #Preview {
     NavigationStack {
-        ProviderStarterCoordinator(provider: .appleMusic, signOut: {}).start()
+        ProviderStarterCoordinator(provider: .appleMusic, signOut: {}, navigate: { _ in }).start()
     }
 }

@@ -11,7 +11,8 @@ final class ProviderStarterCoordinator: Coordinator {
         case settings
         /// Recommended and own playlists, to choose the one to play.
         case playlistSelector
-        case game
+        /// The game, played with the playlist chosen when Play was tapped.
+        case game(ProviderStarterViewData.Playlist)
         // @codegen:routes
     }
 
@@ -24,8 +25,17 @@ final class ProviderStarterCoordinator: Coordinator {
     /// - Parameters:
     ///   - provider: The music service the user signed in with in Home.
     ///   - signOut: Goes back to Home.
-    convenience init(provider: MusicProvider, signOut: @escaping @MainActor () -> Void) {
-        self.init(dependencies: ProviderStarterDependencies(provider: provider, signOut: signOut))
+    ///   - navigate: Pushes a route on the app's navigation stack, so the view model can open a feature.
+    convenience init(
+        provider: MusicProvider,
+        signOut: @escaping @MainActor () -> Void,
+        navigate: @escaping @MainActor (Route) -> Void
+    ) {
+        self.init(dependencies: ProviderStarterDependencies(
+            provider: provider,
+            signOut: signOut,
+            navigate: navigate
+        ))
     }
 
     func start() -> some View {
@@ -53,8 +63,16 @@ final class ProviderStarterCoordinator: Coordinator {
                     covers: playlist.covers
                 ))
             }.start())
-        case .game:
-            return AnyView(GameCoordinator().start())
+        case .game(let playlist):
+            return AnyView(GameCoordinator(
+                provider: dependencies.resolveProvider(),
+                playlist: GameViewData.Playlist(
+                    id: playlist.id,
+                    name: playlist.name,
+                    songCount: playlist.songCount,
+                    covers: playlist.covers
+                )
+            ).start())
         // @codegen:destinations
         }
     }
