@@ -171,6 +171,23 @@
         }
       }
     },
+    "game.continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
+          }
+        }
+      }
+    },
     "game.empty" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -184,6 +201,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esta lista no tiene canciones."
+          }
+        }
+      }
+    },
+    "game.finished" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No songs left: you've played the whole playlist."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No quedan canciones: has jugado toda la lista."
           }
         }
       }
@@ -371,6 +405,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Revelar"
+          }
+        }
+      }
+    },
+    "game.reveal.album" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Album"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Álbum"
+          }
+        }
+      }
+    },
+    "game.reveal.duration" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Length"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duración"
           }
         }
       }

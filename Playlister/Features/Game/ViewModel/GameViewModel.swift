@@ -9,6 +9,8 @@ final class GameViewModel {
         case idle
         case loading
         case loaded
+        /// Every song was revealed: the playlist is over.
+        case finished
         case failed(String)
     }
 
@@ -144,6 +146,48 @@ final class GameViewModel {
         }
     }
 
+    /// `false` until a song plays and once it is revealed.
+    var canReveal: Bool {
+        viewData.round != nil && !viewData.isRevealed
+    }
+
+    /// Release year of the current song for the revealed card, or «—» when it is unknown.
+    var revealedYear: String {
+        currentSong?.releaseYear.map(String.init) ?? "—"
+    }
+
+    /// Length of the whole current song for the revealed card, when it is known.
+    var revealedDurationText: String? {
+        (viewData.round?.songDuration ?? currentSong?.duration).map { Self.formatted(seconds: Int($0)) }
+    }
+
+    /// Shows the current song's card. The song keeps sounding until it ends; a paused song plays again.
+    func reveal() async {
+        guard canReveal, !isChangingPlayback else { return }
+        isChangingPlayback = true
+        defer { isChangingPlayback = false }
+        viewData.isRevealed = true
+        if viewData.isPaused {
+            await resume()
+        }
+    }
+
+    /// After Reveal: stops the song, takes it out of the game for good and starts a new round with the next one.
+    /// With no songs left the game is over.
+    func continueToNextSong() async {
+        guard viewData.isRevealed, !isChangingPlayback else { return }
+        isChangingPlayback = true
+        defer { isChangingPlayback = false }
+        stopProgress()
+        await playerUseCase.stop(provider: provider)
+        viewData.queue?.removeFirst()
+        guard currentSong != nil else {
+            state = .finished
+            return
+        }
+        await playCurrentSong()
+    }
+
     /// `false` until the songs load.
     var canPlayNextSong: Bool {
         state == .loaded && viewData.queue?.isEmpty == false
@@ -255,13 +299,14 @@ final class GameViewModel {
         }
     }
 
-    /// Stops reading the player and empties the round, so the next one starts at 0 and playing.
+    /// Stops reading the player and empties the round, so the next one starts at 0, playing and hidden.
     private func stopProgress() {
         progressTask?.cancel()
         progressTask = nil
         viewData.round = nil
         viewData.playbackTime = 0
         viewData.isPaused = false
+        viewData.isRevealed = false
     }
 
     private static func message(for error: GamePlaybackError) -> String {

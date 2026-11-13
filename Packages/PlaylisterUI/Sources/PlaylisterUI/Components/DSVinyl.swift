@@ -7,7 +7,8 @@ import SwiftUI
 ///   to bind the bars to the audio; without them the bars animate on their own.
 /// - `paused`: the playing vinyl, still. The disc stops at its angle and turns on from it when it plays again,
 ///   and the equalizer bars settle low.
-/// - `revealed`: turns every 6 s and the album cover pops in (scale 0.6 → 1).
+/// - `revealed`: turns every 6 s and the album cover pops in (scale 0.6 → 1). With `isPaused` (e.g. the song
+///   ended) the disc stops at its angle, and turns on from it when it is `false` again.
 /// - Bingo: with a `category`, grooves, ring and glow take its color, the centre is solid with `bg-night` bars,
 ///   and the category name appears under the disc.
 /// - With Reduce Motion the disc does not turn and the bars are static.
@@ -15,7 +16,7 @@ public struct DSVinyl: View {
     public enum Phase: Equatable, Sendable {
         case playing
         case paused
-        case revealed(cover: URL?)
+        case revealed(cover: URL?, isPaused: Bool = false)
     }
 
     private let phase: Phase
@@ -41,7 +42,7 @@ public struct DSVinyl: View {
     public var body: some View {
         VStack(spacing: DSSpacing.space4) {
             ZStack {
-                DSVinylDisc(tint: category?.color, secondsPerTurn: isRevealed ? 6 : 1.8, isSpinning: phase != .paused)
+                DSVinylDisc(tint: category?.color, secondsPerTurn: isRevealed ? 6 : 1.8, isSpinning: isSpinning)
                 center
             }
             .frame(width: diameter, height: diameter)
@@ -64,7 +65,7 @@ public struct DSVinyl: View {
             DSEqualizerCenter(tint: category?.color, levels: levels, isPaused: phase == .paused)
                 .frame(width: diameter * 0.456, height: diameter * 0.456)
                 .transition(.opacity)
-        case .revealed(let cover):
+        case .revealed(let cover, _):
             DSVinylLabel(cover: cover)
                 .frame(width: diameter * 0.56, height: diameter * 0.56)
                 .transition(.scale(scale: 0.6).combined(with: .opacity))
@@ -73,6 +74,15 @@ public struct DSVinyl: View {
 
     private var isRevealed: Bool {
         if case .revealed = phase { true } else { false }
+    }
+
+    /// `false` while the vinyl is paused, whether it is playing or revealed.
+    private var isSpinning: Bool {
+        switch phase {
+        case .playing: true
+        case .paused: false
+        case .revealed(_, let isPaused): !isPaused
+        }
     }
 
     private var accessibilityText: String {
@@ -239,7 +249,7 @@ private struct DSVinylLabel: View {
     @Previewable @State var revealed = false
     @Previewable @State var paused = false
     VStack(spacing: DSSpacing.space8) {
-        DSVinyl(phase: revealed ? .revealed(cover: nil) : (paused ? .paused : .playing))
+        DSVinyl(phase: revealed ? .revealed(cover: nil, isPaused: paused) : (paused ? .paused : .playing))
         DSVinyl(phase: paused ? .paused : .playing, category: .green, diameter: 180)
         HStack(spacing: DSSpacing.space3) {
             DSButton(paused ? "Reproducir" : "Pausa", style: .secondary) { paused.toggle() }

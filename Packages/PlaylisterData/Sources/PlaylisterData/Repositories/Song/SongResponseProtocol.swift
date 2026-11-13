@@ -43,6 +43,12 @@ public protocol PlaylistSongItemProtocol: Sendable {
     /// song of a library playlist it is the catalogue song it comes from, `nil` for songs the user uploaded.
     /// Play the song with it when there is one: `id` alone may not be found on the device.
     var catalogID: String? { get }
+    /// Album the song belongs to, when the service gives it.
+    var albumName: String? { get }
+    /// Year the song was released, when the service gives it.
+    var releaseYear: Int? { get }
+    /// The same artwork as `artworkURL`, large enough for a big view (`SongRepository.largeArtworkSide` pixels).
+    var largeArtworkURL: URL? { get }
 }
 
 /// One page of the songs of a playlist, in their order.

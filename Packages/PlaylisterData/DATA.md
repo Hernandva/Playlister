@@ -164,7 +164,8 @@ internal `SongServiceProtocol` of that provider, registered in `SongRepository.i
 `fetchSongs(_:)` takes a `PlaylistSongsRequestProtocol` (provider, `playlistID` and `offset`) and returns one page of
 `SongRepository.songsPageSize` (25) songs, in their order, as a `PlaylistSongsResponseProtocol`: its
 `PlaylistSongItemProtocol`s (id, title, artist, web artwork URL or `nil`, duration when the API gives it, and
-`catalogID`: the song's own id for a catalogue song, `playParams.catalogId` for a library one, `nil` when it has none), the
+`catalogID`: the song's own id for a catalogue song, `playParams.catalogId` for a library one, `nil` when it has none;
+`albumName`, `releaseYear` from `releaseDate`, and `largeArtworkURL` at `SongRepository.largeArtworkSide` (600) pixels), the
 `total` songs of the playlist when the API sends `meta.total`, and `hasMore`, `true` when the API announces a `next`
 page. Songs without artwork are kept. The selector's long-press sheet reads it through `FetchSongsFromPlaylistUseCase`.
 

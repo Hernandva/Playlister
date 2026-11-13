@@ -114,4 +114,23 @@ struct AppleMusicAPIDAOTests {
 
         #expect(songs.map(\.catalogID) == ["1612052158", "1612052158", nil])
     }
+
+    @Test func readsTheAlbumYearAndLargeArtworkOfASong() throws {
+        let page = try Self.decode("""
+        {"data": [
+            {"id": "1", "type": "songs", "attributes": {"name": "Bohemian Rhapsody", "artistName": "Queen",
+             "albumName": "A Night at the Opera", "releaseDate": "1975-10-31",
+             "artwork": {"url": "https://example.com/{w}x{h}.jpg"}}},
+            {"id": "i.2", "type": "library-songs", "attributes": {"name": "Uploaded", "artistName": "Me"}}
+        ]}
+        """, as: AppleMusicSongAttributesDAO.self)
+
+        let songs = page.data.compactMap { PlaylistSongItemDAO(song: $0, artworkSide: 150) }
+
+        #expect(songs.first?.albumName == "A Night at the Opera")
+        #expect(songs.first?.releaseYear == 1975)
+        #expect(songs.first?.largeArtworkURL?.absoluteString == "https://example.com/600x600.jpg")
+        #expect(songs.last?.releaseYear == nil)
+        #expect(songs.last?.largeArtworkURL == nil)
+    }
 }

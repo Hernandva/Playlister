@@ -84,6 +84,10 @@ struct GameViewData: Equatable, Sendable {
         let duration: TimeInterval?
         /// Identifier of the song in the service's catalogue, `nil` for songs the user uploaded.
         let catalogID: String?
+        let album: String?
+        let releaseYear: Int?
+        /// Large album artwork for the revealed vinyl, or `nil` when the song has none.
+        let largeCover: URL?
 
         /// Identifier the player looks the song up with: the catalogue one when there is one, because a library id
         /// is only found when the song is in the device library.
@@ -103,6 +107,8 @@ struct GameViewData: Equatable, Sendable {
     var playbackError: String?
     /// The current song once it plays, or `nil` until then.
     var round: Round?
+    /// `true` once Reveal shows the current song's card, until the next round.
+    var isRevealed = false
     /// `true` while the current song is paused: by the user, or because it stopped on its own.
     var isPaused = false
     /// Current time of the song in the player, in seconds of the whole song. Read by `GamePlayBackStatusUseCase`.

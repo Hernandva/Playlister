@@ -33,21 +33,8 @@ struct PlaylistSongItemDAO: Sendable, Equatable, PlaylistSongItemProtocol {
     let artistName: String
     let artworkURL: URL?
     let duration: TimeInterval?
-    let catalogID: String?
-
-    init(
-        id: String,
-        title: String,
-        artistName: String,
-        artworkURL: URL?,
-        duration: TimeInterval?,
-        catalogID: String? = nil
-    ) {
-        self.id = id
-        self.title = title
-        self.artistName = artistName
-        self.artworkURL = artworkURL
-        self.duration = duration
-        self.catalogID = catalogID
-    }
+    var catalogID: String?
+    var albumName: String?
+    var releaseYear: Int?
+    var largeArtworkURL: URL?
 }

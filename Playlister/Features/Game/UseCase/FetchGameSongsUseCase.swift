@@ -40,7 +40,10 @@ struct FetchGameSongsUseCase: FetchGameSongsUseCaseProtocol {
                     artist: song.artistName,
                     cover: song.artworkURL,
                     duration: song.duration,
-                    catalogID: song.catalogID
+                    catalogID: song.catalogID,
+                    album: song.albumName,
+                    releaseYear: song.releaseYear,
+                    largeCover: song.largeArtworkURL
                 )
             }
             offset += response.songs.count

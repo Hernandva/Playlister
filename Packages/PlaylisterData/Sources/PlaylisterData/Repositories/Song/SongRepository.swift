@@ -15,6 +15,8 @@ public protocol SongRepositoryProtocol: Sendable {
 public final class SongRepository: SongRepositoryProtocol {
     /// Songs per page of `fetchSongs(_:)`.
     static let songsPageSize = 25
+    /// Side, in pixels, of `PlaylistSongItemProtocol.largeArtworkURL`: a 200 pt view at 3×.
+    static let largeArtworkSide = 600
 
     private let services: [MusicProvider: any SongServiceProtocol]
 
