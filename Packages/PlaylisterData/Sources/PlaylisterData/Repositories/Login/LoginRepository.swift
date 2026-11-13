@@ -5,7 +5,7 @@ public final class LoginRepository: LoginServiceProtocol {
     private let services: [MusicProvider: any LoginServiceProtocol]
 
     public convenience init() {
-        self.init(services: [.appleMusic: AppleMusicLoginService()])
+        self.init(services: [.appleMusic: AppleMusicLoginService(), .spotify: SpotifyLoginService()])
     }
 
     /// Lets tests inject fake services.

@@ -109,6 +109,32 @@ and requires, through MusicKit's `MusicSubscription`, a subscription that can pl
 in `LoginRepository.init()`.
 Failures are thrown as `LoginError`; a provider without a service throws `LoginError.unsupportedProvider`.
 
+`SpotifyLoginService` (in `Remote/Spotify/`) asks `SpotifySession` for a token, reads the account with
+`GET /v1/me` through `SpotifyAPIClient` and requires `product == "premium"` (`LoginError.subscriptionRequired`
+otherwise): Spotify only lets Premium accounts control the playback. A closed or refused sign-in throws
+`LoginError.notAuthorized`; a 401 forgets the tokens and signs in once more; any other failure throws
+`LoginError.unavailable`. `SpotifyAuthorizationService` always answers `authorized` without showing anything:
+Spotify has no system permission, the user consents on Spotify's page during the login.
+
+### Spotify session (shared by the Spotify services)
+
+`Core/Remote/Spotify/` holds what every Spotify service needs, like `Core/Remote/AppleMusic/` for Apple Music:
+
+- `SpotifySession` (actor, `shared`) hands out a valid access token: the stored one, one renewed with the refresh
+  token, or one from a new sign-in (Authorization Code with PKCE, no client secret) in `ASWebAuthenticationSession`
+  (`SpotifyWebAuthenticator`). The tokens live in the **keychain** (`Core/Local/Spotify/SpotifySessionStorage.swift`,
+  service `playlisterData.spotify`, account `session`), never in `UserDefaults`.
+- `SpotifyAccountsClient` calls `POST https://accounts.spotify.com/api/token`, form encoded
+  (`NetworkClient`'s `encoding: .form`).
+- `SpotifyAPIClient` calls the Web API (`https://api.spotify.com/v1`) with the token. Add each new path to its
+  `configuration.serviceNames`.
+- `SpotifyAuthConfiguration` holds the scopes (asked for at once, so the other repositories need no new consent)
+  and reads the Client ID from the app's Info.plist key `SpotifyClientID`. Without it the sign-in fails as
+  `LoginError.unavailable`. The redirect URI `playlister://spotify-callback` must be listed in the app of the
+  Spotify developer dashboard.
+- `NetworkClient` throws `NetworkError.unacceptableStatusCode` for answers outside 200…299, so services can tell a
+  rejected token (401) from other failures.
+
 ### LastPlaylist (local storage, no HTTP)
 
 `LastPlaylistRepository` keeps the last playlist played with each `MusicProvider` on the device.

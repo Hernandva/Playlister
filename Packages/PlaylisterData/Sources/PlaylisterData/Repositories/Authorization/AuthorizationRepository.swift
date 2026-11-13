@@ -5,7 +5,7 @@ public final class AuthorizationRepository: AuthorizationServiceProtocol {
     private let services: [MusicProvider: any AuthorizationServiceProtocol]
 
     public convenience init() {
-        self.init(services: [.appleMusic: AppleMusicAuthorizationService()])
+        self.init(services: [.appleMusic: AppleMusicAuthorizationService(), .spotify: SpotifyAuthorizationService()])
     }
 
     /// Lets tests inject fake services.

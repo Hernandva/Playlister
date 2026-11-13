@@ -4,6 +4,8 @@
 <dict>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>Playlister uses your Apple Music account to play the songs of each game.</string>
+	<key>SpotifyClientID</key>
+	<string>15d79637401d4c25a04c230629035b7b</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
