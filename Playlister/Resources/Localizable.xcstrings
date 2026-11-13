@@ -1430,19 +1430,19 @@
         }
       }
     },
-    "providerStarter.choosePlaylist" : {
+    "providerStarter.changePlaylist" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose another playlist"
+            "value" : "Change playlist"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elegir otra lista"
+            "value" : "Cambiar lista"
           }
         }
       }
