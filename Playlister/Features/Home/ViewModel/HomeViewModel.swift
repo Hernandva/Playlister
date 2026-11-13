@@ -81,6 +81,13 @@ final class HomeViewModel {
         }
     }
 
+    /// Called when "Continue without an account" is tapped. Free mode needs no authorisation
+    /// or login, so it opens its screen right away.
+    func didTapContinueWithoutAccount() {
+        guard startingProvider == nil else { return }
+        coordinator?.openProvider(.free)
+    }
+
     /// Signs in with `provider`: opens its screen on success, shows the error sheet otherwise.
     func startProvider(_ provider: Provider) async {
         startingProvider = provider

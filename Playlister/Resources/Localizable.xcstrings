@@ -930,6 +930,23 @@
         }
       }
     },
+    "home.signIn.withoutAccount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue without an account"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar sin cuenta"
+          }
+        }
+      }
+    },
     "home.title" : {
       "extractionState" : "manual",
       "localizations" : {

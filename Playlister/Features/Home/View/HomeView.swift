@@ -1,7 +1,8 @@
 import PlaylisterUI
 import SwiftUI
 
-/// Home without a session: the spinning vinyl, the app name and the Spotify / Apple Music sign-in buttons.
+/// Home without a session: the spinning vinyl, the app name, the Spotify / Apple Music sign-in buttons
+/// and the button that continues without an account, in free mode.
 struct HomeView: View {
     /// Keeps the column readable on iPad.
     private static let maxContentWidth: CGFloat = 480
@@ -74,7 +75,7 @@ struct HomeView: View {
     }
 
     /// Shown while the authorisations load, in place of the sign-in buttons.
-    /// Takes the height of the two buttons so the layout does not jump when they appear.
+    /// Takes the height of the three buttons so the layout does not jump when they appear.
     private var loading: some View {
         VStack(spacing: DSSpacing.space3) {
             ProgressView()
@@ -82,7 +83,7 @@ struct HomeView: View {
             DSText(style: .footnote, color: DSColor.textSecondary)
                 .localized("home.loading")
         }
-        .frame(maxWidth: .infinity, minHeight: DSButtonStyle.capsuleHeight * 2 + DSSpacing.space3)
+        .frame(maxWidth: .infinity, minHeight: DSButtonStyle.capsuleHeight * 3 + DSSpacing.space3 * 2)
         .accessibilityElement(children: .combine)
     }
 
@@ -132,6 +133,11 @@ struct HomeView: View {
                 Label(viewModel.signInTitle(for: .appleMusic), systemImage: "music.note")
             }
             .buttonStyle(DSButtonStyle(style: .appleMusic))
+
+            DSButton(style: .secondary) {
+                viewModel.didTapContinueWithoutAccount()
+            }
+            .localized("home.signIn.withoutAccount")
         }
         .disabled(viewModel.startingProvider != nil)
     }
