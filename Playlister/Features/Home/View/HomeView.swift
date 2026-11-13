@@ -1,7 +1,7 @@
 import PlaylisterUI
 import SwiftUI
 
-/// Home without a session: the spinning vinyl, the app name and the Spotify / Apple Music sign-in buttons.
+/// Home without a session: the spinning vinyl, the app name and the Apple Music sign-in button.
 struct HomeView: View {
     /// Keeps the column readable on iPad.
     private static let maxContentWidth: CGFloat = 480
@@ -74,7 +74,7 @@ struct HomeView: View {
     }
 
     /// Shown while the authorisations load, in place of the sign-in buttons.
-    /// Takes the height of the two buttons so the layout does not jump when they appear.
+    /// Takes the height of the sign-in button so the layout does not jump when it appears.
     private var loading: some View {
         VStack(spacing: DSSpacing.space3) {
             ProgressView()
@@ -82,7 +82,7 @@ struct HomeView: View {
             DSText(style: .footnote, color: DSColor.textSecondary)
                 .localized("home.loading")
         }
-        .frame(maxWidth: .infinity, minHeight: DSButtonStyle.capsuleHeight * 2 + DSSpacing.space3)
+        .frame(maxWidth: .infinity, minHeight: DSButtonStyle.capsuleHeight)
         .accessibilityElement(children: .combine)
     }
 
@@ -116,15 +116,8 @@ struct HomeView: View {
     }
 
     private var signInButtons: some View {
+        // Only Apple Music signs in from Home for now; the Spotify provider stays in the view model.
         VStack(spacing: DSSpacing.space3) {
-            Button {
-                viewModel.didTapSignIn(with: .spotify)
-            } label: {
-                // Placeholder symbol: replace it with the logo from Spotify's brand kit.
-                Label(viewModel.signInTitle(for: .spotify), systemImage: "dot.radiowaves.left.and.right")
-            }
-            .buttonStyle(DSButtonStyle(style: .spotify))
-
             Button {
                 viewModel.didTapSignIn(with: .appleMusic)
             } label: {
