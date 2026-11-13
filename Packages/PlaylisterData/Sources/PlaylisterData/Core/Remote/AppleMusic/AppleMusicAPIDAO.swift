@@ -5,6 +5,13 @@ struct AppleMusicPageDAO<Attributes: Decodable & Sendable>: Decodable, Sendable 
     let data: [AppleMusicResourceDAO<Attributes>]
     /// Path of the next page, when there is one.
     let next: String?
+    /// Sent by some paths, e.g. the songs of a playlist, with the number of resources of every page together.
+    let meta: AppleMusicPageMetaDAO?
+}
+
+/// `meta` of a page of the Apple Music API: `{ "total": 312 }`. Internal.
+struct AppleMusicPageMetaDAO: Decodable, Sendable {
+    let total: Int?
 }
 
 /// One Apple Music API resource: its `id` and its `attributes`, which the API may leave out. Internal.

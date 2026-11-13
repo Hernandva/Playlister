@@ -5,7 +5,7 @@ import PlaylisterData
 /// to its own field, so a new result never erases the rest of the data.
 struct PlaylistSelectorViewData: Equatable, Sendable {
     /// A playlist shown in a carousel and handed to ProviderStarter when the user selects it.
-    /// Only what the music service returns for the playlist itself: its songs are never read here.
+    /// Only what the music service returns for the playlist itself: its songs are read only by the long-press sheet.
     struct Playlist: Equatable, Sendable, Identifiable {
         /// Identifier of the playlist in its music service.
         let id: String
@@ -31,6 +31,38 @@ struct PlaylistSelectorViewData: Equatable, Sendable {
         var playlists: [Playlist] = []
         var nextOffset = 0
         var hasMore = false
+    }
+
+    /// A song of the long-press sheet.
+    struct Song: Equatable, Sendable, Identifiable {
+        let id: String
+        let title: String
+        let artist: String
+        /// Album artwork, or `nil` when the song has none.
+        let cover: URL?
+        /// Length of the song, when the music service gives it.
+        let duration: TimeInterval?
+    }
+
+    /// Result of `FetchSongsFromPlaylistUseCase`: one page of the songs of a playlist.
+    struct SongsPage: Equatable, Sendable {
+        let songs: [Song]
+        /// Where the next page starts.
+        let nextOffset: Int
+        /// `true` when the next page may hold more songs.
+        let hasMore: Bool
+        /// Songs of the whole playlist, when the music service says so.
+        let total: Int?
+    }
+
+    /// Every page of `FetchSongsFromPlaylistUseCase` loaded so far for the playlist of the long-press sheet.
+    /// `PlaylistSongsViewModel`, the view model of that sheet, keeps it.
+    struct PlaylistSongs: Equatable, Sendable {
+        let playlistID: String
+        var songs: [Song] = []
+        var nextOffset = 0
+        var hasMore = false
+        var total: Int?
     }
 
     /// Brand name of the music service the user signed in with. Known before anything loads.

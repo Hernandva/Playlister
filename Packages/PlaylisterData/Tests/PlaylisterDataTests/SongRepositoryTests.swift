@@ -8,9 +8,16 @@ private struct SongRequest: SongRequestProtocol {
     let count: Int
 }
 
+private struct PlaylistSongsRequest: PlaylistSongsRequestProtocol {
+    let provider: MusicProvider
+    let playlistID: String
+    let offset: Int
+}
+
 private final class FakeSongService: SongServiceProtocol, @unchecked Sendable {
     let error: SongError?
     private(set) var receivedRequest: SongRequestDAO?
+    private(set) var receivedPageRequest: PlaylistSongsRequestDAO?
 
     init(error: SongError? = nil) {
         self.error = error
@@ -22,6 +29,15 @@ private final class FakeSongService: SongServiceProtocol, @unchecked Sendable {
         let artwork = try #require(URL(string: "https://example.com/cover.jpg"))
         let song = SongItemDAO(id: "1", title: "Billie Jean", artistName: "Michael Jackson", artworkURL: artwork)
         return SongResponseDAO(provider: request.provider, items: [song])
+    }
+
+    func fetchSongs(_ request: PlaylistSongsRequestDAO) async throws -> PlaylistSongsResponseDAO {
+        receivedPageRequest = request
+        if let error { throw error }
+        let song = PlaylistSongItemDAO(
+            id: "1", title: "La Bamba", artistName: "Ritchie Valens", artworkURL: nil, duration: 124
+        )
+        return PlaylistSongsResponseDAO(provider: request.provider, items: [song], total: 312, hasMore: true)
     }
 }
 
@@ -42,6 +58,29 @@ struct SongRepositoryTests {
         let repository = SongRepository(services: [.appleMusic: FakeSongService(error: .playlistNotFound)])
         await #expect(throws: SongError.playlistNotFound) {
             try await repository.fetchRandomSongs(Self.request)
+        }
+    }
+
+    @Test func asksForAPageOfTwentyFiveSongs() async throws {
+        let service = FakeSongService()
+        let repository = SongRepository(services: [.appleMusic: service])
+
+        let response = try await repository.fetchSongs(
+            PlaylistSongsRequest(provider: .appleMusic, playlistID: "pl.1", offset: 25)
+        )
+
+        #expect(service.receivedPageRequest == PlaylistSongsRequestDAO(
+            provider: .appleMusic, playlistID: "pl.1", offset: 25, limit: 25
+        ))
+        #expect(response.songs.map(\.title) == ["La Bamba"])
+        #expect(response.total == 312)
+        #expect(response.hasMore)
+    }
+
+    @Test func rejectsAProviderWithoutServiceWhenListingSongs() async {
+        let repository = SongRepository(services: [:])
+        await #expect(throws: SongError.unsupportedProvider(.spotify)) {
+            try await repository.fetchSongs(PlaylistSongsRequest(provider: .spotify, playlistID: "pl.1", offset: 0))
         }
     }
 

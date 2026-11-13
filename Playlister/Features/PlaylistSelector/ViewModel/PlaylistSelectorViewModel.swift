@@ -36,6 +36,10 @@ final class PlaylistSelectorViewModel {
     var pendingPlaylist: Playlist?
     /// Set once the user selected a playlist: the view closes once the sheet has closed.
     private(set) var wantsToClose = false
+    /// Long-press sheet with the songs of a playlist.
+    let playlistSongs: PlaylistSongsViewModel
+    /// Playlist chosen with «Use this playlist»: its confirmation opens once the songs sheet has closed.
+    private var playlistToConfirm: Playlist?
 
     /// Playlists whose custom artwork is loading or loaded, so each one is asked for once.
     private var customArtworkRequests: Set<String> = []
@@ -56,6 +60,7 @@ final class PlaylistSelectorViewModel {
         self.searchByTermUseCase = dependencies.resolveSearchByTermUseCase()
         self.playlistCustomArtworkUseCase = dependencies.resolvePlaylistCustomArtworkUseCase()
         self.selectPlaylist = dependencies.resolveSelectPlaylist()
+        self.playlistSongs = dependencies.resolvePlaylistSongsViewModel()
     }
 
     // MARK: Sections
@@ -247,6 +252,34 @@ final class PlaylistSelectorViewModel {
     /// «Cancel» in the confirmation sheet.
     func cancelSelection() {
         pendingPlaylist = nil
+    }
+
+    // MARK: Songs
+
+    /// Playlist whose songs sheet is shown, or `nil` when the sheet is closed.
+    var songsPlaylist: Playlist? {
+        get { playlistSongs.playlist }
+        set { playlistSongs.playlist = newValue }
+    }
+
+    /// A playlist was held down: shows its songs.
+    func didLongPress(_ playlist: Playlist) {
+        playlistToConfirm = nil
+        playlistSongs.open(playlist)
+    }
+
+    /// «Use this playlist» in the songs sheet: closes it and then asks to confirm the playlist.
+    func useSongsPlaylist() {
+        playlistToConfirm = playlistSongs.playlist
+        playlistSongs.close()
+    }
+
+    /// The songs sheet has closed: opens the confirmation of the playlist chosen in it, if any, so both sheets
+    /// never animate at the same time.
+    func songsSheetDidClose() {
+        guard let playlist = playlistToConfirm else { return }
+        playlistToConfirm = nil
+        didTap(playlist)
     }
 
     // MARK: Private

@@ -5,8 +5,8 @@ import SwiftUI
 /// Playlist selector: a search field, the playlists found with it, the «Hitster» playlists and the user's playlists.
 /// Every section loads on its own, in parallel, and disappears when it has no playlists. The search results load
 /// 25 more each time the user scrolls to the last one. A playlist without artwork shows the covers of four random
-/// songs. Tapping a playlist asks to confirm it; once confirmed,
-/// ProviderStarter shows it and the selector closes.
+/// songs. Tapping a playlist asks to confirm it; once confirmed, ProviderStarter shows it and the selector closes.
+/// Holding a playlist down shows its songs, 25 at a time, with «Use this playlist» to confirm it from there.
 struct PlaylistSelectorView: View {
     /// Card sides of the design system: 200 pt for «Hitster», 150 pt for the search and «Your playlists».
     private static let hitsterCardSize: CGFloat = 200
@@ -35,6 +35,14 @@ struct PlaylistSelectorView: View {
         .task(id: viewModel.searchText) { await viewModel.search() }
         .sheet(item: $viewModel.pendingPlaylist, onDismiss: closeIfSelected) { playlist in
             confirmationSheet(for: playlist)
+        }
+        .sheet(item: $viewModel.songsPlaylist, onDismiss: viewModel.songsSheetDidClose) { playlist in
+            PlaylistSongsSheetView(
+                viewModel: viewModel.playlistSongs,
+                playlist: playlist,
+                covers: viewModel.covers(for: playlist),
+                use: viewModel.useSongsPlaylist
+            )
         }
     }
 
@@ -115,7 +123,8 @@ struct PlaylistSelectorView: View {
             count: count,
             errorMessage: String(localized: "playlistSelector.section.error"),
             retry: String(localized: "playlistSelector.retry"),
-            cardHint: String(localized: "playlistSelector.card.hint")
+            cardHint: String(localized: "playlistSelector.card.hint"),
+            longPressAction: String(localized: "playlistSelector.card.songs")
         )
     }
 
@@ -131,8 +140,8 @@ struct PlaylistSelectorView: View {
         }
     }
 
-    /// Tapping a card asks to confirm its playlist, a card on screen loads its custom artwork when it needs one,
-    /// and «Try again» runs `retry`.
+    /// Tapping a card asks to confirm its playlist, holding it down shows its songs, a card on screen loads its
+    /// custom artwork when it needs one, and «Try again» runs `retry`.
     private func actions(
         for playlists: [PlaylistSelectorViewData.Playlist],
         retry: @escaping @MainActor @Sendable () async -> Void
@@ -151,6 +160,11 @@ struct PlaylistSelectorView: View {
             cardAppear: { item in
                 if let playlist = playlistsByID[item.id] {
                     await viewModel.loadCustomArtworkIfNeeded(for: playlist)
+                }
+            },
+            longPress: { item in
+                if let playlist = playlistsByID[item.id] {
+                    viewModel.didLongPress(playlist)
                 }
             }
         )

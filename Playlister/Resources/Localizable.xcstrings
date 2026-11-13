@@ -494,6 +494,23 @@
         }
       }
     },
+    "playlistSelector.card.songs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show songs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver canciones"
+          }
+        }
+      }
+    },
     "playlistSelector.confirm.cancel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -568,13 +585,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap a playlist to choose it"
+            "value" : "Tap a playlist to choose it, or hold it to see its songs"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toca una lista para elegirla"
+            "value" : "Toca una lista para elegirla o mantenla pulsada para ver sus canciones"
           }
         }
       }
@@ -711,6 +728,132 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No se pudieron cargar estas listas."
+          }
+        }
+      }
+    },
+    "playlistSelector.songs.close" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar"
+          }
+        }
+      }
+    },
+    "playlistSelector.songs.count %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld song"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld songs"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld canción"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld canciones"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "playlistSelector.songs.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This playlist has no songs."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta lista no tiene canciones."
+          }
+        }
+      }
+    },
+    "playlistSelector.songs.error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The songs couldn't be loaded."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron cargar las canciones."
+          }
+        }
+      }
+    },
+    "playlistSelector.songs.loadMore" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load more songs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargar más canciones"
+          }
+        }
+      }
+    },
+    "playlistSelector.songs.use" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use this playlist"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar esta lista"
           }
         }
       }

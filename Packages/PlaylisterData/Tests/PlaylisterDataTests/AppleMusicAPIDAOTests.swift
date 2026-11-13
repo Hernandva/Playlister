@@ -76,4 +76,25 @@ struct AppleMusicAPIDAOTests {
         #expect(songs.first?.artworkURL.absoluteString == "https://example.com/400x400.jpg")
         #expect(page.next != nil)
     }
+
+    @Test func listsSongsWithAndWithoutArtworkWithTheirDuration() throws {
+        let page = try Self.decode("""
+        {"data": [
+            {"id": "i.1", "type": "library-songs",
+             "attributes": {"name": "Billie Jean", "artistName": "Michael Jackson", "durationInMillis": 294000,
+                            "artwork": {"url": "https://example.com/{w}x{h}.jpg"}}},
+            {"id": "i.2", "type": "library-songs", "attributes": {"name": "Uploaded", "artistName": "Me"}},
+            {"id": "i.3", "type": "library-songs"}
+        ], "next": "/v1/me/library/playlists/p.1/tracks?offset=25", "meta": {"total": 312}}
+        """, as: AppleMusicSongAttributesDAO.self)
+
+        let songs = page.data.compactMap { PlaylistSongItemDAO(song: $0, artworkSide: 150) }
+
+        #expect(songs.map(\.title) == ["Billie Jean", "Uploaded"])
+        #expect(songs.first?.duration == 294)
+        #expect(songs.first?.artworkURL?.absoluteString == "https://example.com/150x150.jpg")
+        #expect(songs.last?.artworkURL == nil)
+        #expect(songs.last?.duration == nil)
+        #expect(page.meta?.total == 312)
+    }
 }

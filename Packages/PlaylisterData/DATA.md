@@ -160,11 +160,18 @@ for the storefront of catalogue paths), so the app can run them in parallel. Lib
 internal `SongServiceProtocol` of that provider, registered in `SongRepository.init()`. It returns a
 `SongResponseProtocol` with up to `count` random `SongItemProtocol`s (id, title, artist and web artwork URL).
 
+`fetchSongs(_:)` takes a `PlaylistSongsRequestProtocol` (provider, `playlistID` and `offset`) and returns one page of
+`SongRepository.songsPageSize` (25) songs, in their order, as a `PlaylistSongsResponseProtocol`: its
+`PlaylistSongItemProtocol`s (id, title, artist, web artwork URL or `nil`, and duration when the API gives it), the
+`total` songs of the playlist when the API sends `meta.total`, and `hasMore`, `true` when the API announces a `next`
+page. Songs without artwork are kept. The selector's long-press sheet reads it through `FetchSongsFromPlaylistUseCase`.
+
 - `AppleMusicSongService` (in `Remote/AppleMusic/`) reads the first page (100) of the playlist's songs through the
   Apple Music API in **one** request: `GET /v1/me/library/playlists/{id}/tracks` when the id starts with `p.`, else
   `GET /v1/catalog/{storefront}/playlists/{id}/tracks`. Each song already comes with its web artwork, so no song is
   looked up again. `RandomSongPicker` then picks `count` of those with artwork at random; with fewer songs with
   artwork it returns fewer.
+- `fetchSongs(_:)` reads the same paths with `limit=25&offset=…`, one page per request.
 - Only `https` artwork URLs are kept.
 - Without MusicKit access it throws `SongError.notAuthorized`, an unknown playlist (API 404)
   `SongError.playlistNotFound`, any other failure `SongError.unavailable`, and a provider without a service `SongError.unsupportedProvider`.

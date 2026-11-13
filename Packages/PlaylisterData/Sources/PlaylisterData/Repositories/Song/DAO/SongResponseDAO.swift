@@ -15,3 +15,22 @@ struct SongItemDAO: Sendable, Equatable, SongItemProtocol {
     let artistName: String
     let artworkURL: URL
 }
+
+/// One page of the songs of a playlist. Internal: the app only sees PlaylistSongsResponseProtocol.
+struct PlaylistSongsResponseDAO: Sendable, Equatable, PlaylistSongsResponseProtocol {
+    let provider: MusicProvider
+    let items: [PlaylistSongItemDAO]
+    let total: Int?
+    let hasMore: Bool
+
+    var songs: [any PlaylistSongItemProtocol] { items }
+}
+
+/// A song as it is listed. Internal: the app only sees PlaylistSongItemProtocol.
+struct PlaylistSongItemDAO: Sendable, Equatable, PlaylistSongItemProtocol {
+    let id: String
+    let title: String
+    let artistName: String
+    let artworkURL: URL?
+    let duration: TimeInterval?
+}

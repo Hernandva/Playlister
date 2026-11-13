@@ -4,4 +4,5 @@ import Foundation
 /// registered in `SongRepository.init()`.
 protocol SongServiceProtocol: Sendable {
     func fetchRandomSongs(_ request: SongRequestDAO) async throws -> SongResponseDAO
+    func fetchSongs(_ request: PlaylistSongsRequestDAO) async throws -> PlaylistSongsResponseDAO
 }

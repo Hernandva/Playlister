@@ -38,7 +38,8 @@ final class PlaylistSelectorDependencies {
         repository
     }
 
-    /// Random songs of a playlist, for the artwork of playlists without one.
+    /// Songs of a playlist: random ones for the artwork of playlists without one, and pages of them for the
+    /// long-press sheet.
     func resolveSongRepository() -> any SongRepositoryProtocol {
         songRepository
     }
@@ -57,6 +58,14 @@ final class PlaylistSelectorDependencies {
 
     func resolvePlaylistCustomArtworkUseCase() -> any PlaylistCustomArtworkUseCaseProtocol {
         PlaylistCustomArtworkUseCase(dependencies: self)
+    }
+
+    func resolveFetchSongsFromPlaylistUseCase() -> any FetchSongsFromPlaylistUseCaseProtocol {
+        FetchSongsFromPlaylistUseCase(dependencies: self)
+    }
+
+    func resolvePlaylistSongsViewModel() -> PlaylistSongsViewModel {
+        PlaylistSongsViewModel(dependencies: self)
     }
 
     func resolveViewModel() -> PlaylistSelectorViewModel {

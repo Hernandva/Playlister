@@ -35,18 +35,28 @@ public struct DSPlaylistSectionTexts: Sendable {
     let errorMessage: String
     let retry: String
     let cardHint: String?
+    let longPressAction: String?
 
     /// - Parameters:
     ///   - count: Shown at the end of the header once loaded, e.g. «12».
     ///   - errorMessage: Shown when the section fails to load.
     ///   - retry: Title of the button under the error.
     ///   - cardHint: Accessibility hint of every card, e.g. what tapping it does.
-    public init(title: String, count: String? = nil, errorMessage: String, retry: String, cardHint: String? = nil) {
+    ///   - longPressAction: Name of the accessibility action that does what a long press does, e.g. «Ver canciones».
+    public init(
+        title: String,
+        count: String? = nil,
+        errorMessage: String,
+        retry: String,
+        cardHint: String? = nil,
+        longPressAction: String? = nil
+    ) {
         self.title = title
         self.count = count
         self.errorMessage = errorMessage
         self.retry = retry
         self.cardHint = cardHint
+        self.longPressAction = longPressAction
     }
 }
 
@@ -55,19 +65,23 @@ public struct DSPlaylistSectionActions {
     let select: @MainActor (DSPlaylistSectionItem) -> Void
     let retry: @MainActor @Sendable () -> Void
     let cardAppear: @MainActor @Sendable (DSPlaylistSectionItem) async -> Void
+    let longPress: (@MainActor (DSPlaylistSectionItem) -> Void)?
 
     /// - Parameters:
     ///   - select: A card was tapped.
     ///   - retry: «Try again» under the error.
     ///   - cardAppear: Runs while a card is on screen, e.g. to load its covers. Cancelled when it disappears.
+    ///   - longPress: A card was held down, e.g. to show its songs. `nil` when holding a card does nothing.
     public init(
         select: @escaping @MainActor (DSPlaylistSectionItem) -> Void,
         retry: @escaping @MainActor @Sendable () -> Void,
-        cardAppear: @escaping @MainActor @Sendable (DSPlaylistSectionItem) async -> Void = { _ in }
+        cardAppear: @escaping @MainActor @Sendable (DSPlaylistSectionItem) async -> Void = { _ in },
+        longPress: (@MainActor (DSPlaylistSectionItem) -> Void)? = nil
     ) {
         self.select = select
         self.retry = retry
         self.cardAppear = cardAppear
+        self.longPress = longPress
     }
 }
 
@@ -77,6 +91,7 @@ public struct DSPlaylistSectionActions {
 ///
 /// - `cardSize`: 200 pt for featured playlists, 150 pt for the rest (see `DSPlaylistCard`).
 /// - `tail` goes after the last card, e.g. a loader that asks for the next page.
+/// - With a `longPress` action, holding a card runs it instead of `select`.
 /// - Place it inside a `DSScreen`, whose `space-4` margins the carousel bleeds into.
 public struct DSPlaylistSection<Tail: View>: View {
     private let texts: DSPlaylistSectionTexts
@@ -161,14 +176,31 @@ public struct DSPlaylistSection<Tail: View>: View {
     }
 
     private func card(_ item: DSPlaylistSectionItem) -> some View {
-        Button {
-            actions.select(item)
-        } label: {
-            DSPlaylistCard(item.name, subtitle: item.subtitle, covers: item.covers, size: cardSize)
+        pressableCard(item)
+            .accessibilityHint(texts.cardHint ?? "")
+            .task { await actions.cardAppear(item) }
+    }
+
+    /// A button, or, when the section handles long presses, a card that tells a tap from a long press, with the
+    /// long press also offered as an accessibility action.
+    @ViewBuilder private func pressableCard(_ item: DSPlaylistSectionItem) -> some View {
+        let card = DSPlaylistCard(item.name, subtitle: item.subtitle, covers: item.covers, size: cardSize)
+        if let longPress = actions.longPress {
+            card
+                .contentShape(Rectangle())
+                .onTapGesture { actions.select(item) }
+                .onLongPressGesture { longPress(item) }
+                .accessibilityAddTraits(.isButton)
+                .accessibilityAction { actions.select(item) }
+                .accessibilityAction(named: texts.longPressAction ?? "") { longPress(item) }
+        } else {
+            Button {
+                actions.select(item)
+            } label: {
+                card
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
-        .accessibilityHint(texts.cardHint ?? "")
-        .task { await actions.cardAppear(item) }
     }
 }
 
