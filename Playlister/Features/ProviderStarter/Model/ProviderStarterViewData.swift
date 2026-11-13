@@ -34,6 +34,50 @@ struct ProviderStarterViewData: Equatable, Sendable {
         let covers: [URL]
     }
 
+    /// What each round plays of a song.
+    enum Playback: Hashable, Sendable {
+        case fullSong
+        case clip
+    }
+
+    /// Where a clip starts in the song.
+    enum ClipStart: Hashable, Sendable {
+        case beginning
+        case random
+    }
+
+    enum GameMode: Hashable, Sendable {
+        case classic
+        case bingo
+    }
+
+    enum BingoLevel: Hashable, Sendable {
+        case beginner
+        case expert
+    }
+
+    /// The Bingo categories, by their color.
+    enum BingoCategory: Hashable, Sendable {
+        case pink
+        case yellow
+        case cyan
+        case green
+        case orange
+    }
+
+    /// Game settings of the music service, read when Play is tapped.
+    /// `Hashable` because the Game route carries them.
+    struct GameSettings: Hashable, Sendable {
+        var playback: Playback
+        /// Length of a clip, in seconds.
+        var clipSeconds: Int
+        var clipStart: ClipStart
+        var mode: GameMode
+        var bingoLevel: BingoLevel
+        /// Bingo categories turned on for `bingoLevel`.
+        var bingoCategories: Set<BingoCategory>
+    }
+
     /// Known before anything loads: it comes from Home.
     var provider: Provider
     /// Result of `LastPlaylistUseCase`. `nil` until it loads, or when no playlist has been played yet.
@@ -41,4 +85,6 @@ struct ProviderStarterViewData: Equatable, Sendable {
     /// Playlist chosen in the playlist selector. When there is one, it is shown and played instead of
     /// `lastPlaylist`, and Play saves it as the new last playlist.
     var selectedPlaylist: Playlist?
+    /// Result of `GameSettingsUseCase`: the settings the last game started with. `nil` until Play is tapped.
+    var gameSettings: GameSettings?
 }

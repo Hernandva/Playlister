@@ -6,13 +6,16 @@ import PlaylisterData
 final class GameDependencies {
     private let provider: MusicProvider
     private let playlist: GameViewData.Playlist
+    private let settings: GameViewData.Settings
 
     /// - Parameters:
     ///   - provider: The music service the user signed in with.
     ///   - playlist: The playlist chosen in ProviderStarter, played by the game.
-    init(provider: MusicProvider, playlist: GameViewData.Playlist) {
+    ///   - settings: The game settings saved in Settings.
+    init(provider: MusicProvider, playlist: GameViewData.Playlist, settings: GameViewData.Settings) {
         self.provider = provider
         self.playlist = playlist
+        self.settings = settings
     }
 
     /// The music service the user signed in with.
@@ -23,6 +26,11 @@ final class GameDependencies {
     /// The playlist the game is played with.
     func resolvePlaylist() -> GameViewData.Playlist {
         playlist
+    }
+
+    /// The game settings the game is played with.
+    func resolveSettings() -> GameViewData.Settings {
+        settings
     }
 
     func resolveUseCase() -> any GameUseCaseProtocol {

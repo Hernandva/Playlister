@@ -1090,6 +1090,23 @@
         }
       }
     },
+    "providerStarter.play.settingsError" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The game settings couldn't be read. Try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron leer los ajustes del juego. Inténtalo de nuevo."
+          }
+        }
+      }
+    },
     "providerStarter.retry" : {
       "extractionState" : "manual",
       "localizations" : {

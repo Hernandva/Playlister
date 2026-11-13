@@ -26,7 +26,8 @@ final class ProviderStarterViewModel {
 
     private let lastPlaylistUseCase: any LastPlaylistUseCaseProtocol
     private let saveLastPlaylistUseCase: any SaveLastPlaylistUseCaseProtocol
-    private let openGame: @MainActor (ProviderStarterViewData.Playlist) -> Void
+    private let gameSettingsUseCase: any GameSettingsUseCaseProtocol
+    private let openGame: @MainActor (ProviderStarterViewData.Playlist, ProviderStarterViewData.GameSettings) -> Void
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: ProviderStarterDependencies) {
@@ -34,6 +35,7 @@ final class ProviderStarterViewModel {
         self.viewData = ProviderStarterViewData(provider: provider)
         self.lastPlaylistUseCase = dependencies.resolveLastPlaylistUseCase()
         self.saveLastPlaylistUseCase = dependencies.resolveSaveLastPlaylistUseCase()
+        self.gameSettingsUseCase = dependencies.resolveGameSettingsUseCase()
         self.openGame = dependencies.resolveOpenGame()
     }
 
@@ -102,23 +104,34 @@ final class ProviderStarterViewModel {
         playErrorMessage = nil
     }
 
-    /// Play: saves the selected playlist as the last playlist, then opens the game with it and the
-    /// music service. When the save fails, the game does not open and the error is shown under Play.
+    /// Play: saves the selected playlist as the last playlist, reads the game settings, then opens the game
+    /// with the playlist, the music service and the settings. When a step fails, the game does not open and
+    /// the error is shown under Play.
     func didTapPlay() async {
         guard !isStartingGame, let playlist = selectedPlaylist else { return }
-        if let selected = viewData.selectedPlaylist, selected != viewData.lastPlaylist {
-            isStartingGame = true
-            defer { isStartingGame = false }
-            do {
-                try await saveLastPlaylistUseCase.execute(playlist: selected)
-                viewData.lastPlaylist = selected
-                playErrorMessage = nil
-            } catch {
-                playErrorMessage = String(localized: "providerStarter.play.saveError")
-                return
-            }
+        isStartingGame = true
+        defer { isStartingGame = false }
+        playErrorMessage = nil
+        do {
+            try await saveAsLastPlaylist(playlist)
+        } catch {
+            playErrorMessage = String(localized: "providerStarter.play.saveError")
+            return
         }
-        openGame(playlist)
+        do {
+            let settings = try await gameSettingsUseCase.execute()
+            viewData.gameSettings = settings
+            openGame(playlist, settings)
+        } catch {
+            playErrorMessage = String(localized: "providerStarter.play.settingsError")
+        }
+    }
+
+    /// Stores `playlist` as the last playlist, unless it already is.
+    private func saveAsLastPlaylist(_ playlist: ProviderStarterViewData.Playlist) async throws {
+        guard playlist != viewData.lastPlaylist else { return }
+        try await saveLastPlaylistUseCase.execute(playlist: playlist)
+        viewData.lastPlaylist = playlist
     }
 
     func load() async {

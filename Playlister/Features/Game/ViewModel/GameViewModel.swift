@@ -19,7 +19,10 @@ final class GameViewModel {
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: GameDependencies) {
-        self.viewData = GameViewData(playlist: dependencies.resolvePlaylist())
+        self.viewData = GameViewData(
+            playlist: dependencies.resolvePlaylist(),
+            settings: dependencies.resolveSettings()
+        )
         self.useCase = dependencies.resolveUseCase()
     }
 

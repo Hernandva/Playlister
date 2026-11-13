@@ -32,7 +32,15 @@ struct GameView: View {
     NavigationStack {
         GameCoordinator(
             provider: .appleMusic,
-            playlist: GameViewData.Playlist(id: "preview", name: "Road Trip", songCount: 42, covers: [])
+            playlist: GameViewData.Playlist(id: "preview", name: "Road Trip", songCount: 42, covers: []),
+            settings: GameViewData.Settings(
+                playback: .clip,
+                clipSeconds: 15,
+                clipStart: .random,
+                mode: .classic,
+                bingoLevel: .beginner,
+                bingoCategories: [.pink, .yellow, .cyan, .green, .orange]
+            )
         ).start()
     }
 }

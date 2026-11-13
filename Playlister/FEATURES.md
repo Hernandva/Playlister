@@ -150,7 +150,7 @@ adds the route to the parent coordinator and updates this file.
 | Feature | Opened from | Repository |
 |---|---|---|
 | `Home` | — (root) | `Authorization`, `Login` |
-| `ProviderStarter` | Home | `LastPlaylistRepository` |
+| `ProviderStarter` | Home | `LastPlaylistRepository`, `SettingsRepository` |
 | `Settings` | ProviderStarter | `SettingsRepository` |
 | `PlaylistSelector` | ProviderStarter | `PlaylistsRepository`, `SongRepository` |
 | `Game` | ProviderStarter | — |

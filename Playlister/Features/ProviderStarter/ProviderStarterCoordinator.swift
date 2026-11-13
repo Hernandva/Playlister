@@ -11,8 +11,8 @@ final class ProviderStarterCoordinator: Coordinator {
         case settings
         /// Recommended and own playlists, to choose the one to play.
         case playlistSelector
-        /// The game, played with the playlist chosen when Play was tapped.
-        case game(ProviderStarterViewData.Playlist)
+        /// The game, played with the playlist chosen and the game settings read when Play was tapped.
+        case game(ProviderStarterViewData.Playlist, ProviderStarterViewData.GameSettings)
         // @codegen:routes
     }
 
@@ -63,7 +63,7 @@ final class ProviderStarterCoordinator: Coordinator {
                     covers: playlist.covers
                 ))
             }.start())
-        case .game(let playlist):
+        case .game(let playlist, let settings):
             return AnyView(GameCoordinator(
                 provider: dependencies.resolveProvider(),
                 playlist: GameViewData.Playlist(
@@ -71,7 +71,8 @@ final class ProviderStarterCoordinator: Coordinator {
                     name: playlist.name,
                     songCount: playlist.songCount,
                     covers: playlist.covers
-                )
+                ),
+                settings: GameViewData.Settings(settings)
             ).start())
         // @codegen:destinations
         }

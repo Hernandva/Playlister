@@ -19,8 +19,9 @@ final class GameCoordinator: Coordinator {
     /// - Parameters:
     ///   - provider: The music service the user signed in with.
     ///   - playlist: The playlist chosen in ProviderStarter, played by the game.
-    convenience init(provider: MusicProvider, playlist: GameViewData.Playlist) {
-        self.init(dependencies: GameDependencies(provider: provider, playlist: playlist))
+    ///   - settings: The game settings saved in Settings.
+    convenience init(provider: MusicProvider, playlist: GameViewData.Playlist, settings: GameViewData.Settings) {
+        self.init(dependencies: GameDependencies(provider: provider, playlist: playlist, settings: settings))
     }
 
     func start() -> some View {

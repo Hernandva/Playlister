@@ -8,6 +8,7 @@ final class ProviderStarterDependencies {
     private let signOut: @MainActor () -> Void
     private let navigate: @MainActor (ProviderStarterCoordinator.Route) -> Void
     private let repository: any LastPlaylistRepositoryProtocol
+    private let settingsRepository: any SettingsRepositoryProtocol
     /// One view model per container, so the playlist selector hands its choice to the screen on display.
     private lazy var viewModel = ProviderStarterViewModel(dependencies: self)
 
@@ -19,12 +20,14 @@ final class ProviderStarterDependencies {
         provider: MusicProvider,
         signOut: @escaping @MainActor () -> Void,
         navigate: @escaping @MainActor (ProviderStarterCoordinator.Route) -> Void,
-        repository: any LastPlaylistRepositoryProtocol = LastPlaylistRepository()
+        repository: any LastPlaylistRepositoryProtocol = LastPlaylistRepository(),
+        settingsRepository: any SettingsRepositoryProtocol = SettingsRepository()
     ) {
         self.provider = provider
         self.signOut = signOut
         self.navigate = navigate
         self.repository = repository
+        self.settingsRepository = settingsRepository
     }
 
     /// The music service the user signed in with.
@@ -37,11 +40,21 @@ final class ProviderStarterDependencies {
         signOut
     }
 
-    /// Opens the game with `playlist`. The view model calls it from Play.
-    func resolveOpenGame() -> @MainActor (ProviderStarterViewData.Playlist) -> Void {
-        { [navigate] playlist in
-            navigate(.game(playlist))
+    /// Opens the game with `playlist` and the game settings. The view model calls it from Play.
+    func resolveOpenGame()
+        -> @MainActor (ProviderStarterViewData.Playlist, ProviderStarterViewData.GameSettings) -> Void {
+        { [navigate] playlist, settings in
+            navigate(.game(playlist, settings))
         }
+    }
+
+    /// Game settings of each music service, from PlaylisterData.
+    func resolveSettingsRepository() -> any SettingsRepositoryProtocol {
+        settingsRepository
+    }
+
+    func resolveGameSettingsUseCase() -> any GameSettingsUseCaseProtocol {
+        GameSettingsUseCase(dependencies: self)
     }
 
     func resolveRepository() -> any LastPlaylistRepositoryProtocol {
