@@ -20,7 +20,16 @@ struct HitsterPlayListUseCase: HitsterPlayListUseCaseProtocol {
     /// It is the last part of the playlist's link, e.g. music.apple.com/es/playlist/hitster/pl.u-DdANxEPFj4Jyvq.
     /// Add more by hand; they are all read in one request.
     private static let playlistIDs = [
-        "pl.u-DdANxEPFj4Jyvq"
+        "pl.u-8aAVXd6Cvrrbmz0",
+        "pl.u-b3b8M68CKqG0PpY",
+        "pl.u-DdANxEPFj4Jyvq",
+        "pl.u-leyll9Ltj6b7KpW",
+        "pl.u-NpXmYAau8EMRA",
+        "pl.u-vxy665jskD2JG3",
+        "pl.u-V9D7m8pC3r3gRYg",
+        "pl.u-V9D7m8pC3r3gRYg",
+        "pl.u-EdAVvbbFJMjMEA",
+        "pl.u-gxbllD0IWAVN9d"
     ]
 
     private let provider: MusicProvider

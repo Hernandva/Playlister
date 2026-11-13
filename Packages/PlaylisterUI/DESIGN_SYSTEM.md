@@ -32,6 +32,7 @@ They follow the component guides of the Playlister design system (Claude Design)
 | Component | Use |
 |---|---|
 | `DSScreen { … }` | Root container of every screen: scroll view, aura background (`bg-night` + violet/magenta radials), `space-4` margins, `space-6` between blocks, `bubblegum` tint, dark scheme. |
+| `DSExternalDisplayCanvas(size:glow:content:)` | Root of a screen on an external display (TV through AirPlay): lays the content out on a fixed 960 × 540 pt canvas (`defaultSize`) and scales it to fill the display, so components keep their iPhone sizes. Aura background (with an optional `glow`) over the whole display, dark scheme. |
 | `DSAuraBackground()` | The same background, for sheets and full-screen views. |
 | `DSText(_:style:color:)` | Any text. Styles: `.hero`, `.largeTitle` (both with the animated glow), `.title`, `.sectionTitle`, `.headline`, `.body`, `.bodyStrong`, `.subheadline`, `.footnote`, `.caption`. |
 | `DSButton(_:style:trailingSystemImage:action:)` | Actions. `trailingSystemImage` adds a symbol after the text (`chevron.right` on «Continuar»), hidden from VoiceOver. `.primary` (52 pt capsule, animated gradient, `shadow-glow`, one per screen), `.secondary` (`tint-fill` + `tint-ink`), `.plain` (`bubblegum`), `.destructive`, `.spotify`, `.appleMusic`. `DSButtonStyle` for custom labels. |
@@ -58,7 +59,7 @@ They follow the component guides of the Playlister design system (Claude Design)
 | `DSVinyl(phase:category:level:levels:diameter:)` | Game vinyl. `.playing` (1.8 s per turn, equalizer bars, pass `levels` 0…1 to bind them to audio), `.paused` (the disc stops at its angle and turns on from it, the bars settle low) and `.revealed(cover:isPaused:)` (6 s per turn, cover pops in; with `isPaused`, e.g. when the song ends, the disc stops the same way). With a Bingo `category` it takes its color and shows the category name under the disc, revealed or not. |
 | `DSBingoCategory` / `DSBingoLevel` | The five Bingo categories with their color, `ink` (`bg-night`) and localised `title(for:)` (keys `bingo.category.<color>.<beginner|expert>`). |
 | `DSBingoCategoryRow(category:level:isOn:)` | Settings row: color square, name and switch; 45 % opacity when off. |
-| `DSSongRevealCard(title:artist:year:details:trailingDetail:category:)` | Revealed song card on `surface-2`, or in the category color with `bg-night` text. `trailingDetail` goes right-aligned under the year (the duration). Insert it with `.transition(DSSongRevealCard.revealTransition)`. |
+| `DSSongRevealCard(title:artist:year:details:trailingDetail:category:)` | Revealed song card on `surface-2`, or in the category color with `bg-night` text. `trailingDetail` goes right-aligned under the year (the duration). Long title, artist and detail values wrap onto more lines, never cut. Insert it with `.transition(DSSongRevealCard.revealTransition)`. |
 
 Styles shared by the components live in `Sources/PlaylisterUI/Styles/` (hand-written, not generated):
 

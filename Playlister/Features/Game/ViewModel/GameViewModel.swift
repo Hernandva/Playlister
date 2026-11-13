@@ -36,6 +36,8 @@ final class GameViewModel {
     private let playerUseCase: any GamePlayerUseCaseProtocol
     private let playBackStatusUseCase: any GamePlayBackStatusUseCaseProtocol
     private let artistKindUseCase: any FetchArtistKindUseCaseProtocol
+    /// Shows the game on an external display (a TV through AirPlay) while it is played.
+    let externalDisplaySession: GameExternalDisplaySession
     /// `true` while a pause, a resume or a change of song is on its way, so a second tap does not overlap it and the
     /// status readings do not undo it.
     @ObservationIgnored private var isChangingPlayback = false
@@ -57,6 +59,7 @@ final class GameViewModel {
         self.playerUseCase = dependencies.resolveGamePlayerUseCase()
         self.playBackStatusUseCase = dependencies.resolveGamePlayBackStatusUseCase()
         self.artistKindUseCase = dependencies.resolveFetchArtistKindUseCase()
+        self.externalDisplaySession = dependencies.resolveExternalDisplaySession()
     }
 
     /// Played share of the round, 0…1: of the clip, or of the whole song.
@@ -102,8 +105,10 @@ final class GameViewModel {
         Duration.seconds(seconds).formatted(.time(pattern: .minuteSecond))
     }
 
-    /// Reads every song of the playlist, shuffles them into the queue and plays the first one.
+    /// Reads every song of the playlist, shuffles them into the queue and plays the first one. An external display
+    /// shows the game from now on.
     func load() async {
+        externalDisplaySession.present(self)
         state = .loading
         do {
             let songs = try await fetchSongsUseCase.execute(playlistID: viewData.playlist.id, provider: provider)
@@ -206,12 +211,6 @@ final class GameViewModel {
         } catch {
             viewData.playbackError = Self.message(for: error as? GamePlaybackError ?? .unavailable)
         }
-    }
-
-    /// Stops the music when the user leaves the game.
-    func stop() async {
-        stopProgress()
-        await playerUseCase.stop(provider: provider)
     }
 
     /// Plays the current song. When it cannot be played (missing or unavailable) it goes to the end of the queue and
@@ -339,6 +338,13 @@ final class GameViewModel {
 // MARK: - End of the game
 
 extension GameViewModel {
+    /// Stops the music when the user leaves the game, and takes the game off the external display.
+    func stop() async {
+        externalDisplaySession.dismiss(self)
+        stopProgress()
+        await playerUseCase.stop(provider: provider)
+    }
+
     /// The mode chip at the top was tapped: offers to end the game, and pauses the song while the offer is shown.
     /// A song the user had already paused stays paused when the sheet closes.
     func didTapModeChip() async {

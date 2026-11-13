@@ -128,6 +128,27 @@ func load() async {
 - A view that needs a glass icon button as a link uses `NavigationLink(value:) { Image(systemName:) }` with
   `.buttonStyle(DSIconButtonStyle(diameter:))`, never a `DSIconButton` inside a `NavigationLink`.
 
+### External display (AirPlay)
+
+The game has its own screen for an external display (a TV through AirPlay or a cable) instead of mirroring the
+iPhone: the TV shows the round in 16:9 for the room, and the iPhone keeps the controls.
+
+- `App/AppDelegate.swift` gives the `windowExternalDisplayNonInteractive` scene role its own delegate,
+  `App/ExternalDisplaySceneDelegate.swift`, which hosts `App/ExternalDisplayRootView.swift`. Every other scene keeps
+  SwiftUI's default configuration. That is enough before iOS 27.
+- From iOS 27 the system only connects that scene for a registered `UISceneAccessory`. `GameView` registers one
+  with `.externalDisplayAccessory()` (`App/ExternalDisplayAccessory.swift`), with the same configuration and
+  delegate, so the display has its own screen only during a game and mirrors the iPhone everywhere else.
+- UIKit creates that scene, so it cannot receive a feature's dependencies. It reads the shared
+  `Features/Game/ExternalDisplay/GameExternalDisplaySession.swift` instead: `GameViewModel` presents itself there in
+  `load()` and takes itself off in `stop()`, and the scene delegate reports when a display connects or disconnects.
+  `GameDependencies` injects the session (`resolveExternalDisplaySession()`).
+- `GameExternalDisplayView` is the one view that does not take `init(dependencies:)`: it mirrors the view model of
+  the iPhone's `GameView` and owns none of its own. It has no controls, because the display is not interactive.
+- `View/GameViewModel+DesignSystem.swift` maps the game's state to design-system types for both views, so the iPhone
+  and the TV always show the same round.
+- Test it in the Simulator with *I/O > External Displays*.
+
 ### Localisation
 
 - Strings live in `Resources/Localizable.xcstrings`. Keys follow `<featureName>.<element>`, e.g. `profile.title`.

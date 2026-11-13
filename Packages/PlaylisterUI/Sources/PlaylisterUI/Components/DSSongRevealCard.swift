@@ -14,6 +14,8 @@ public enum DSArtistKind: Sendable {
 /// - `trailingDetail` goes at the trailing edge of the details row, right-aligned under the year
 ///   (e.g. «Duración: 5:55»).
 /// - `artistKind` adds an icon after the artist: one person for a solo artist, three for a group.
+/// - Long titles, artists and detail values wrap onto more lines instead of being cut: the card grows taller,
+///   and the year keeps its size.
 /// - Insert it with `.transition(DSSongRevealCard.revealTransition)`: it rises 24 pt while fading in.
 ///
 /// Strings are passed already localised.
@@ -115,12 +117,18 @@ public struct DSSongRevealCard: View {
                 .foregroundStyle(secondaryInk(0.75))
                 .animation(.easeOut(duration: 0.25), value: artistKind?.kind)
             }
+            .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
-            if category == nil {
-                DSText(year, style: .hero)
-            } else {
-                DSText(year, style: .hero, color: ink)
-            }
+            yearView
+                .fixedSize()
+        }
+    }
+
+    @ViewBuilder private var yearView: some View {
+        if category == nil {
+            DSText(year, style: .hero)
+        } else {
+            DSText(year, style: .hero, color: ink)
         }
     }
 
@@ -132,6 +140,7 @@ public struct DSSongRevealCard: View {
             if let trailingDetail {
                 Spacer(minLength: 0)
                 detailView(trailingDetail, alignment: .trailing)
+                    .layoutPriority(1)
             }
         }
         .padding(.top, DSSpacing.space3)
@@ -155,6 +164,7 @@ public struct DSSongRevealCard: View {
                 .foregroundStyle(ink)
         }
         .multilineTextAlignment(alignment == .trailing ? .trailing : .leading)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     /// Main text color: `text-primary`, or `bg-night` on a category color.
@@ -176,6 +186,14 @@ public struct DSSongRevealCard: View {
             year: "1975",
             details: [.init("Álbum", value: "A Night at the Opera")],
             trailingDetail: .init("Duración", value: "5:55"),
+            artistKind: .init(.group, label: "Grupo")
+        )
+        DSSongRevealCard(
+            title: "Don't Stop Me Now (Remastered 2011, Live at the Hammersmith Odeon)",
+            artist: "Freddie Mercury, Brian May, Roger Taylor & John Deacon",
+            year: "1979",
+            details: [.init("Álbum", value: "Live Killers (Deluxe Remastered Edition, Part Two)")],
+            trailingDetail: .init("Duración", value: "3:29"),
             artistKind: .init(.group, label: "Grupo")
         )
         DSSongRevealCard(

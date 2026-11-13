@@ -171,6 +171,40 @@
         }
       }
     },
+    "externalDisplay.waiting.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a game on your iPhone to play it here."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza una partida en tu iPhone para jugarla aquí."
+          }
+        }
+      }
+    },
+    "externalDisplay.waiting.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Playlister"
+          }
+        }
+      }
+    },
     "game.continue" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -286,6 +320,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "¿Terminar la partida?"
+          }
+        }
+      }
+    },
+    "game.externalDisplay.connected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the TV"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En la TV"
+          }
+        }
+      }
+    },
+    "game.externalDisplay.question" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What song is it?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué canción es?"
           }
         }
       }
