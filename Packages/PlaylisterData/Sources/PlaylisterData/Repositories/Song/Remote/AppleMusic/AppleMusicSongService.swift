@@ -26,7 +26,7 @@ struct AppleMusicSongService: SongServiceProtocol {
             )
             let songs = page.data.compactMap { SongItemDAO(song: $0, artworkSide: Self.artworkSide) }
             let picked = RandomSongPicker.pick(songs, count: request.count)
-            return SongResponseDAO(provider: .appleMusic, items: picked)
+            return SongResponseDAO(provider: request.provider, items: picked)
         }
     }
 
@@ -42,7 +42,7 @@ struct AppleMusicSongService: SongServiceProtocol {
                 ]
             )
             return PlaylistSongsResponseDAO(
-                provider: .appleMusic,
+                provider: request.provider,
                 items: page.data.compactMap { PlaylistSongItemDAO(song: $0, artworkSide: Self.listArtworkSide) },
                 total: page.meta?.total,
                 hasMore: page.next != nil
@@ -51,7 +51,7 @@ struct AppleMusicSongService: SongServiceProtocol {
     }
 
     private func checkAccess(for provider: MusicProvider) throws {
-        guard provider == .appleMusic else {
+        guard provider.usesAppleMusic else {
             throw SongError.unsupportedProvider(provider)
         }
         guard MusicAuthorization.currentStatus == .authorized else {

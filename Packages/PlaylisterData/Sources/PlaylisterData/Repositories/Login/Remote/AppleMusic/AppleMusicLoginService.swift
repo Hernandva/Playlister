@@ -9,7 +9,7 @@ struct AppleMusicLoginService: AppleMusicLoginServiceProtocol {
     private let client = AppleMusicAPIClient()
 
     func login(with provider: MusicProvider) async throws {
-        guard provider == .appleMusic else {
+        guard provider.usesAppleMusic else {
             throw LoginError.unsupportedProvider(provider)
         }
         guard MusicAuthorization.currentStatus == .authorized else {

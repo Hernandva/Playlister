@@ -91,6 +91,13 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 | `Artist` | `ArtistRepositoryProtocol` / `ArtistRepository` | `Sources/PlaylisterData/Repositories/Artist/` |
 <!-- codegen:repository-registry:end -->
 
+### Free mode (`MusicProvider.free`)
+
+Free mode uses the Apple Music services: authorisation, login, playlists, songs and player. Every repository
+registers its Apple Music service under both providers with `MusicProvider.appleMusicServices(_:)`, and each Apple
+Music service accepts any provider where `usesAppleMusic` is `true` and answers with the provider of the request.
+Settings and the last playlist are still stored apart, under their own `free` keys.
+
 ### Authorization (no HTTP)
 
 `AuthorizationRepository` does not use `NetworkClient` or DAOs: it forwards

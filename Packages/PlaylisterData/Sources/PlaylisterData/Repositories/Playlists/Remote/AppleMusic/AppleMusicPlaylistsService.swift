@@ -18,7 +18,7 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
                 "me/library/playlists",
                 query: [URLQueryItem(name: "limit", value: "\(request.limit)")]
             )
-            return PlaylistsResponseDAO(provider: .appleMusic, items: Self.items(from: page))
+            return PlaylistsResponseDAO(provider: request.provider, items: Self.items(from: page))
         }
     }
 
@@ -27,7 +27,7 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
     func fetchRecommended(_ request: RecommendedPlaylistsRequestDAO) async throws -> PlaylistsResponseDAO {
         try checkAccess(for: request.provider)
         guard !request.playlistIDs.isEmpty else {
-            return PlaylistsResponseDAO(provider: .appleMusic, items: [])
+            return PlaylistsResponseDAO(provider: request.provider, items: [])
         }
         return try await mappingErrors {
             let page: AppleMusicPageDAO<AppleMusicPlaylistAttributesDAO>
@@ -38,10 +38,13 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
                 )
             } catch let error as MusicDataRequest.Error where error.status == 404 {
                 // None of the ids is in the catalogue.
-                return PlaylistsResponseDAO(provider: .appleMusic, items: [])
+                return PlaylistsResponseDAO(provider: request.provider, items: [])
             }
             let itemsByID = [String: PlaylistsItemDAO](Self.items(from: page).map { ($0.id, $0) }) { first, _ in first }
-            return PlaylistsResponseDAO(provider: .appleMusic, items: request.playlistIDs.compactMap { itemsByID[$0] })
+            return PlaylistsResponseDAO(
+                provider: request.provider,
+                items: request.playlistIDs.compactMap { itemsByID[$0] }
+            )
         }
     }
 
@@ -51,7 +54,7 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
         try checkAccess(for: request.provider)
         let term = request.term.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !term.isEmpty else {
-            return PlaylistsSearchResponseDAO(provider: .appleMusic, items: [], hasMore: false)
+            return PlaylistsSearchResponseDAO(provider: request.provider, items: [], hasMore: false)
         }
         return try await mappingErrors {
             let response: AppleMusicPlaylistsSearchDAO = try await client.get(
@@ -66,7 +69,7 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
             )
             let page = response.results.playlists
             return PlaylistsSearchResponseDAO(
-                provider: .appleMusic,
+                provider: request.provider,
                 items: page.map(Self.items(from:)) ?? [],
                 hasMore: page?.next != nil
             )
@@ -74,7 +77,7 @@ struct AppleMusicPlaylistsService: PlaylistsServiceProtocol {
     }
 
     private func checkAccess(for provider: MusicProvider) throws {
-        guard provider == .appleMusic else {
+        guard provider.usesAppleMusic else {
             throw PlaylistsError.unsupportedProvider(provider)
         }
         guard MusicAuthorization.currentStatus == .authorized else {

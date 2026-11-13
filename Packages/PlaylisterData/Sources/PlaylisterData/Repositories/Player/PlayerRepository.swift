@@ -22,7 +22,7 @@ public final class PlayerRepository: PlayerRepositoryProtocol {
     private let services: [MusicProvider: any PlayerServiceProtocol]
 
     public convenience init() {
-        self.init(services: [.appleMusic: AppleMusicPlayerService()])
+        self.init(services: MusicProvider.appleMusicServices(AppleMusicPlayerService()))
     }
 
     /// Lets tests inject fake players.

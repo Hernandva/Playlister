@@ -31,7 +31,7 @@ public final class PlaylistsRepository: PlaylistsRepositoryProtocol {
     private let services: [MusicProvider: any PlaylistsServiceProtocol]
 
     public convenience init() {
-        self.init(services: [.appleMusic: AppleMusicPlaylistsService()])
+        self.init(services: MusicProvider.appleMusicServices(AppleMusicPlaylistsService()))
     }
 
     /// Lets tests inject fake services.

@@ -6,7 +6,7 @@ protocol AppleMusicAuthorizationServiceProtocol: AuthorizationServiceProtocol {}
 /// Wraps MusicKit: shows the system's Apple Music prompt the first time and returns the stored decision afterwards.
 struct AppleMusicAuthorizationService: AppleMusicAuthorizationServiceProtocol {
     func requestAuthorization(for provider: MusicProvider) async throws -> AuthorizationStatus {
-        guard provider == .appleMusic else {
+        guard provider.usesAppleMusic else {
             throw AuthorizationError.unsupportedProvider(provider)
         }
         switch await MusicAuthorization.request() {

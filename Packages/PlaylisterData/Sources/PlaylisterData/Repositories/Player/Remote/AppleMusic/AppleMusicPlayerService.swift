@@ -31,7 +31,7 @@ struct AppleMusicPlayerService: PlayerServiceProtocol {
             }
             try await player.play()
         }
-        return PlayerResponseDAO(provider: .appleMusic, songID: request.songID, duration: song.duration)
+        return PlayerResponseDAO(provider: request.provider, songID: request.songID, duration: song.duration)
     }
 
     func pause() async {
@@ -65,7 +65,7 @@ struct AppleMusicPlayerService: PlayerServiceProtocol {
     }
 
     private func checkAccess(for provider: MusicProvider) throws {
-        guard provider == .appleMusic else {
+        guard provider.usesAppleMusic else {
             throw PlayerError.unsupportedProvider(provider)
         }
         guard MusicAuthorization.currentStatus == .authorized else {

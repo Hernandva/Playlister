@@ -81,11 +81,16 @@ final class HomeViewModel {
         }
     }
 
-    /// Called when "Continue without an account" is tapped. Free mode needs no authorisation
-    /// or login, so it opens its screen right away.
+    /// Called when "Continue without an account" is tapped. Free mode uses the Apple Music services,
+    /// so it needs Apple Music access but no login: once authorised it opens its screen right away.
+    /// Otherwise opens the Apple Music settings sheet, because that is the access the user has to allow.
     func didTapContinueWithoutAccount() {
         guard startingProvider == nil else { return }
-        coordinator?.openProvider(.free)
+        if viewData.authorization(for: .free) == .authorized {
+            coordinator?.openProvider(.free)
+        } else {
+            settingsSheetProvider = .appleMusic
+        }
     }
 
     /// Signs in with `provider`: opens its screen on success, shows the error sheet otherwise.
