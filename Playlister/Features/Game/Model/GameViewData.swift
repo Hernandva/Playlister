@@ -96,11 +96,9 @@ struct GameViewData: Equatable, Sendable {
     var playlist: Playlist
     /// Known before anything loads: it comes from ProviderStarter.
     var settings: Settings
-    /// Songs of the playlist in the order the game plays them: shuffled once when the game starts.
-    /// `nil` until they load.
+    /// Songs of the playlist in the order the game plays them: shuffled once when the game starts. The first one is
+    /// the current song; Next (or a song that cannot be played) sends it to the end. `nil` until they load.
     var queue: [Song]?
-    /// Position in `queue` of the song that is playing.
-    var currentIndex = 0
     /// Why the current song could not be played, already localised, or `nil` while it plays.
     var playbackError: String?
     /// The current song once it plays, or `nil` until then.

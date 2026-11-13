@@ -3,7 +3,8 @@ import SwiftUI
 
 /// «Partida · sonando»: playlist and mode on top, the spinning vinyl, the round progress and the
 /// Pause, Reveal and Next controls. The first shuffled song plays on load and stops when the view goes away.
-/// Pause turns into Play while the song is paused; Reveal and Next are not connected yet.
+/// Pause turns into Play while the song is paused, Next starts a new round with the next song; Reveal is not
+/// connected yet.
 struct GameView: View {
     /// Room kept under the controls for the revealed song card, so the vinyl does not move when it appears.
     private static let revealCardHeight: CGFloat = 196
@@ -86,8 +87,11 @@ struct GameView: View {
             .disabled(!viewModel.canTogglePause)
             DSIconButton(systemImage: "questionmark.circle.fill") {}
                 .localized("game.reveal")
-            DSIconButton(systemImage: "forward.end.fill") {}
-                .localized("game.next")
+            DSIconButton(systemImage: "forward.end.fill") {
+                Task { await viewModel.playNextSong() }
+            }
+            .localized("game.next")
+            .disabled(!viewModel.canPlayNextSong)
         }
     }
 }

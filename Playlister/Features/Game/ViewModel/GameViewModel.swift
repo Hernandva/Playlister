@@ -26,8 +26,9 @@ final class GameViewModel {
     private let fetchSongsUseCase: any FetchGameSongsUseCaseProtocol
     private let playerUseCase: any GamePlayerUseCaseProtocol
     private let playBackStatusUseCase: any GamePlayBackStatusUseCaseProtocol
-    /// `true` while a pause or a resume is on its way, so a second tap does not overlap it.
-    @ObservationIgnored private var isTogglingPause = false
+    /// `true` while a pause, a resume or a change of song is on its way, so a second tap does not overlap it and the
+    /// status readings do not undo it.
+    @ObservationIgnored private var isChangingPlayback = false
     /// Reads the player's time while a song plays.
     @ObservationIgnored private var progressTask: Task<Void, Never>?
 
@@ -74,10 +75,9 @@ final class GameViewModel {
         Self.formatted(seconds: Int(elapsed))
     }
 
-    /// The song that is playing: the first of the shuffled queue when the game starts.
+    /// The song that is playing: the first of the queue.
     var currentSong: GameViewData.Song? {
-        guard let queue = viewData.queue, queue.indices.contains(viewData.currentIndex) else { return nil }
-        return queue[viewData.currentIndex]
+        viewData.queue?.first
     }
 
     /// Length of the round: the clip length, or the length of the song when it plays whole.
@@ -116,7 +116,6 @@ final class GameViewModel {
                 return
             }
             viewData.queue = songs.shuffled()
-            viewData.currentIndex = 0
             state = .loaded
         } catch is CancellationError {
             state = .idle
@@ -133,11 +132,11 @@ final class GameViewModel {
         viewData.round != nil
     }
 
-    /// Pauses the song, or plays it again from where it was paused. The progress stops while it is paused.
+    /// Pauses the song, or plays it again from where it was paused.
     func togglePause() async {
-        guard canTogglePause, !isTogglingPause else { return }
-        isTogglingPause = true
-        defer { isTogglingPause = false }
+        guard canTogglePause, !isChangingPlayback else { return }
+        isChangingPlayback = true
+        defer { isChangingPlayback = false }
         if viewData.isPaused {
             await resume()
         } else {
@@ -145,12 +144,25 @@ final class GameViewModel {
         }
     }
 
+    /// `false` until the songs load.
+    var canPlayNextSong: Bool {
+        state == .loaded && viewData.queue?.isEmpty == false
+    }
+
+    /// Stops the song, sends it to the end of the queue and starts a new round with the next one.
+    func playNextSong() async {
+        guard canPlayNextSong, !isChangingPlayback else { return }
+        isChangingPlayback = true
+        defer { isChangingPlayback = false }
+        stopProgress()
+        await playerUseCase.stop(provider: provider)
+        moveCurrentSongToEnd()
+        await playCurrentSong()
+    }
+
     private func pause() async {
-        cancelProgress()
         viewData.isPaused = true
         await playerUseCase.pause(provider: provider)
-        // The bar shows where the song stopped, not the last reading of the timer.
-        viewData.playbackTime = await playBackStatusUseCase.execute(provider: provider).time
     }
 
     private func resume() async {
@@ -158,7 +170,9 @@ final class GameViewModel {
             try await playerUseCase.resume(provider: provider)
             viewData.isPaused = false
             viewData.playbackError = nil
-            startProgress()
+            if progressTask == nil {
+                startProgress()
+            }
         } catch is CancellationError {
             return
         } catch {
@@ -172,7 +186,8 @@ final class GameViewModel {
         await playerUseCase.stop(provider: provider)
     }
 
-    /// Plays the current song. When it cannot be played (missing or unavailable) it moves on to the next one, up to
+    /// Plays the current song. When it cannot be played (missing or unavailable) it goes to the end of the queue and
+    /// the next one plays, up to
     /// `maxSkippedSongs` in a row; errors of the account or the service stop and are shown, since every song would
     /// fail the same way.
     private func playCurrentSong() async {
@@ -192,7 +207,7 @@ final class GameViewModel {
                 return
             } catch GamePlaybackError.unavailable where skipped < Self.maxSkippedSongs {
                 skipped += 1
-                viewData.currentIndex += 1
+                moveCurrentSongToEnd()
             } catch {
                 viewData.playbackError = Self.message(for: error as? GamePlaybackError ?? .unavailable)
                 return
@@ -201,8 +216,17 @@ final class GameViewModel {
         viewData.playbackError = Self.message(for: .unavailable)
     }
 
-    /// Reads the player's time and status every `progressInterval` until `stopProgress()`. When the song stops
-    /// sounding on its own (a call, Control Center, the end of the song) the game pauses, so Play resumes it.
+    /// Sends the current song to the end of the queue, so the next one becomes the current song.
+    private func moveCurrentSongToEnd() {
+        guard var queue = viewData.queue, !queue.isEmpty else { return }
+        queue.append(queue.removeFirst())
+        viewData.queue = queue
+    }
+
+    /// Reads the player's time and status every `progressInterval` while the song is in the game, paused or not,
+    /// until `stopProgress()` (a new song or leaving the game). The game follows the player: it pauses when the song
+    /// stops sounding on its own (a call, Control Center, the end of the song) and plays again when the song sounds
+    /// again from outside the app.
     private func startProgress() {
         progressTask = Task { [weak self] in
             // Until the song is heard once, a reading that is not playing is the player still starting.
@@ -212,35 +236,32 @@ final class GameViewModel {
                 let reading = await playBackStatusUseCase.execute(provider: provider)
                 guard !Task.isCancelled else { return }
                 viewData.playbackTime = reading.time
-                if reading.isPlaying {
-                    hasPlayed = true
-                } else if hasPlayed {
-                    songDidStop()
-                    return
+                if !isChangingPlayback {
+                    followPlayer(isPlaying: reading.isPlaying, hasPlayed: hasPlayed)
                 }
+                hasPlayed = hasPlayed || reading.isPlaying
                 try? await Task.sleep(for: .seconds(Self.progressInterval))
             }
         }
     }
 
-    /// The song stopped without the user: the game shows it as paused and stops reading the player.
-    private func songDidStop() {
-        progressTask = nil
-        viewData.isPaused = true
+    /// Matches the game's pause to the player's status.
+    private func followPlayer(isPlaying: Bool, hasPlayed: Bool) {
+        if isPlaying, viewData.isPaused {
+            viewData.isPaused = false
+            viewData.playbackError = nil
+        } else if !isPlaying, hasPlayed, !viewData.isPaused {
+            viewData.isPaused = true
+        }
     }
 
-    /// Stops reading the player's time and empties the round, so the bar starts again at 0.
+    /// Stops reading the player and empties the round, so the next one starts at 0 and playing.
     private func stopProgress() {
-        cancelProgress()
+        progressTask?.cancel()
+        progressTask = nil
         viewData.round = nil
         viewData.playbackTime = 0
         viewData.isPaused = false
-    }
-
-    /// Stops reading the player's time and keeps where the bar is.
-    private func cancelProgress() {
-        progressTask?.cancel()
-        progressTask = nil
     }
 
     private static func message(for error: GamePlaybackError) -> String {
