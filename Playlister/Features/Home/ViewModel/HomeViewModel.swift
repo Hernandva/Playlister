@@ -16,14 +16,16 @@ final class HomeViewModel {
     enum Provider: Hashable, Identifiable, Sendable {
         case spotify
         case appleMusic
+        case free
 
         var id: Self { self }
 
-        /// Brand name of the service. Brand names are not translated.
+        /// Name of the service. Brand names are not translated; free mode is.
         var displayName: String {
             switch self {
             case .spotify: "Spotify"
             case .appleMusic: "Apple Music"
+            case .free: String(localized: "provider.free")
             }
         }
     }

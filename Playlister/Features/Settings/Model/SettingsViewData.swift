@@ -9,19 +9,22 @@ struct SettingsViewData: Equatable, Sendable {
     enum Provider: Equatable, Sendable {
         case spotify
         case appleMusic
+        case free
 
         init(_ provider: MusicProvider) {
             switch provider {
             case .spotify: self = .spotify
             case .appleMusic: self = .appleMusic
+            case .free: self = .free
             }
         }
 
-        /// Brand name of the service. Brand names are not translated.
+        /// Name of the service. Brand names are not translated; free mode is.
         var displayName: String {
             switch self {
             case .spotify: "Spotify"
             case .appleMusic: "Apple Music"
+            case .free: String(localized: "provider.free")
             }
         }
     }

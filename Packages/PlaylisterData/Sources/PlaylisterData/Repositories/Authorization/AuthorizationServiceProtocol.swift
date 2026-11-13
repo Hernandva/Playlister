@@ -4,6 +4,8 @@ import Foundation
 public enum MusicProvider: Hashable, Sendable, CaseIterable {
     case spotify
     case appleMusic
+    /// Free mode: plays without signing in to a paid music service.
+    case free
 }
 
 /// Decision of the user, or of the device, about access to a music service.

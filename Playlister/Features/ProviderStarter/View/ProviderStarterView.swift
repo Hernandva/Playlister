@@ -91,7 +91,8 @@ struct ProviderStarterView: View {
     private var badgeStyle: DSStatusBadge.Style {
         switch viewModel.provider {
         case .spotify: .spotify
-        case .appleMusic: .appleMusic
+        // Free mode has no brand colour: it uses the app's own tint, like Apple Music.
+        case .appleMusic, .free: .appleMusic
         }
     }
 

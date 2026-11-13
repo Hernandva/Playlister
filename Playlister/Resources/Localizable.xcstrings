@@ -1345,6 +1345,23 @@
         }
       }
     },
+    "provider.free" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free mode"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo gratuito"
+          }
+        }
+      }
+    },
     "providerStarter.changeProvider.hint" : {
       "extractionState" : "manual",
       "localizations" : {

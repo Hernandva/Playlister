@@ -42,6 +42,7 @@ private extension AuthorizationUseCase {
         switch musicProvider {
         case .spotify: .spotify
         case .appleMusic: .appleMusic
+        case .free: .free
         }
     }
 
@@ -49,6 +50,7 @@ private extension AuthorizationUseCase {
         switch provider {
         case .spotify: .spotify
         case .appleMusic: .appleMusic
+        case .free: .free
         }
     }
 

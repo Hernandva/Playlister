@@ -81,11 +81,12 @@ struct PlaylistSelectorViewData: Equatable, Sendable {
         self.providerName = Self.displayName(of: provider)
     }
 
-    /// Brand names are not translated.
+    /// Brand names are not translated; free mode is.
     private static func displayName(of provider: MusicProvider) -> String {
         switch provider {
         case .spotify: "Spotify"
         case .appleMusic: "Apple Music"
+        case .free: String(localized: "provider.free")
         }
     }
 }

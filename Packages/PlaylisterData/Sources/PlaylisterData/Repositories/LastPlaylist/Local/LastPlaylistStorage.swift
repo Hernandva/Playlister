@@ -43,6 +43,7 @@ struct LastPlaylistUserDefaultsStorage: LastPlaylistStorageProtocol {
         switch provider {
         case .spotify: keyPrefix + "spotify"
         case .appleMusic: keyPrefix + "appleMusic"
+        case .free: keyPrefix + "free"
         }
     }
 }

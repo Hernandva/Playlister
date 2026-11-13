@@ -33,6 +33,7 @@ private extension StartProviderUseCase {
         switch provider {
         case .spotify: .spotify
         case .appleMusic: .appleMusic
+        case .free: .free
         }
     }
 
