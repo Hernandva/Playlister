@@ -85,6 +85,7 @@ struct SettingsView: View {
                     .padding(.vertical, DSSpacing.space3)
                 }
             }
+            .disabled(viewModel.isPlaybackLocked)
             .animation(.snappy, value: viewModel.playback)
         }
     }

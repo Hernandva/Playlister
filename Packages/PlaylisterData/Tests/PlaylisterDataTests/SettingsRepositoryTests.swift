@@ -28,6 +28,15 @@ struct SettingsRepositoryTests {
         #expect(GameSettingsDAO(response) == GameSettingsDAO.defaults)
     }
 
+    @Test func returnsThirtySecondRandomClipsByDefaultInFreeMode() async throws {
+        let response = try await Self.makeRepository().fetch(FakeSettingsRequest(provider: .free))
+
+        #expect(GameSettingsDAO(response) == GameSettingsDAO.freeDefaults)
+        #expect(response.playbackMode == .clip)
+        #expect(response.clipSeconds == 30)
+        #expect(response.clipStart == .random)
+    }
+
     @Test func returnsTheSavedSettings() async throws {
         let repository = Self.makeRepository()
 

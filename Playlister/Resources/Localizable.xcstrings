@@ -2066,6 +2066,23 @@
         }
       }
     },
+    "settings.playback.footer.free %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In free mode, %lld seconds of each song will play, from a random point."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En el modo gratuito sonarán %lld segundos de cada canción, desde un punto al azar."
+          }
+        }
+      }
+    },
     "settings.playback.footer.fullSong" : {
       "extractionState" : "manual",
       "localizations" : {

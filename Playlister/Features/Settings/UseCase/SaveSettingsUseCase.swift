@@ -20,6 +20,7 @@ struct SaveSettingsUseCase: SaveSettingsUseCaseProtocol {
     }
 
     func execute(game: SettingsViewData.Game) async throws {
+        let game = game.enforcingPlayback(of: SettingsViewData.Provider(provider))
         try await repository.saveSettings(SavedSettings(game), for: provider)
     }
 }

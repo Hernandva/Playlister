@@ -28,7 +28,7 @@ struct SettingsUseCase: SettingsUseCaseProtocol {
 
     func execute() async throws -> SettingsViewData.Game {
         let response = try await repository.fetch(SettingsRequest(provider: provider))
-        return Self.game(from: response)
+        return Self.game(from: response).enforcingPlayback(of: SettingsViewData.Provider(provider))
     }
 }
 

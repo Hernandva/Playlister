@@ -27,6 +27,11 @@ struct SettingsViewData: Equatable, Sendable {
             case .free: String(localized: "provider.free")
             }
         }
+
+        /// `true` when the player cannot change the Playback section: free mode always plays a fixed clip.
+        var locksPlayback: Bool {
+            self == .free
+        }
     }
 
     /// What each round plays of a song.
@@ -51,6 +56,8 @@ struct SettingsViewData: Equatable, Sendable {
         /// Lengths a clip can have, in seconds, and the step between them.
         static let clipSecondsRange = 5...60
         static let clipSecondsStep = 5
+        /// Length of the clip in free mode, which always starts at a random point.
+        static let freeClipSeconds = 30
 
         var playback: Playback
         var clipSeconds: Int
@@ -59,6 +66,17 @@ struct SettingsViewData: Equatable, Sendable {
         var bingoLevel: DSBingoLevel
         /// Bingo categories turned off, per level. A level that is missing has every category on.
         var disabledCategories: [DSBingoLevel: Set<DSBingoCategory>]
+
+        /// The same settings with the playback of `provider`: free mode always plays
+        /// `freeClipSeconds` from a random point; the other services keep what the player chose.
+        func enforcingPlayback(of provider: Provider) -> Game {
+            guard provider.locksPlayback else { return self }
+            var game = self
+            game.playback = .clip
+            game.clipSeconds = Self.freeClipSeconds
+            game.clipStart = .random
+            return game
+        }
     }
 
     var provider: Provider

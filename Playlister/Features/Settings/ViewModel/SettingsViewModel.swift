@@ -34,20 +34,25 @@ final class SettingsViewModel {
 
     // MARK: Settings, bound to the controls. Each change is saved right away.
 
+    /// `true` in free mode: the Playback section is shown but cannot be changed.
+    var isPlaybackLocked: Bool {
+        viewData.provider.locksPlayback
+    }
+
     var playback: SettingsViewData.Playback {
         get { viewData.game?.playback ?? .clip }
-        set { update { $0.playback = newValue } }
+        set { updatePlayback { $0.playback = newValue } }
     }
 
     /// Length of a clip, as the slider needs it.
     var clipSeconds: Double {
         get { Double(viewData.game?.clipSeconds ?? SettingsViewData.Game.clipSecondsRange.lowerBound) }
-        set { update { $0.clipSeconds = Int(newValue.rounded()) } }
+        set { updatePlayback { $0.clipSeconds = Int(newValue.rounded()) } }
     }
 
     var clipStart: SettingsViewData.ClipStart {
         get { viewData.game?.clipStart ?? .random }
-        set { update { $0.clipStart = newValue } }
+        set { updatePlayback { $0.clipStart = newValue } }
     }
 
     var gameMode: SettingsViewData.GameMode {
@@ -98,6 +103,9 @@ final class SettingsViewModel {
     /// What each round will play, under the Playback section.
     var playbackFooter: String {
         let seconds = Int(clipSeconds)
+        if isPlaybackLocked {
+            return String(localized: "settings.playback.footer.free \(seconds)")
+        }
         switch (playback, clipStart) {
         case (.fullSong, _): return String(localized: "settings.playback.footer.fullSong")
         case (.clip, .beginning): return String(localized: "settings.playback.footer.clip.beginning \(seconds)")
@@ -136,6 +144,12 @@ final class SettingsViewModel {
 private extension SettingsViewModel {
     var activeCategoryCount: Int {
         DSBingoCategory.allCases.filter(isCategoryOn).count
+    }
+
+    /// Applies a change of the Playback section, unless free mode locks it.
+    func updatePlayback(_ change: (inout SettingsViewData.Game) -> Void) {
+        guard !isPlaybackLocked else { return }
+        update(change)
     }
 
     /// Applies `change` to the loaded settings and saves them when they changed.

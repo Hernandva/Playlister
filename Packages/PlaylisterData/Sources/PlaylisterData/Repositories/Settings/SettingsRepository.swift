@@ -3,7 +3,7 @@ import Foundation
 /// Public API of the Settings repository. Features depend on this protocol, never on the concrete class.
 public protocol SettingsRepositoryProtocol: Sendable {
     /// Reads the game settings of the music service in `request` from the local storage,
-    /// or the default ones when none were saved for it.
+    /// or the default ones of that service when none were saved for it.
     func fetch(_ request: some SettingsRequestProtocol) async throws -> any SettingsResponseProtocol
 
     /// Stores `settings` as the game settings of `provider`, replacing the previous ones.
@@ -25,7 +25,7 @@ public final class SettingsRepository: SettingsRepositoryProtocol {
     }
 
     public func fetch(_ request: some SettingsRequestProtocol) async throws -> any SettingsResponseProtocol {
-        storage.settings(for: request.provider) ?? GameSettingsDAO.defaults
+        storage.settings(for: request.provider) ?? GameSettingsDAO.defaults(for: request.provider)
     }
 
     public func saveSettings(_ settings: some GameSettingsProtocol, for provider: MusicProvider) async throws {

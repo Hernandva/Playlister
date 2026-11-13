@@ -12,6 +12,25 @@ struct GameSettingsDAO: Codable, Sendable, Equatable, SettingsResponseProtocol {
         disabledBingoCategories: [:]
     )
 
+    /// Settings of a first launch in free mode. Free mode always plays 30-second clips from a random point,
+    /// so these stay fixed even if `defaults` changes.
+    static let freeDefaults = GameSettingsDAO(
+        playbackMode: .clip,
+        clipSeconds: 30,
+        clipStart: .random,
+        gameMode: .classic,
+        bingoLevel: .beginner,
+        disabledBingoCategories: [:]
+    )
+
+    /// Settings of a first launch with `provider`.
+    static func defaults(for provider: MusicProvider) -> GameSettingsDAO {
+        switch provider {
+        case .spotify, .appleMusic: defaults
+        case .free: freeDefaults
+        }
+    }
+
     let playbackMode: SettingsPlaybackMode
     let clipSeconds: Int
     let clipStart: SettingsClipStart

@@ -126,7 +126,8 @@ Write failures are thrown as `LastPlaylistError.storageFailed`; unreadable data 
 `SettingsRequestProtocol` (the provider the user signed in with) and returns a `SettingsResponseProtocol`
 (a `GameSettingsProtocol`: playback mode, clip length and start, game mode, Bingo level and the Bingo categories
 turned off per level), or the defaults (30-second clips from a random point, classic mode, every category on) until
-something is saved for that provider. `saveSettings(_:for:)` replaces the settings of a provider; each provider has
+something is saved for that provider. `.free` has its own defaults (`GameSettingsDAO.freeDefaults`), fixed at
+30-second clips from a random point because free mode cannot change its playback. `saveSettings(_:for:)` replaces the settings of a provider; each provider has
 its own entry. The internal `SettingsStorageProtocol` (in `Local/`) is backed by `SettingsUserDefaultsStorage`, which writes the
 `Codable` `GameSettingsDAO` as JSON under `playlisterData.settings.<provider>`. Do not change those keys or the raw
 values of the `Settings…` enums: saved settings would be lost. A missing field reads as its default, so adding a
