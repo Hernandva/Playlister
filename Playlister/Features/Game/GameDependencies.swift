@@ -9,6 +9,7 @@ final class GameDependencies {
     private let settings: GameViewData.Settings
     private let songRepository: any SongRepositoryProtocol
     private let playerRepository: any PlayerRepositoryProtocol
+    private let artistRepository: any ArtistRepositoryProtocol
 
     /// - Parameters:
     ///   - provider: The music service the user signed in with.
@@ -19,13 +20,15 @@ final class GameDependencies {
         playlist: GameViewData.Playlist,
         settings: GameViewData.Settings,
         songRepository: any SongRepositoryProtocol = SongRepository(),
-        playerRepository: any PlayerRepositoryProtocol = PlayerRepository()
+        playerRepository: any PlayerRepositoryProtocol = PlayerRepository(),
+        artistRepository: any ArtistRepositoryProtocol = ArtistRepository()
     ) {
         self.provider = provider
         self.playlist = playlist
         self.settings = settings
         self.songRepository = songRepository
         self.playerRepository = playerRepository
+        self.artistRepository = artistRepository
     }
 
     /// The music service the user signed in with.
@@ -49,6 +52,14 @@ final class GameDependencies {
 
     func resolvePlayerRepository() -> any PlayerRepositoryProtocol {
         playerRepository
+    }
+
+    func resolveArtistRepository() -> any ArtistRepositoryProtocol {
+        artistRepository
+    }
+
+    func resolveFetchArtistKindUseCase() -> any FetchArtistKindUseCaseProtocol {
+        FetchArtistKindUseCase(dependencies: self)
     }
 
     func resolveGamePlayerUseCase() -> any GamePlayerUseCaseProtocol {

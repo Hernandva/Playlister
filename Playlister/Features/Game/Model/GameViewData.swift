@@ -44,6 +44,12 @@ struct GameViewData: Equatable, Sendable {
         case orange
     }
 
+    /// Whether the current song's main artist is one person or a group, returned by `FetchArtistKindUseCase`.
+    enum ArtistKind: Equatable, Sendable {
+        case solo
+        case group
+    }
+
     /// The song that started playing, returned by `GamePlayerUseCase.play`.
     struct Round: Equatable, Sendable {
         /// Second of the song where playback started: 0, or a random point for a clip.
@@ -88,6 +94,8 @@ struct GameViewData: Equatable, Sendable {
         let releaseYear: Int?
         /// Large album artwork for the revealed vinyl, or `nil` when the song has none.
         let largeCover: URL?
+        /// International Standard Recording Code, for MusicBrainz; only catalogue songs have it.
+        let isrc: String?
 
         /// Identifier the player looks the song up with: the catalogue one when there is one, because a library id
         /// is only found when the song is in the device library.
@@ -116,4 +124,6 @@ struct GameViewData: Equatable, Sendable {
     /// Bingo category of the current song, drawn from `settings.bingoCategories` before it plays. `nil` in the
     /// classic mode.
     var bingoCategory: BingoCategory?
+    /// Kind of artist of the current song, from MusicBrainz. `nil` while it loads, or when it is not known.
+    var artistKind: ArtistKind?
 }

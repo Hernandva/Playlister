@@ -88,6 +88,7 @@ python3 scripts/codegen/new_repo.py --name <RepositoryName>
 | `Playlists` | `PlaylistsRepositoryProtocol` / `PlaylistsRepository` | `Sources/PlaylisterData/Repositories/Playlists/` |
 | `Song` | `SongRepositoryProtocol` / `SongRepository` | `Sources/PlaylisterData/Repositories/Song/` |
 | `Player` | `PlayerRepositoryProtocol` / `PlayerRepository` | `Sources/PlaylisterData/Repositories/Player/` |
+| `Artist` | `ArtistRepositoryProtocol` / `ArtistRepository` | `Sources/PlaylisterData/Repositories/Artist/` |
 <!-- codegen:repository-registry:end -->
 
 ### Authorization (no HTTP)
@@ -205,3 +206,24 @@ player.
 - Without MusicKit access it throws `PlayerError.notAuthorized`, without a subscription
   `PlayerError.subscriptionRequired`, an unknown song `PlayerError.songNotFound`, a cancelled call rethrows
   `CancellationError`, and any other failure throws `PlayerError.unavailable`.
+
+### Artist (MusicBrainz)
+
+`ArtistRepository` tells whether the main artist of a song is a solo artist or a group, from the
+[MusicBrainz web service](https://musicbrainz.org/doc/MusicBrainz_API) (`https://musicbrainz.org/ws/2`, no key).
+`fetchKind(_:)` takes an `ArtistRequestProtocol` (`artistName` and the song's `isrc`, when it has one) and returns an
+`ArtistResponseProtocol` with the `kind` (`ArtistKind`: `solo`, `group` or `unknown`) and the artist's name in
+MusicBrainz.
+
+- With an ISRC it calls `GET /isrc/{isrc}?inc=artist-credits` and reads the type of the first artist credited on the
+  first recording (the main artist of «A feat. B»). Without one, or when MusicBrainz does not know the ISRC, it
+  searches `GET /artist?query=artist:"…"&limit=1` and keeps the best match only with a score of
+  `ArtistRepository.minimumSearchScore` (90) or more.
+- MusicBrainz types map as `Person` → `solo`; `Group`, `Orchestra`, `Choir` → `group`; anything else, or no match,
+  → `unknown`, which is not an error.
+- The internal `MusicBrainzClient` (in `Remote/MusicBrainz/`) calls through `NetworkClient` with the `User-Agent`
+  MusicBrainz requires (`Playlister/<version> ( <contact> )`, set in `MusicBrainzClient.contact`), and
+  `MusicBrainzThrottle` spaces every call 1.1 s apart: MusicBrainz allows one request per second.
+- Answers are kept in memory for the life of the repository, by ISRC and by name (without case or accents).
+- Only catalogue songs have an ISRC (`PlaylistSongItemProtocol.isrc`); songs of library playlists are searched by name.
+- A failed search throws `ArtistError.unavailable`; a cancelled call rethrows `CancellationError`.

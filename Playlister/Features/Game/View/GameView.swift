@@ -105,7 +105,8 @@ struct GameView: View {
                         artist: song.artist,
                         year: viewModel.revealedYear,
                         details: song.album.map { [.init(String(localized: "game.reveal.album"), value: $0)] } ?? [],
-                        trailingDetail: revealedDuration
+                        trailingDetail: revealedDuration,
+                        artistKind: revealedArtistKind
                     )
                     // A worded button, unlike the round Next, so it does not read as skipping the song.
                     DSButton(trailingSystemImage: "chevron.right") {
@@ -117,6 +118,15 @@ struct GameView: View {
             }
         }
         .frame(maxWidth: .infinity, minHeight: Self.revealCardHeight, alignment: .top)
+    }
+
+    /// Icon after the artist: solo artist or group, once MusicBrainz answers.
+    private var revealedArtistKind: DSSongRevealCard.ArtistKind? {
+        switch viewModel.viewData.artistKind {
+        case .solo: .init(.solo, label: String(localized: "game.reveal.artist.solo"))
+        case .group: .init(.group, label: String(localized: "game.reveal.artist.group"))
+        case nil: nil
+        }
     }
 
     /// The song's length, under the year.

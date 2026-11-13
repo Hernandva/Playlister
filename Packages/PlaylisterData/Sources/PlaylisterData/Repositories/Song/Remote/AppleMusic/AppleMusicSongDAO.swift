@@ -13,6 +13,8 @@ struct AppleMusicSongAttributesDAO: Decodable, Sendable {
     let albumName: String?
     /// «yyyy-mm-dd», or just «yyyy» for some songs; missing for some library songs.
     let releaseDate: String?
+    /// International Standard Recording Code. Only catalogue songs have it.
+    let isrc: String?
 }
 
 /// `playParams` of a playable resource. Internal.
@@ -50,7 +52,8 @@ extension PlaylistSongItemDAO {
             catalogID: resource.type == Self.catalogSongType ? resource.id : attributes.playParams?.catalogId,
             albumName: attributes.albumName,
             releaseYear: attributes.releaseDate.flatMap { Int($0.prefix(Self.yearLength)) },
-            largeArtworkURL: attributes.artwork?.url(side: SongRepository.largeArtworkSide)
+            largeArtworkURL: attributes.artwork?.url(side: SongRepository.largeArtworkSide),
+            isrc: attributes.isrc
         )
     }
 }

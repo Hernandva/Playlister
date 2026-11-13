@@ -1,5 +1,11 @@
 import SwiftUI
 
+/// Kind of artist of a song, shown as an icon after the artist on `DSSongRevealCard`.
+public enum DSArtistKind: Sendable {
+    case solo
+    case group
+}
+
 /// Song information shown when the answer is revealed: title, artist, year and extra fields.
 ///
 /// - Classic mode: `surface-2` with the year in the animated glow.
@@ -7,6 +13,7 @@ import SwiftUI
 ///   Put the category answer first in `details` and highlight it («Década: Años 70»).
 /// - `trailingDetail` goes at the trailing edge of the details row, right-aligned under the year
 ///   (e.g. «Duración: 5:55»).
+/// - `artistKind` adds an icon after the artist: one person for a solo artist, three for a group.
 /// - Insert it with `.transition(DSSongRevealCard.revealTransition)`: it rises 24 pt while fading in.
 ///
 /// Strings are passed already localised.
@@ -23,6 +30,24 @@ public struct DSSongRevealCard: View {
         }
     }
 
+    /// Whether the artist is a solo artist or a group, with its localised accessibility label («Grupo»).
+    public struct ArtistKind: Sendable {
+        public let kind: DSArtistKind
+        public let label: String
+
+        public init(_ kind: DSArtistKind, label: String) {
+            self.kind = kind
+            self.label = label
+        }
+
+        var systemImage: String {
+            switch kind {
+            case .solo: "person.fill"
+            case .group: "person.3.fill"
+            }
+        }
+    }
+
     /// Reveal animation of the card: it rises 24 pt with a fade.
     public static var revealTransition: AnyTransition {
         .offset(y: 24).combined(with: .opacity)
@@ -34,6 +59,7 @@ public struct DSSongRevealCard: View {
     private let details: [Detail]
     private let trailingDetail: Detail?
     private let category: DSBingoCategory?
+    private let artistKind: ArtistKind?
 
     public init(
         title: String,
@@ -41,7 +67,8 @@ public struct DSSongRevealCard: View {
         year: String,
         details: [Detail] = [],
         trailingDetail: Detail? = nil,
-        category: DSBingoCategory? = nil
+        category: DSBingoCategory? = nil,
+        artistKind: ArtistKind? = nil
     ) {
         self.title = title
         self.artist = artist
@@ -49,6 +76,7 @@ public struct DSSongRevealCard: View {
         self.details = details
         self.trailingDetail = trailingDetail
         self.category = category
+        self.artistKind = artistKind
     }
 
     public var body: some View {
@@ -74,9 +102,18 @@ public struct DSSongRevealCard: View {
                 Text(title)
                     .font(DSFont.title)
                     .foregroundStyle(ink)
-                Text(artist)
-                    .font(DSFont.body)
-                    .foregroundStyle(secondaryInk(0.75))
+                HStack(alignment: .firstTextBaseline, spacing: DSSpacing.space2) {
+                    Text(artist)
+                    if let artistKind {
+                        Image(systemName: artistKind.systemImage)
+                            .font(DSFont.footnote)
+                            .accessibilityLabel(artistKind.label)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                .font(DSFont.body)
+                .foregroundStyle(secondaryInk(0.75))
+                .animation(.easeOut(duration: 0.25), value: artistKind?.kind)
             }
             Spacer(minLength: 0)
             if category == nil {
@@ -138,7 +175,8 @@ public struct DSSongRevealCard: View {
             artist: "Queen",
             year: "1975",
             details: [.init("Álbum", value: "A Night at the Opera")],
-            trailingDetail: .init("Duración", value: "5:55")
+            trailingDetail: .init("Duración", value: "5:55"),
+            artistKind: .init(.group, label: "Grupo")
         )
         DSSongRevealCard(
             title: "Bohemian Rhapsody",
@@ -148,7 +186,8 @@ public struct DSSongRevealCard: View {
                 .init("Década", value: "Años 70", isHighlighted: true),
                 .init("Álbum", value: "A Night at the Opera")
             ],
-            category: .green
+            category: .green,
+            artistKind: .init(.solo, label: "Solista")
         )
     }
     .padding(DSSpacing.space4)

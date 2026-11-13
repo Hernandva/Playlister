@@ -31,11 +31,14 @@ final class GameViewModel {
     private let fetchSongsUseCase: any FetchGameSongsUseCaseProtocol
     private let playerUseCase: any GamePlayerUseCaseProtocol
     private let playBackStatusUseCase: any GamePlayBackStatusUseCaseProtocol
+    private let artistKindUseCase: any FetchArtistKindUseCaseProtocol
     /// `true` while a pause, a resume or a change of song is on its way, so a second tap does not overlap it and the
     /// status readings do not undo it.
     @ObservationIgnored private var isChangingPlayback = false
     /// Reads the player's time while a song plays.
     @ObservationIgnored private var progressTask: Task<Void, Never>?
+    /// Asks MusicBrainz for the kind of artist of the current song.
+    @ObservationIgnored private var artistKindTask: Task<Void, Never>?
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: GameDependencies) {
@@ -47,6 +50,7 @@ final class GameViewModel {
         self.fetchSongsUseCase = dependencies.resolveFetchGameSongsUseCase()
         self.playerUseCase = dependencies.resolveGamePlayerUseCase()
         self.playBackStatusUseCase = dependencies.resolveGamePlayBackStatusUseCase()
+        self.artistKindUseCase = dependencies.resolveFetchArtistKindUseCase()
     }
 
     /// Played share of the round, 0…1: of the clip, or of the whole song.
@@ -220,6 +224,7 @@ final class GameViewModel {
                     provider: provider
                 )
                 startProgress()
+                loadArtistKind(of: song)
                 return
             } catch is CancellationError {
                 return
@@ -232,6 +237,17 @@ final class GameViewModel {
             }
         }
         viewData.playbackError = Self.message(for: .unavailable)
+    }
+
+    /// Asks for the kind of artist of the song that just started, while it plays, for the revealed card. A failure
+    /// leaves it unknown: the card then shows no icon.
+    private func loadArtistKind(of song: GameViewData.Song) {
+        artistKindTask = Task { [weak self] in
+            guard let self else { return }
+            let kind = try? await artistKindUseCase.execute(song: song)
+            guard !Task.isCancelled, currentSong?.id == song.id else { return }
+            viewData.artistKind = kind
+        }
     }
 
     /// In the Bingo mode, picks the category of the new round at random among the ones turned on in Settings.
@@ -303,6 +319,9 @@ final class GameViewModel {
     private func stopProgress() {
         progressTask?.cancel()
         progressTask = nil
+        artistKindTask?.cancel()
+        artistKindTask = nil
+        viewData.artistKind = nil
         viewData.round = nil
         viewData.playbackTime = 0
         viewData.isPaused = false

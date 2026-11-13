@@ -49,6 +49,9 @@ public protocol PlaylistSongItemProtocol: Sendable {
     var releaseYear: Int? { get }
     /// The same artwork as `artworkURL`, large enough for a big view (`SongRepository.largeArtworkSide` pixels).
     var largeArtworkURL: URL? { get }
+    /// International Standard Recording Code of the song, when the service gives it: only catalogue songs have it,
+    /// not those of a library playlist.
+    var isrc: String? { get }
 }
 
 /// One page of the songs of a playlist, in their order.

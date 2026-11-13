@@ -426,6 +426,40 @@
         }
       }
     },
+    "game.reveal.artist.group" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Group"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grupo"
+          }
+        }
+      }
+    },
+    "game.reveal.artist.solo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo artist"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solista"
+          }
+        }
+      }
+    },
     "game.reveal.duration" : {
       "extractionState" : "manual",
       "localizations" : {

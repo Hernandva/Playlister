@@ -37,4 +37,5 @@ struct PlaylistSongItemDAO: Sendable, Equatable, PlaylistSongItemProtocol {
     var albumName: String?
     var releaseYear: Int?
     var largeArtworkURL: URL?
+    var isrc: String?
 }
