@@ -51,16 +51,12 @@ final class GameDependencies {
         playerRepository
     }
 
-    func resolvePlayGameSongUseCase() -> any PlayGameSongUseCaseProtocol {
-        PlayGameSongUseCase(dependencies: self)
+    func resolveGamePlayerUseCase() -> any GamePlayerUseCaseProtocol {
+        GamePlayerUseCase(dependencies: self)
     }
 
-    func resolveGamePlaybackTimeUseCase() -> any GamePlaybackTimeUseCaseProtocol {
-        GamePlaybackTimeUseCase(dependencies: self)
-    }
-
-    func resolveStopGameSongUseCase() -> any StopGameSongUseCaseProtocol {
-        StopGameSongUseCase(dependencies: self)
+    func resolveGamePlayBackStatusUseCase() -> any GamePlayBackStatusUseCaseProtocol {
+        GamePlayBackStatusUseCase(dependencies: self)
     }
 
     func resolveFetchGameSongsUseCase() -> any FetchGameSongsUseCaseProtocol {

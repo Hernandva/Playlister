@@ -5,6 +5,8 @@ import SwiftUI
 /// - `playing`: turns every 1.8 s. The centre wears the primary gradient and 7 white equalizer bars
 ///   that do not turn with the disc. Pass `levels` (0…1 per bar, e.g. from an `AVAudioEngine` power tap)
 ///   to bind the bars to the audio; without them the bars animate on their own.
+/// - `paused`: the playing vinyl, still. The disc stops at its angle and turns on from it when it plays again,
+///   and the equalizer bars settle low.
 /// - `revealed`: turns every 6 s and the album cover pops in (scale 0.6 → 1).
 /// - Bingo: with a `category`, grooves, ring and glow take its color, the centre is solid with `bg-night` bars,
 ///   and the category name appears under the disc.
@@ -12,6 +14,7 @@ import SwiftUI
 public struct DSVinyl: View {
     public enum Phase: Equatable, Sendable {
         case playing
+        case paused
         case revealed(cover: URL?)
     }
 
@@ -38,7 +41,7 @@ public struct DSVinyl: View {
     public var body: some View {
         VStack(spacing: DSSpacing.space4) {
             ZStack {
-                DSVinylDisc(tint: category?.color, secondsPerTurn: phase == .playing ? 1.8 : 6)
+                DSVinylDisc(tint: category?.color, secondsPerTurn: isRevealed ? 6 : 1.8, isSpinning: phase != .paused)
                 center
             }
             .frame(width: diameter, height: diameter)
@@ -57,8 +60,8 @@ public struct DSVinyl: View {
 
     @ViewBuilder private var center: some View {
         switch phase {
-        case .playing:
-            DSEqualizerCenter(tint: category?.color, levels: levels)
+        case .playing, .paused:
+            DSEqualizerCenter(tint: category?.color, levels: levels, isPaused: phase == .paused)
                 .frame(width: diameter * 0.456, height: diameter * 0.456)
                 .transition(.opacity)
         case .revealed(let cover):
@@ -68,10 +71,19 @@ public struct DSVinyl: View {
         }
     }
 
+    private var isRevealed: Bool {
+        if case .revealed = phase { true } else { false }
+    }
+
     private var accessibilityText: String {
-        phase == .playing
-            ? Bundle.main.localizedString(forKey: "vinyl.playing", value: "Vinilo sonando", table: nil)
-            : Bundle.main.localizedString(forKey: "vinyl.revealed", value: "Vinilo revelado con portada", table: nil)
+        switch phase {
+        case .playing:
+            Bundle.main.localizedString(forKey: "vinyl.playing", value: "Vinilo sonando", table: nil)
+        case .paused:
+            Bundle.main.localizedString(forKey: "vinyl.paused", value: "Vinilo en pausa", table: nil)
+        case .revealed:
+            Bundle.main.localizedString(forKey: "vinyl.revealed", value: "Vinilo revelado con portada", table: nil)
+        }
     }
 }
 
@@ -82,14 +94,30 @@ private struct DSVinylDisc: View {
     private static let grooveLight = Color(red: 29 / 255, green: 23 / 255, blue: 36 / 255)
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// When the disc stopped, while it is still.
+    @State private var stoppedAt: Date?
+    /// Seconds the disc has been still, taken out of the clock so it turns on from where it stopped.
+    @State private var stillTime: TimeInterval = 0
     let tint: Color?
     let secondsPerTurn: TimeInterval
+    let isSpinning: Bool
 
     var body: some View {
         ZStack {
             grooves
-            TimelineView(.animation(paused: reduceMotion)) { context in
-                sheen.rotationEffect(.degrees(reduceMotion ? 0 : angle(at: context.date)))
+            TimelineView(.animation(paused: reduceMotion || !isSpinning)) { context in
+                sheen.rotationEffect(.degrees(reduceMotion ? 0 : angle(at: stoppedAt ?? context.date)))
+            }
+        }
+        .onAppear {
+            if !isSpinning { stoppedAt = .now }
+        }
+        .onChange(of: isSpinning) { _, spinning in
+            if spinning {
+                stillTime += stoppedAt.map { Date.now.timeIntervalSince($0) } ?? 0
+                stoppedAt = nil
+            } else {
+                stoppedAt = .now
             }
         }
         .clipShape(Circle())
@@ -135,12 +163,16 @@ private struct DSVinylDisc: View {
     }
 
     private func angle(at date: Date) -> Double {
-        date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: secondsPerTurn) / secondsPerTurn * 360
+        (date.timeIntervalSinceReferenceDate - stillTime)
+            .truncatingRemainder(dividingBy: secondsPerTurn) / secondsPerTurn * 360
     }
 }
 
 /// Centre of the playing vinyl: primary gradient (or the category color) with 7 equalizer bars.
+/// Paused, the bars settle at their lowest.
 private struct DSEqualizerCenter: View {
+    private static let restScale: CGFloat = 0.25
+
     /// Bar loops between 0.7 and 1.1 s, out of phase.
     private static let durations: [TimeInterval] = [0.7, 1.0, 0.8, 1.1, 0.75, 0.9, 0.85]
     private static let offsets: [TimeInterval] = [0, 0.4, 0.2, 0.6, 0.1, 0.3, 0.5]
@@ -148,6 +180,7 @@ private struct DSEqualizerCenter: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let tint: Color?
     let levels: [Double]?
+    let isPaused: Bool
 
     var body: some View {
         GeometryReader { proxy in
@@ -157,7 +190,7 @@ private struct DSEqualizerCenter: View {
                 } else {
                     DSPrimaryGradient().clipShape(Circle())
                 }
-                TimelineView(.animation(paused: reduceMotion || levels != nil)) { context in
+                TimelineView(.animation(paused: reduceMotion || levels != nil || isPaused)) { context in
                     HStack(spacing: 4) {
                         ForEach(Self.durations.indices, id: \.self) { index in
                             Capsule()
@@ -166,12 +199,16 @@ private struct DSEqualizerCenter: View {
                                 .scaleEffect(x: 1, y: scale(of: index, at: context.date), anchor: .bottom)
                         }
                     }
+                    .animation(.easeOut(duration: 0.3), value: isPaused)
                 }
             }
         }
     }
 
     private func scale(of index: Int, at date: Date) -> CGFloat {
+        if isPaused {
+            return Self.restScale
+        }
         if let levels, levels.indices.contains(index) {
             return 0.25 + 0.75 * min(max(levels[index], 0), 1)
         }
@@ -200,10 +237,14 @@ private struct DSVinylLabel: View {
 
 #Preview {
     @Previewable @State var revealed = false
+    @Previewable @State var paused = false
     VStack(spacing: DSSpacing.space8) {
-        DSVinyl(phase: revealed ? .revealed(cover: nil) : .playing)
-        DSVinyl(phase: .playing, category: .green, diameter: 180)
-        DSButton(revealed ? "Siguiente" : "Revelar", style: .secondary) { revealed.toggle() }
+        DSVinyl(phase: revealed ? .revealed(cover: nil) : (paused ? .paused : .playing))
+        DSVinyl(phase: paused ? .paused : .playing, category: .green, diameter: 180)
+        HStack(spacing: DSSpacing.space3) {
+            DSButton(paused ? "Reproducir" : "Pausa", style: .secondary) { paused.toggle() }
+            DSButton(revealed ? "Siguiente" : "Revelar", style: .secondary) { revealed.toggle() }
+        }
     }
     .padding(DSSpacing.space6)
     .background(DSColor.background)
