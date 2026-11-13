@@ -11,6 +11,7 @@ final class ProviderStarterCoordinator: Coordinator {
         case settings
         /// Recommended and own playlists, to choose the one to play.
         case playlistSelector
+        case game
         // @codegen:routes
     }
 
@@ -52,6 +53,8 @@ final class ProviderStarterCoordinator: Coordinator {
                     covers: playlist.covers
                 ))
             }.start())
+        case .game:
+            return AnyView(GameCoordinator().start())
         // @codegen:destinations
         }
     }
