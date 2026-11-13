@@ -30,18 +30,19 @@ struct GameViewData: Equatable, Sendable {
         case bingo
     }
 
-    enum BingoLevel: Equatable, Sendable {
-        case beginner
-        case expert
-    }
-
-    /// The Bingo categories, by their color.
-    enum BingoCategory: Hashable, Sendable {
+    /// The five Bingo categories, by their color.
+    enum BingoColor: Hashable, Sendable {
         case pink
         case yellow
         case cyan
         case green
         case orange
+    }
+
+    /// A Bingo category of the level in the settings: its color and its name in that level, already localised.
+    struct BingoCategory: Equatable, Sendable {
+        let color: BingoColor
+        let title: String
     }
 
     /// Whether the current song's main artist is one person or a group, returned by `FetchArtistKindUseCase`.
@@ -73,9 +74,10 @@ struct GameViewData: Equatable, Sendable {
         var clipSeconds: Int
         var clipStart: ClipStart
         var mode: Mode
-        var bingoLevel: BingoLevel
-        /// Bingo categories turned on for `bingoLevel`.
-        var bingoCategories: Set<BingoCategory>
+        /// Name of the Bingo level, already localised («Principiante»).
+        var bingoLevelTitle: String
+        /// The five categories of the Bingo level, from the Settings repository.
+        var bingoCategories: [BingoCategory]
     }
 
     /// A song of the playlist, returned by `FetchGameSongsUseCase`.

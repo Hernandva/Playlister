@@ -1,7 +1,7 @@
 import PlaylisterUI
 import SwiftUI
 
-/// Settings: what each round plays, the game mode, the Bingo categories and the account.
+/// Settings: what each round plays, the game mode, the Bingo level with its categories and the account.
 /// Every change is saved as soon as it is made.
 struct SettingsView: View {
     /// Keeps the column readable on iPad.
@@ -131,20 +131,19 @@ struct SettingsView: View {
     // MARK: Bingo
 
     private var bingoSection: some View {
-        section(header: "settings.bingo.header", footer: viewModel.bingoFooter) {
+        section(header: "settings.bingo.header", footer: String(localized: "settings.bingo.footer")) {
             DSListGroup {
-                segmented(selection: $viewModel.bingoLevel, segments: [
-                    .init(.beginner, title: String(localized: "settings.bingo.level.beginner")),
-                    .init(.expert, title: String(localized: "settings.bingo.level.expert"))
-                ])
-                ForEach(DSBingoCategory.allCases) { category in
-                    DSBingoCategoryRow(category: category, level: viewModel.bingoLevel, isOn: Binding(
-                        get: { viewModel.isCategoryOn(category) },
-                        set: { viewModel.setCategory(category, isOn: $0) }
-                    ))
-                    .disabled(!viewModel.canTurnOff(category))
+                // One segment per level of the Settings repository, so a new level shows up here on its own.
+                segmented(
+                    selection: $viewModel.bingoLevel,
+                    segments: viewModel.bingoLevels.map { .init($0.id, title: $0.title) }
+                )
+                // The same five categories in every level; only their names change.
+                ForEach(viewModel.bingoCategories) { category in
+                    DSBingoCategoryRow(category: DSBingoCategory(category.color), title: category.title)
                 }
             }
+            .animation(.snappy, value: viewModel.bingoLevel)
         }
     }
 
@@ -190,6 +189,19 @@ struct SettingsView: View {
         DSSegmentedControl(selection: selection, segments: segments)
             .padding(.horizontal, DSSpacing.space4)
             .padding(.vertical, DSSpacing.space3)
+    }
+}
+
+private extension DSBingoCategory {
+    /// The design system's look of a category's color.
+    init(_ color: SettingsViewData.BingoColor) {
+        switch color {
+        case .pink: self = .pink
+        case .yellow: self = .yellow
+        case .cyan: self = .cyan
+        case .green: self = .green
+        case .orange: self = .orange
+        }
     }
 }
 

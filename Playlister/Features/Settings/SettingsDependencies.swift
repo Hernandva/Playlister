@@ -39,6 +39,10 @@ final class SettingsDependencies {
         SettingsUseCase(dependencies: self)
     }
 
+    func resolveBingoLevelsUseCase() -> any BingoLevelsUseCaseProtocol {
+        BingoLevelsUseCase(dependencies: self)
+    }
+
     func resolveSaveSettingsUseCase() -> any SaveSettingsUseCaseProtocol {
         SaveSettingsUseCase(dependencies: self)
     }

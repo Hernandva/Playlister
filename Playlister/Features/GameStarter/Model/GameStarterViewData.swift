@@ -51,18 +51,19 @@ struct GameStarterViewData: Equatable, Sendable {
         case bingo
     }
 
-    enum BingoLevel: Hashable, Sendable {
-        case beginner
-        case expert
-    }
-
-    /// The Bingo categories, by their color.
-    enum BingoCategory: Hashable, Sendable {
+    /// The five Bingo categories, by their color.
+    enum BingoColor: Hashable, Sendable {
         case pink
         case yellow
         case cyan
         case green
         case orange
+    }
+
+    /// A Bingo category of the level in the settings: its color and its name in that level, already localised.
+    struct BingoCategory: Hashable, Sendable {
+        let color: BingoColor
+        let title: String
     }
 
     /// Game settings of the music service, read when Play is tapped.
@@ -73,9 +74,10 @@ struct GameStarterViewData: Equatable, Sendable {
         var clipSeconds: Int
         var clipStart: ClipStart
         var mode: GameMode
-        var bingoLevel: BingoLevel
-        /// Bingo categories turned on for `bingoLevel`.
-        var bingoCategories: Set<BingoCategory>
+        /// Name of the Bingo level, already localised («Principiante»).
+        var bingoLevelTitle: String
+        /// The five categories of the Bingo level, from the Settings repository.
+        var bingoCategories: [BingoCategory]
     }
 
     /// Known before anything loads: it comes from Home.

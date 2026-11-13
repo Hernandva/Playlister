@@ -1,7 +1,7 @@
 import PlaylisterData
 import SwiftUI
 
-/// Entry point of the Settings feature: playback, game mode, Bingo categories and account.
+/// Entry point of the Settings feature: playback, game mode, Bingo level and categories, and account.
 /// Builds the view through `SettingsDependencies` and resolves the routes to the features opened from it.
 @MainActor
 final class SettingsCoordinator: Coordinator {

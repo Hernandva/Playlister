@@ -154,6 +154,23 @@ iPhone: the TV shows the round in 16:9 for the room, and the iPhone keeps the co
 - Strings live in `Resources/Localizable.xcstrings`. Keys follow `<featureName>.<element>`, e.g. `profile.title`.
 - Components that show text expose `.localized("key")` (see `Packages/PlaylisterUI/DESIGN_SYSTEM.md`).
 
+### Bingo levels and categories
+
+The Settings repository (`PlaylisterData`) owns which Bingo levels exist and, for each one, its five categories:
+`SettingsRepositoryProtocol.bingoLevels()` returns them in order, with the keys of their names. Features read them in
+a use case (`BingoLevelsUseCase` in Settings, `GameSettingsUseCase` in GameStarter), localise the names there and
+keep them in their ViewData. `PlaylisterUI` only draws: `DSBingoCategory` is the color, and components receive the
+names already localised.
+
+Every level has the same five categories with the same colors; a level only changes their names. To add one:
+
+1. `SettingsBingoLevel` (PlaylisterData): add the case. Its raw value is stored, so it never changes later.
+2. `BingoLevelsCatalog` (PlaylisterData, `Repositories/Settings/Local/`): add `BingoLevelDAO(level: .<level>)` where
+   it should show up.
+3. `Localizable.xcstrings`: add `bingo.level.<level>` and the five `bingo.category.<color>.<level>`.
+
+Settings shows its segment and its categories, and the game uses them, with no other change.
+
 ### Creating a feature
 
 Use the `playlister-new-feature` skill, or run:

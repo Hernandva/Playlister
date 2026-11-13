@@ -9,6 +9,9 @@ public protocol SettingsRepositoryProtocol: Sendable {
     /// Stores `settings` as the game settings of `provider`, replacing the previous ones.
     /// Throws `SettingsError.storageFailed` when they cannot be written.
     func saveSettings(_ settings: some GameSettingsProtocol, for provider: MusicProvider) async throws
+
+    /// The Bingo levels, in the order Settings shows them, each with its five categories.
+    func bingoLevels() async -> [any SettingsBingoLevelResponseProtocol]
 }
 
 /// Public entry point of the game settings. Keeps them in the local storage, one set per provider.
@@ -30,5 +33,9 @@ public final class SettingsRepository: SettingsRepositoryProtocol {
 
     public func saveSettings(_ settings: some GameSettingsProtocol, for provider: MusicProvider) async throws {
         try storage.saveSettings(GameSettingsDAO(settings), for: provider)
+    }
+
+    public func bingoLevels() async -> [any SettingsBingoLevelResponseProtocol] {
+        BingoLevelsCatalog.levels
     }
 }

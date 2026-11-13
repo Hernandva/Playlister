@@ -113,7 +113,7 @@ struct GameView: View {
 
     private var player: some View {
         VStack(spacing: DSSpacing.space6) {
-            DSVinyl(phase: viewModel.vinylPhase, category: viewModel.category, level: viewModel.bingoLevel)
+            DSVinyl(phase: viewModel.vinylPhase, category: viewModel.category, categoryTitle: viewModel.categoryTitle)
             DSProgressBar(
                 progress: viewModel.progress,
                 elapsed: viewModel.elapsedText,
@@ -199,8 +199,8 @@ struct GameView: View {
                 clipSeconds: 15,
                 clipStart: .random,
                 mode: .classic,
-                bingoLevel: .beginner,
-                bingoCategories: [.pink, .yellow, .cyan, .green, .orange]
+                bingoLevelTitle: "Principiante",
+                bingoCategories: []
             )
         ).start()
     }

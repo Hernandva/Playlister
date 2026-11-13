@@ -15,11 +15,7 @@ extension GameViewModel {
             }
             return "\(String(localized: "settings.mode.classic")) · \(playback)"
         case .bingo:
-            let level = switch settings.bingoLevel {
-            case .beginner: String(localized: "settings.bingo.level.beginner")
-            case .expert: String(localized: "settings.bingo.level.expert")
-            }
-            return "\(String(localized: "settings.mode.bingo")) · \(level)"
+            return "\(String(localized: "settings.mode.bingo")) · \(settings.bingoLevelTitle)"
         }
     }
 

@@ -55,7 +55,7 @@ struct GameExternalDisplayView: View {
 
     private var player: some View {
         VStack(spacing: DSSpacing.space6) {
-            DSVinyl(phase: viewModel.vinylPhase, category: viewModel.category, level: viewModel.bingoLevel)
+            DSVinyl(phase: viewModel.vinylPhase, category: viewModel.category, categoryTitle: viewModel.categoryTitle)
             DSProgressBar(
                 progress: viewModel.progress,
                 elapsed: viewModel.elapsedText,
@@ -81,9 +81,9 @@ struct GameExternalDisplayView: View {
                 .transition(DSSongRevealCard.revealTransition)
             } else {
                 VStack(alignment: .leading, spacing: DSSpacing.space3) {
-                    if let category = viewModel.category {
+                    if let category = viewModel.category, let title = viewModel.categoryTitle {
                         // Bingo: the round's category is what the room has to answer.
-                        DSText(category.title(for: viewModel.bingoLevel), style: .largeTitle, color: category.color)
+                        DSText(title, style: .largeTitle, color: category.color)
                     } else {
                         DSText(style: .largeTitle).localized("game.externalDisplay.question")
                     }

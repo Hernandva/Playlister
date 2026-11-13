@@ -256,7 +256,7 @@ final class GameViewModel {
         }
     }
 
-    /// In the Bingo mode, picks the category of the new round at random among the ones turned on in Settings.
+    /// In the Bingo mode, picks the category of the new round at random among the level's five.
     private func drawBingoCategory() {
         let settings = viewData.settings
         guard settings.mode == .bingo else {

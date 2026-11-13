@@ -4,13 +4,14 @@ import SwiftUI
 /// The game's state in the design system's terms, shared by the iPhone's `GameView` and the TV's
 /// `GameExternalDisplayView` so both show the same round.
 extension GameViewModel {
-    /// Bingo category of the round. `nil` in the classic mode.
+    /// Look of the round's Bingo category. `nil` in the classic mode.
     var category: DSBingoCategory? {
-        viewData.bingoCategory.map(DSBingoCategory.init)
+        viewData.bingoCategory.map { DSBingoCategory($0.color) }
     }
 
-    var bingoLevel: DSBingoLevel {
-        viewData.settings.bingoLevel == .expert ? .expert : .beginner
+    /// Name of the round's Bingo category in the level, from the Settings repository. `nil` in the classic mode.
+    var categoryTitle: String? {
+        viewData.bingoCategory?.title
     }
 
     /// Style of the mode chip at the top: the round's category in the Bingo mode.
@@ -47,8 +48,8 @@ extension GameViewModel {
 }
 
 private extension DSBingoCategory {
-    init(_ category: GameViewData.BingoCategory) {
-        switch category {
+    init(_ color: GameViewData.BingoColor) {
+        switch color {
         case .pink: self = .pink
         case .yellow: self = .yellow
         case .cyan: self = .cyan

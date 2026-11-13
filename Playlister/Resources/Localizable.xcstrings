@@ -1794,19 +1794,19 @@
         }
       }
     },
-    "settings.bingo.footer %lld %lld" : {
+    "settings.bingo.footer" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld of %2$lld categories on. Cards only use the categories that are on."
+            "value" : "Cards always use these five categories. The level only changes what each color asks."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$lld de %2$lld categorías activas. Los cartones solo usarán las categorías activadas."
+            "value" : "Los cartones usan siempre estas cinco categorías. El nivel solo cambia lo que pide cada color."
           }
         }
       }
@@ -1828,7 +1828,7 @@
         }
       }
     },
-    "settings.bingo.level.beginner" : {
+    "bingo.level.beginner" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1845,7 +1845,7 @@
         }
       }
     },
-    "settings.bingo.level.expert" : {
+    "bingo.level.expert" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {

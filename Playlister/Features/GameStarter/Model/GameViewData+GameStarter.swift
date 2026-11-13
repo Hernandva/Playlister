@@ -9,13 +9,15 @@ extension GameViewData.Settings {
             clipSeconds: settings.clipSeconds,
             clipStart: settings.clipStart == .beginning ? .beginning : .random,
             mode: settings.mode == .bingo ? .bingo : .classic,
-            bingoLevel: settings.bingoLevel == .expert ? .expert : .beginner,
-            bingoCategories: Set(settings.bingoCategories.map(Self.category))
+            bingoLevelTitle: settings.bingoLevelTitle,
+            bingoCategories: settings.bingoCategories.map { category in
+                GameViewData.BingoCategory(color: Self.color(category.color), title: category.title)
+            }
         )
     }
 
-    private static func category(_ category: GameStarterViewData.BingoCategory) -> GameViewData.BingoCategory {
-        switch category {
+    private static func color(_ color: GameStarterViewData.BingoColor) -> GameViewData.BingoColor {
+        switch color {
         case .pink: .pink
         case .yellow: .yellow
         case .cyan: .cyan

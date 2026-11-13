@@ -7,7 +7,7 @@ import SwiftUI
 final class GameStarterCoordinator: Coordinator {
     /// One case per feature that can be opened from GameStarter.
     enum Route: Hashable {
-        /// Playback, game mode, Bingo categories and account.
+        /// Playback, game mode, Bingo level and categories, and account.
         case settings
         /// Recommended and own playlists, to choose the one to play.
         case playlistSelector

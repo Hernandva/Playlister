@@ -9,8 +9,9 @@ import SwiftUI
 ///   and the equalizer bars settle low.
 /// - `revealed`: turns every 6 s and the album cover pops in (scale 0.6 → 1). With `isPaused` (e.g. the song
 ///   ended) the disc stops at its angle, and turns on from it when it is `false` again.
-/// - Bingo: with a `category`, grooves, ring and glow take its color, the centre is solid with `bg-night` bars,
-///   and «CATEGORÍA» with the category name pops in under the disc, and stays there once it is revealed.
+/// - Bingo: with a `category`, grooves, ring and glow take its color and the centre is solid with `bg-night` bars.
+///   With a `categoryTitle` too (already localised), «CATEGORÍA» with that name pops in under the disc, and stays
+///   there once it is revealed.
 /// - With Reduce Motion the disc does not turn and the bars are static.
 public struct DSVinyl: View {
     public enum Phase: Equatable, Sendable {
@@ -21,20 +22,20 @@ public struct DSVinyl: View {
 
     private let phase: Phase
     private let category: DSBingoCategory?
-    private let level: DSBingoLevel
+    private let categoryTitle: String?
     private let levels: [Double]?
     private let diameter: CGFloat
 
     public init(
         phase: Phase,
         category: DSBingoCategory? = nil,
-        level: DSBingoLevel = .beginner,
+        categoryTitle: String? = nil,
         levels: [Double]? = nil,
         diameter: CGFloat = 250
     ) {
         self.phase = phase
         self.category = category
-        self.level = level
+        self.categoryTitle = categoryTitle
         self.levels = levels
         self.diameter = diameter
     }
@@ -49,8 +50,8 @@ public struct DSVinyl: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(accessibilityText)
             .accessibilityAddTraits(.isImage)
-            if let category {
-                categoryLabel(category)
+            if let category, let categoryTitle {
+                categoryLabel(category, title: categoryTitle)
                     .id(category)
                     .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
@@ -60,13 +61,13 @@ public struct DSVinyl: View {
     }
 
     /// «CATEGORÍA» over the category name in its color.
-    private func categoryLabel(_ category: DSBingoCategory) -> some View {
+    private func categoryLabel(_ category: DSBingoCategory, title: String) -> some View {
         VStack(spacing: DSSpacing.space1) {
             Text(Bundle.main.localizedString(forKey: "vinyl.category", value: "Categoría", table: nil).uppercased())
                 .font(DSFont.caption)
                 .tracking(0.72)
                 .foregroundStyle(DSColor.textSecondary)
-            Text(category.title(for: level))
+            Text(title)
                 .font(DSTypeScale.title2.weight(.heavy))
                 .foregroundStyle(category.color)
         }
@@ -274,7 +275,7 @@ private struct DSVinylLabel: View {
     @Previewable @State var paused = false
     VStack(spacing: DSSpacing.space8) {
         DSVinyl(phase: revealed ? .revealed(cover: nil, isPaused: paused) : (paused ? .paused : .playing))
-        DSVinyl(phase: paused ? .paused : .playing, category: .green, diameter: 180)
+        DSVinyl(phase: paused ? .paused : .playing, category: .green, categoryTitle: "Década", diameter: 180)
         HStack(spacing: DSSpacing.space3) {
             DSButton(paused ? "Reproducir" : "Pausa", style: .secondary) { paused.toggle() }
             DSButton(revealed ? "Siguiente" : "Revelar", style: .secondary) { revealed.toggle() }

@@ -1,6 +1,5 @@
 import Foundation
 import Observation
-import PlaylisterUI
 
 @MainActor
 @Observable
@@ -19,6 +18,7 @@ final class SettingsViewModel {
     private(set) var saveErrorMessage: String?
 
     private let settingsUseCase: any SettingsUseCaseProtocol
+    private let bingoLevelsUseCase: any BingoLevelsUseCaseProtocol
     private let saveSettingsUseCase: any SaveSettingsUseCaseProtocol
     private let signOut: @MainActor () -> Void
     /// The last save, so each one waits for the previous and the newest settings are written last.
@@ -28,6 +28,7 @@ final class SettingsViewModel {
     init(dependencies: SettingsDependencies) {
         self.viewData = SettingsViewData(provider: SettingsViewData.Provider(dependencies.resolveProvider()))
         self.settingsUseCase = dependencies.resolveSettingsUseCase()
+        self.bingoLevelsUseCase = dependencies.resolveBingoLevelsUseCase()
         self.saveSettingsUseCase = dependencies.resolveSaveSettingsUseCase()
         self.signOut = dependencies.resolveSignOut()
     }
@@ -55,33 +56,20 @@ final class SettingsViewModel {
         set { update { $0.mode = newValue } }
     }
 
-    var bingoLevel: DSBingoLevel {
-        get { viewData.game?.bingoLevel ?? .beginner }
+    /// Identifier of the selected Bingo level, as the segmented control needs it.
+    var bingoLevel: String {
+        get { viewData.game?.bingoLevel ?? "" }
         set { update { $0.bingoLevel = newValue } }
     }
 
-    func isCategoryOn(_ category: DSBingoCategory) -> Bool {
-        !(viewData.game?.disabledCategories[bingoLevel]?.contains(category) ?? false)
+    /// The Bingo levels from the repository, for the level selector.
+    var bingoLevels: [SettingsViewData.BingoLevel] {
+        viewData.bingoLevels
     }
 
-    /// Turns `category` on or off for the current level. The last category that is on cannot be turned off.
-    func setCategory(_ category: DSBingoCategory, isOn: Bool) {
-        guard isOn || canTurnOff(category) else { return }
-        let level = bingoLevel
-        update { game in
-            var disabled = game.disabledCategories[level, default: []]
-            if isOn {
-                disabled.remove(category)
-            } else {
-                disabled.insert(category)
-            }
-            game.disabledCategories[level] = disabled.isEmpty ? nil : disabled
-        }
-    }
-
-    /// `false` for the only category that is on: cards need at least one.
-    func canTurnOff(_ category: DSBingoCategory) -> Bool {
-        !isCategoryOn(category) || activeCategoryCount > 1
+    /// Categories of the selected level, with their names in it.
+    var bingoCategories: [SettingsViewData.BingoCategory] {
+        viewData.bingoLevels.first { $0.id == bingoLevel }?.categories ?? []
     }
 
     // MARK: Texts
@@ -105,11 +93,6 @@ final class SettingsViewModel {
         }
     }
 
-    /// How many categories are on, under the Bingo categories section.
-    var bingoFooter: String {
-        String(localized: "settings.bingo.footer \(activeCategoryCount) \(DSBingoCategory.allCases.count)")
-    }
-
     /// Name of the music service in the Account section.
     var providerName: String {
         viewData.provider.displayName
@@ -124,6 +107,7 @@ final class SettingsViewModel {
 
     func load() async {
         state = .loading
+        viewData.bingoLevels = await bingoLevelsUseCase.execute()
         do {
             viewData.game = try await settingsUseCase.execute()
             state = .loaded
@@ -134,10 +118,6 @@ final class SettingsViewModel {
 }
 
 private extension SettingsViewModel {
-    var activeCategoryCount: Int {
-        DSBingoCategory.allCases.filter(isCategoryOn).count
-    }
-
     /// Applies `change` to the loaded settings and saves them when they changed.
     func update(_ change: (inout SettingsViewData.Game) -> Void) {
         guard var game = viewData.game else { return }

@@ -1,6 +1,5 @@
 import Foundation
 import PlaylisterData
-import PlaylisterUI
 
 /// Display-ready data of Settings. The view model owns it as a variable and adds each use case result
 /// to its own field, so a new result never erases the rest of the data.
@@ -53,12 +52,38 @@ struct SettingsViewData: Equatable, Sendable {
         var clipSeconds: Int
         var clipStart: ClipStart
         var mode: GameMode
-        var bingoLevel: DSBingoLevel
-        /// Bingo categories turned off, per level. A level that is missing has every category on.
-        var disabledCategories: [DSBingoLevel: Set<DSBingoCategory>]
+        /// Identifier of the Bingo level: the `id` of one of the `bingoLevels`.
+        var bingoLevel: String
+    }
+
+    /// The five Bingo categories, by their color.
+    enum BingoColor: Hashable, Sendable {
+        case pink
+        case yellow
+        case cyan
+        case green
+        case orange
+    }
+
+    /// A category of a Bingo level: its color and its name in that level, already localised.
+    struct BingoCategory: Equatable, Sendable, Identifiable {
+        let color: BingoColor
+        let title: String
+
+        var id: BingoColor { color }
+    }
+
+    /// A Bingo level with its five categories, returned by `BingoLevelsUseCase`.
+    struct BingoLevel: Equatable, Sendable, Identifiable {
+        /// Identifier stored in the settings.
+        let id: String
+        let title: String
+        let categories: [BingoCategory]
     }
 
     var provider: Provider
     /// Result of `SettingsUseCase`, or `nil` until it loads.
     var game: Game?
+    /// Result of `BingoLevelsUseCase`, in the order Settings shows them. Empty until it loads.
+    var bingoLevels: [BingoLevel] = []
 }

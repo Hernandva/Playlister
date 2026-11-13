@@ -1,6 +1,5 @@
 import Foundation
 import PlaylisterData
-import PlaylisterUI
 
 protocol SettingsUseCaseProtocol: Sendable {
     /// Returns only the game settings. The view model adds them to its `SettingsViewData`.
@@ -40,12 +39,7 @@ private extension SettingsUseCase {
             clipSeconds: clipSeconds(response.clipSeconds),
             clipStart: response.clipStart == .beginning ? .beginning : .random,
             mode: response.gameMode == .bingo ? .bingo : .classic,
-            bingoLevel: DSBingoLevel(response.bingoLevel),
-            disabledCategories: Dictionary(
-                uniqueKeysWithValues: response.disabledBingoCategories.map { level, categories in
-                    (DSBingoLevel(level), Set(categories.map(DSBingoCategory.init)))
-                }
-            )
+            bingoLevel: response.bingoLevel.rawValue
         )
     }
 
@@ -55,26 +49,5 @@ private extension SettingsUseCase {
         let step = SettingsViewData.Game.clipSecondsStep
         let stepped = (seconds + step / 2) / step * step
         return min(max(stepped, range.lowerBound), range.upperBound)
-    }
-}
-
-extension DSBingoLevel {
-    init(_ level: SettingsBingoLevel) {
-        switch level {
-        case .beginner: self = .beginner
-        case .expert: self = .expert
-        }
-    }
-}
-
-extension DSBingoCategory {
-    init(_ category: SettingsBingoCategory) {
-        switch category {
-        case .pink: self = .pink
-        case .yellow: self = .yellow
-        case .cyan: self = .cyan
-        case .green: self = .green
-        case .orange: self = .orange
-        }
     }
 }

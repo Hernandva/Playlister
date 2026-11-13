@@ -28,31 +28,40 @@ struct GameSettingsUseCase: GameSettingsUseCaseProtocol {
 
     func execute() async throws -> GameStarterViewData.GameSettings {
         let response = try await repository.fetch(GameSettingsRequest(provider: provider))
-        return Self.settings(from: response)
+        let levels = await repository.bingoLevels()
+        let level = levels.first { $0.level == response.bingoLevel } ?? levels.first
+        return Self.settings(from: response, level: level)
     }
 }
 
 private extension GameSettingsUseCase {
     typealias Settings = GameStarterViewData.GameSettings
+    typealias Category = GameStarterViewData.BingoCategory
 
-    /// Maps SettingsResponseProtocol into the data the view model adds to its ViewData.
-    static func settings(from response: any SettingsResponseProtocol) -> Settings {
-        let disabled = response.disabledBingoCategories[response.bingoLevel] ?? []
-        return Settings(
+    /// Maps SettingsResponseProtocol and the saved Bingo level of the repository into the data the view model adds
+    /// to its ViewData.
+    static func settings(
+        from response: any SettingsResponseProtocol,
+        level: (any SettingsBingoLevelResponseProtocol)?
+    ) -> Settings {
+        Settings(
             playback: response.playbackMode == .fullSong ? .fullSong : .clip,
             clipSeconds: response.clipSeconds,
             clipStart: response.clipStart == .beginning ? .beginning : .random,
             mode: response.gameMode == .bingo ? .bingo : .classic,
-            bingoLevel: response.bingoLevel == .expert ? .expert : .beginner,
-            bingoCategories: Set(
-                SettingsBingoCategory.allCases
-                    .filter { !disabled.contains($0) }
-                    .map(category)
-            )
+            bingoLevelTitle: level.map { localized($0.titleKey) } ?? "",
+            bingoCategories: level?.categories.map { category in
+                Category(color: color(category.category), title: localized(category.titleKey))
+            } ?? []
         )
     }
 
-    static func category(_ category: SettingsBingoCategory) -> GameStarterViewData.BingoCategory {
+    /// The repository gives the keys of the names; the app's strings hold them.
+    static func localized(_ key: String) -> String {
+        String(localized: String.LocalizationValue(key))
+    }
+
+    static func color(_ category: SettingsBingoCategory) -> GameStarterViewData.BingoColor {
         switch category {
         case .pink: .pink
         case .yellow: .yellow
