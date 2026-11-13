@@ -34,10 +34,17 @@ extension GameViewModel {
 
     /// Icon after the artist: solo artist or group, once MusicBrainz answers.
     var revealedArtistKind: DSSongRevealCard.ArtistKind? {
-        switch viewData.artistKind {
+        switch viewData.artist?.kind {
         case .solo: .init(.solo, label: String(localized: "game.reveal.artist.solo"))
         case .group: .init(.group, label: String(localized: "game.reveal.artist.group"))
         case nil: nil
+        }
+    }
+
+    /// Flags after the artist, with each country's name in the user's language for VoiceOver.
+    var revealedArtistCountries: [DSSongRevealCard.Country] {
+        (viewData.artist?.countryCodes ?? []).map { code in
+            .init(regionCode: code, label: Locale.current.localizedString(forRegionCode: code) ?? code)
         }
     }
 

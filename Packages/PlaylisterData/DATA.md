@@ -212,19 +212,27 @@ player.
   `PlayerError.subscriptionRequired`, an unknown song `PlayerError.songNotFound`, a cancelled call rethrows
   `CancellationError`, and any other failure throws `PlayerError.unavailable`.
 
-### Artist (MusicBrainz)
+### Artist (MusicBrainz and Wikidata)
 
-`ArtistRepository` tells whether the main artist of a song is a solo artist or a group, from the
-[MusicBrainz web service](https://musicbrainz.org/doc/MusicBrainz_API) (`https://musicbrainz.org/ws/2`, no key).
+`ArtistRepository` tells whether the main artist of a song is a solo artist or a group, and where it is from, from the
+[MusicBrainz web service](https://musicbrainz.org/doc/MusicBrainz_API) (`https://musicbrainz.org/ws/2`, no key) and,
+for a missing country, the [Wikidata Query Service](https://query.wikidata.org) (`https://query.wikidata.org`, no key).
 `fetchKind(_:)` takes an `ArtistRequestProtocol` (`artistName` and the song's `isrc`, when it has one) and returns an
-`ArtistResponseProtocol` with the `kind` (`ArtistKind`: `solo`, `group` or `unknown`) and the artist's name in
-MusicBrainz.
+`ArtistResponseProtocol` with the `kind` (`ArtistKind`: `solo`, `group` or `unknown`), the artist's name in
+MusicBrainz and its `countryCodes` (ISO 3166-1 alpha-2, upper-cased; empty when unknown).
 
 - With an ISRC it calls `GET /isrc/{isrc}?inc=artist-credits` and reads the type of the first artist credited on the
   first recording (the main artist of «A feat. B»). Without one, when MusicBrainz does not know the ISRC, or when
   the recording's artist has no kind (`unknown`), it searches `GET /artist?query=artist:"…"&limit=1` and keeps the
   best match only with a score of `ArtistRepository.minimumSearchScore` (90) or more. When that search finds no
   kind either (or fails), the recording's `unknown` answer is kept.
+- Countries: the `country` of the MusicBrainz artist that answered, in the same call. MusicBrainz often has only a
+  city as the artist's area, and some codes have no flag (`XW`, `XE`, gone countries such as `SU`), which count as
+  missing: then the internal `WikidataClient` (in `Remote/Wikidata/`) runs one SPARQL query, `GET /sparql`, for the
+  artist with that MusicBrainz identifier (P434) and the ISO codes (P297) of its country of citizenship (P27) or of
+  origin (P495). It may give several, sorted and without repeats (`PR`, `US`). The identifier must be a UUID to reach
+  the query. A failed Wikidata call never fails `fetchKind`: the answer comes without countries and is not cached,
+  so the next call asks again.
 - MusicBrainz types map as `Person` → `solo`; `Group`, `Orchestra`, `Choir` → `group`; anything else, or no match,
   → `unknown`, which is not an error.
 - The internal `MusicBrainzClient` (in `Remote/MusicBrainz/`) calls through `NetworkClient` with the `User-Agent`

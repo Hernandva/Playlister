@@ -30,6 +30,7 @@ public enum SettingsGameMode: String, Codable, Sendable, CaseIterable {
 /// and its entry in `BingoLevelsCatalog`; the raw values are what is stored, so existing ones never change.
 public enum SettingsBingoLevel: String, Codable, Sendable, CaseIterable {
     case beginner
+    case intermediate
     case expert
 }
 

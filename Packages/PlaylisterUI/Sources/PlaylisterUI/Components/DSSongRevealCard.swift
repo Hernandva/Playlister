@@ -14,6 +14,7 @@ public enum DSArtistKind: Sendable {
 /// - `trailingDetail` goes at the trailing edge of the details row, right-aligned under the year
 ///   (e.g. «Duración: 5:55»).
 /// - `artistKind` adds an icon after the artist: one person for a solo artist, three for a group.
+/// - `artistCountries` adds the flag of each of the artist's countries after it.
 /// - Long titles, artists and detail values wrap onto more lines instead of being cut: the card grows taller,
 ///   and the year keeps its size.
 /// - Insert it with `.transition(DSSongRevealCard.revealTransition)`: it rises 24 pt while fading in.
@@ -50,6 +51,25 @@ public struct DSSongRevealCard: View {
         }
     }
 
+    /// A country of the artist: its ISO 3166-1 alpha-2 code (`ES`), shown as its flag, and its localised name for
+    /// VoiceOver («España»).
+    public struct Country: Sendable, Hashable {
+        public let regionCode: String
+        public let label: String
+
+        public init(regionCode: String, label: String) {
+            self.regionCode = regionCode
+            self.label = label
+        }
+
+        /// The flag emoji: each letter of the code as its regional indicator symbol.
+        var flag: String {
+            let base: UInt32 = 0x1F1E6 - 0x41
+            let scalars = regionCode.uppercased().unicodeScalars.compactMap { Unicode.Scalar(base + $0.value) }
+            return String(String.UnicodeScalarView(scalars))
+        }
+    }
+
     /// Reveal animation of the card: it rises 24 pt with a fade.
     public static var revealTransition: AnyTransition {
         .offset(y: 24).combined(with: .opacity)
@@ -62,6 +82,7 @@ public struct DSSongRevealCard: View {
     private let trailingDetail: Detail?
     private let category: DSBingoCategory?
     private let artistKind: ArtistKind?
+    private let artistCountries: [Country]
 
     public init(
         title: String,
@@ -70,7 +91,8 @@ public struct DSSongRevealCard: View {
         details: [Detail] = [],
         trailingDetail: Detail? = nil,
         category: DSBingoCategory? = nil,
-        artistKind: ArtistKind? = nil
+        artistKind: ArtistKind? = nil,
+        artistCountries: [Country] = []
     ) {
         self.title = title
         self.artist = artist
@@ -79,6 +101,7 @@ public struct DSSongRevealCard: View {
         self.trailingDetail = trailingDetail
         self.category = category
         self.artistKind = artistKind
+        self.artistCountries = artistCountries
     }
 
     public var body: some View {
@@ -112,10 +135,17 @@ public struct DSSongRevealCard: View {
                             .accessibilityLabel(artistKind.label)
                             .transition(.scale.combined(with: .opacity))
                     }
+                    ForEach(artistCountries, id: \.self) { country in
+                        Text(country.flag)
+                            .font(DSFont.footnote)
+                            .accessibilityLabel(country.label)
+                            .transition(.scale.combined(with: .opacity))
+                    }
                 }
                 .font(DSFont.body)
                 .foregroundStyle(secondaryInk(0.75))
                 .animation(.easeOut(duration: 0.25), value: artistKind?.kind)
+                .animation(.easeOut(duration: 0.25), value: artistCountries)
             }
             .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
@@ -186,7 +216,8 @@ public struct DSSongRevealCard: View {
             year: "1975",
             details: [.init("Álbum", value: "A Night at the Opera")],
             trailingDetail: .init("Duración", value: "5:55"),
-            artistKind: .init(.group, label: "Grupo")
+            artistKind: .init(.group, label: "Grupo"),
+            artistCountries: [.init(regionCode: "GB", label: "Reino Unido")]
         )
         DSSongRevealCard(
             title: "Don't Stop Me Now (Remastered 2011, Live at the Hammersmith Odeon)",

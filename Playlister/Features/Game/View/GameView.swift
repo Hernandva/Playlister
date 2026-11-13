@@ -141,7 +141,8 @@ struct GameView: View {
                         year: viewModel.revealedYear,
                         details: viewModel.revealedDetails,
                         trailingDetail: viewModel.revealedDuration,
-                        artistKind: viewModel.revealedArtistKind
+                        artistKind: viewModel.revealedArtistKind,
+                        artistCountries: viewModel.revealedArtistCountries
                     )
                     // A worded button, unlike the round Next, so it does not read as skipping the song.
                     DSButton(trailingSystemImage: "chevron.right") {

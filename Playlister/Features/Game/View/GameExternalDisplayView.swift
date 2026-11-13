@@ -76,7 +76,8 @@ struct GameExternalDisplayView: View {
                     year: viewModel.revealedYear,
                     details: viewModel.revealedDetails,
                     trailingDetail: viewModel.revealedDuration,
-                    artistKind: viewModel.revealedArtistKind
+                    artistKind: viewModel.revealedArtistKind,
+                    artistCountries: viewModel.revealedArtistCountries
                 )
                 .transition(DSSongRevealCard.revealTransition)
             } else {

@@ -6,6 +6,7 @@ enum BingoLevelsCatalog {
     /// One entry per level. Adding a level is a new `SettingsBingoLevel` case here, plus its strings in the app.
     static let levels: [BingoLevelDAO] = [
         BingoLevelDAO(level: .beginner),
+        BingoLevelDAO(level: .intermediate),
         BingoLevelDAO(level: .expert)
     ]
 }

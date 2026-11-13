@@ -45,10 +45,18 @@ struct GameViewData: Equatable, Sendable {
         let title: String
     }
 
-    /// Whether the current song's main artist is one person or a group, returned by `FetchArtistKindUseCase`.
+    /// Whether the current song's main artist is one person or a group.
     enum ArtistKind: Equatable, Sendable {
         case solo
         case group
+    }
+
+    /// Who sings the current song, returned by `FetchArtistUseCase`.
+    struct Artist: Equatable, Sendable {
+        /// `nil` when MusicBrainz does not know it.
+        let kind: ArtistKind?
+        /// ISO 3166-1 alpha-2 codes of the artist's countries (`ES`); empty when nobody knows them.
+        let countryCodes: [String]
     }
 
     /// The song that started playing, returned by `GamePlayerUseCase.play`.
@@ -126,6 +134,6 @@ struct GameViewData: Equatable, Sendable {
     /// Bingo category of the current song, drawn from `settings.bingoCategories` before it plays. `nil` in the
     /// classic mode.
     var bingoCategory: BingoCategory?
-    /// Kind of artist of the current song, from MusicBrainz. `nil` while it loads, or when it is not known.
-    var artistKind: ArtistKind?
+    /// Who sings the current song, from MusicBrainz and Wikidata. `nil` while it loads, or when the call failed.
+    var artist: Artist?
 }

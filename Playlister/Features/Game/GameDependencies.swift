@@ -67,8 +67,8 @@ final class GameDependencies {
         externalDisplaySession
     }
 
-    func resolveFetchArtistKindUseCase() -> any FetchArtistKindUseCaseProtocol {
-        FetchArtistKindUseCase(dependencies: self)
+    func resolveFetchArtistUseCase() -> any FetchArtistUseCaseProtocol {
+        FetchArtistUseCase(dependencies: self)
     }
 
     func resolveGamePlayerUseCase() -> any GamePlayerUseCaseProtocol {

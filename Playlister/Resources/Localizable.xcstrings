@@ -18,6 +18,23 @@
         }
       }
     },
+    "bingo.category.cyan.intermediate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Band or singer name"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre del grupo o cantante"
+          }
+        }
+      }
+    },
     "bingo.category.cyan.expert" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -52,7 +69,7 @@
         }
       }
     },
-    "bingo.category.green.expert" : {
+    "bingo.category.green.intermediate" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -69,7 +86,58 @@
         }
       }
     },
+    "bingo.category.green.expert" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Country"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "País"
+          }
+        }
+      }
+    },
     "bingo.category.orange.beginner" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo artist or group"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solista o grupo"
+          }
+        }
+      }
+    },
+    "bingo.category.orange.intermediate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo artist or group"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solista o grupo"
+          }
+        }
+      }
+    },
+    "bingo.category.orange.expert" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -86,36 +154,36 @@
         }
       }
     },
-    "bingo.category.orange.expert" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "± 3 years"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "± 3 años"
-          }
-        }
-      }
-    },
     "bingo.category.pink.beginner" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Group or solo artist"
+            "value" : "Local or international?"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Grupo o solista"
+            "value" : "¿Nacional o internacional?"
+          }
+        }
+      }
+    },
+    "bingo.category.pink.intermediate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Song title"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Título de la canción"
           }
         }
       }
@@ -138,6 +206,23 @@
       }
     },
     "bingo.category.yellow.beginner" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before 2000?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Antes del 2000?"
+          }
+        }
+      }
+    },
+    "bingo.category.yellow.intermediate" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1841,6 +1926,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Principiante"
+          }
+        }
+      }
+    },
+    "bingo.level.intermediate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intermediate"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intermedio"
           }
         }
       }

@@ -20,4 +20,8 @@ public protocol ArtistResponseProtocol: Sendable {
     /// Main artist of the song as MusicBrainz names it, or `nil` when it was not found.
     var artistName: String? { get }
     var kind: ArtistKind { get }
+    /// Countries of the artist as ISO 3166-1 alpha-2 codes, upper-cased (`ES`, `GB`): the nationality of a person,
+    /// the country of origin of a group. Usually one; more when the artist has several (`US`, `PR`). Empty when it
+    /// is not known.
+    var countryCodes: [String] { get }
 }

@@ -62,11 +62,11 @@ public struct DSBingoCategoryRow: View {
 
 #Preview {
     DSListGroup {
-        DSBingoCategoryRow(category: .pink, title: "Grupo o solista")
+        DSBingoCategoryRow(category: .pink, title: "¿Nacional o internacional?")
         DSBingoCategoryRow(category: .yellow, title: "¿Antes del 2000?")
         DSBingoCategoryRow(category: .cyan, title: "± 4 años")
         DSBingoCategoryRow(category: .green, title: "Década")
-        DSBingoCategoryRow(category: .orange, title: "± 2 años")
+        DSBingoCategoryRow(category: .orange, title: "Solista o grupo")
     }
     .padding(DSSpacing.space4)
     .background(DSColor.background)

@@ -42,14 +42,14 @@ public enum DSPalette {
     public static let destructive = Color("destructive", bundle: .module)
     /// Solo el botón Continuar con Spotify, con texto #0A0A0A.
     public static let spotifyGreen = Color("spotify-green", bundle: .module)
-    /// Categoría de bingo 1 (Grupo o solista / Título). Texto encima en bg-night.
+    /// Categoría de bingo 1 (Nacional o internacional / Título). Texto encima en bg-night.
     public static let bingoPink = Color("bingo-pink", bundle: .module)
     /// Categoría de bingo 2 (¿Antes del 2000? / Año exacto). Texto encima en bg-night.
     public static let bingoYellow = Color("bingo-yellow", bundle: .module)
     /// Categoría de bingo 3 (± 4 años / Nombre del grupo). Texto encima en bg-night.
     public static let bingoCyan = Color("bingo-cyan", bundle: .module)
-    /// Categoría de bingo 4 (Década). Texto encima en bg-night.
+    /// Categoría de bingo 4 (Década / País). Texto encima en bg-night.
     public static let bingoGreen = Color("bingo-green", bundle: .module)
-    /// Categoría de bingo 5 (± 2 años / ± 3 años). Texto encima en bg-night.
+    /// Categoría de bingo 5 (Solista o grupo / ± 2 años). Texto encima en bg-night.
     public static let bingoOrange = Color("bingo-orange", bundle: .module)
 }
