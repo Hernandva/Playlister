@@ -9,7 +9,6 @@ struct ProviderStarterView: View {
     /// Keeps the column readable on iPad.
     private static let maxContentWidth: CGFloat = 480
     private static let coverSide: CGFloat = 112
-    private static let playDiameter: CGFloat = 132
 
     @State private var viewModel: ProviderStarterViewModel
     @Environment(\.dismiss) private var dismiss
@@ -169,7 +168,7 @@ struct ProviderStarterView: View {
                     .clipShape(RoundedRectangle(cornerRadius: DSRadius.radiusCard, style: .continuous))
                     .dsShadow(.card)
                 VStack(alignment: .leading, spacing: DSSpacing.space2) {
-                    DSText(title, style: .headline)
+                    DSText(title, style: .sectionTitle)
                         .lineLimit(2)
                     if let subtitle {
                         DSText(subtitle, style: .subheadline)
@@ -187,14 +186,12 @@ struct ProviderStarterView: View {
 
     private var play: some View {
         VStack(spacing: DSSpacing.space3) {
-            DSIconButton(systemImage: "play.fill", style: .play, diameter: Self.playDiameter) {
+            DSButton(style: .primary, trailingSystemImage: "play.fill") {
                 Task { await viewModel.didTapPlay() }
             }
-            .localized("providerStarter.play.accessibility")
+            .localized("providerStarter.play")
+            .accessibilityHint(String(localized: "providerStarter.play.accessibility"))
             .disabled(viewModel.isStartingGame)
-            DSText(style: .sectionTitle)
-                .localized("providerStarter.play")
-                .accessibilityHidden(true)
             if let message = viewModel.playErrorMessage {
                 DSText(message, style: .footnote, color: DSColor.destructive)
                     .multilineTextAlignment(.center)
