@@ -74,17 +74,18 @@ struct ProviderStarterView: View {
     }
 
     private var header: some View {
+        // Settings on the leading side and the badge on the trailing side, like the chip in Game's header.
         HStack {
-            DSStatusBadge(viewModel.connectedTitle, style: badgeStyle) {
-                viewModel.didTapProviderBadge()
-            }
-            .accessibilityHint(String(localized: "providerStarter.changeProvider.hint"))
-            Spacer()
             NavigationLink(value: ProviderStarterCoordinator.Route.settings) {
                 Image(systemName: "slider.horizontal.3")
             }
             .buttonStyle(DSIconButtonStyle(diameter: DSSpacing.tapMin))
             .accessibilityLabel(String(localized: "providerStarter.settings"))
+            Spacer()
+            DSStatusBadge(viewModel.connectedTitle, style: badgeStyle) {
+                viewModel.didTapProviderBadge()
+            }
+            .accessibilityHint(String(localized: "providerStarter.changeProvider.hint"))
         }
     }
 
