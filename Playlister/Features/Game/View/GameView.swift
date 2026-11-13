@@ -103,7 +103,8 @@ struct GameView: View {
                         title: song.title,
                         artist: song.artist,
                         year: viewModel.revealedYear,
-                        details: revealDetails(of: song)
+                        details: song.album.map { [.init(String(localized: "game.reveal.album"), value: $0)] } ?? [],
+                        trailingDetail: revealedDuration
                     )
                     continueButton
                 }
@@ -127,15 +128,9 @@ struct GameView: View {
         .buttonStyle(DSButtonStyle(style: .primary))
     }
 
-    private func revealDetails(of song: GameViewData.Song) -> [DSSongRevealCard.Detail] {
-        var details: [DSSongRevealCard.Detail] = []
-        if let album = song.album {
-            details.append(.init(String(localized: "game.reveal.album"), value: album))
-        }
-        if let duration = viewModel.revealedDurationText {
-            details.append(.init(String(localized: "game.reveal.duration"), value: duration))
-        }
-        return details
+    /// The song's length, under the year.
+    private var revealedDuration: DSSongRevealCard.Detail? {
+        viewModel.revealedDurationText.map { .init(String(localized: "game.reveal.duration"), value: $0) }
     }
 
     @ViewBuilder private var controls: some View {

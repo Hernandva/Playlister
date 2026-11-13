@@ -56,7 +56,7 @@ They follow the component guides of the Playlister design system (Claude Design)
 | `DSVinyl(phase:category:level:levels:diameter:)` | Game vinyl. `.playing` (1.8 s per turn, equalizer bars, pass `levels` 0…1 to bind them to audio), `.paused` (the disc stops at its angle and turns on from it, the bars settle low) and `.revealed(cover:isPaused:)` (6 s per turn, cover pops in; with `isPaused`, e.g. when the song ends, the disc stops the same way). With a Bingo `category` it takes its color and shows the category name. |
 | `DSBingoCategory` / `DSBingoLevel` | The five Bingo categories with their color, `ink` (`bg-night`) and localised `title(for:)` (keys `bingo.category.<color>.<beginner|expert>`). |
 | `DSBingoCategoryRow(category:level:isOn:)` | Settings row: color square, name and switch; 45 % opacity when off. |
-| `DSSongRevealCard(title:artist:year:details:category:)` | Revealed song card on `surface-2`, or in the category color with `bg-night` text. Insert it with `.transition(DSSongRevealCard.revealTransition)`. |
+| `DSSongRevealCard(title:artist:year:details:trailingDetail:category:)` | Revealed song card on `surface-2`, or in the category color with `bg-night` text. `trailingDetail` goes right-aligned under the year (the duration). Insert it with `.transition(DSSongRevealCard.revealTransition)`. |
 
 Styles shared by the components live in `Sources/PlaylisterUI/Styles/` (hand-written, not generated):
 
