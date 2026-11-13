@@ -7,6 +7,9 @@ import SwiftUI
 /// - `plain`: no background, `bubblegum` text (Cancelar, going back).
 /// - `destructive`: plain with `destructive` text (Cerrar sesión).
 /// - `spotify` / `appleMusic`: login capsules. The official logo is added by the caller.
+///
+/// `trailingSystemImage` adds a symbol after the text, e.g. `chevron.right` on «Continuar»; it is not read by
+/// VoiceOver.
 public struct DSButton: View, DSLocalizableText {
     public enum Style: Sendable {
         case primary
@@ -19,17 +22,30 @@ public struct DSButton: View, DSLocalizableText {
 
     public var text: String
     private let style: Style
+    private let trailingSystemImage: String?
     private let action: @MainActor () -> Void
 
-    public init(_ text: String = "", style: Style = .primary, action: @escaping @MainActor () -> Void) {
+    public init(
+        _ text: String = "",
+        style: Style = .primary,
+        trailingSystemImage: String? = nil,
+        action: @escaping @MainActor () -> Void
+    ) {
         self.text = text
         self.style = style
+        self.trailingSystemImage = trailingSystemImage
         self.action = action
     }
 
     public var body: some View {
         Button(action: action) {
-            Text(text)
+            HStack(spacing: DSSpacing.space2) {
+                Text(text)
+                if let trailingSystemImage {
+                    Image(systemName: trailingSystemImage)
+                        .accessibilityHidden(true)
+                }
+            }
         }
         .buttonStyle(DSButtonStyle(style: style))
     }
@@ -109,6 +125,7 @@ public struct DSButtonStyle: ButtonStyle {
 #Preview {
     VStack(spacing: DSSpacing.space3) {
         DSButton("Jugar") {}
+        DSButton("Continuar", trailingSystemImage: "chevron.right") {}
         DSButton("Elegir otra lista", style: .secondary) {}
         HStack {
             DSButton("Cancelar", style: .plain) {}

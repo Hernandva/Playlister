@@ -9,9 +9,6 @@ import SwiftUI
 struct GameView: View {
     /// Room kept under the controls for the revealed song card, so the vinyl does not move when it appears.
     private static let revealCardHeight: CGFloat = 196
-    private static let controlsSpacing = DSSpacing.space8 + DSSpacing.space4
-    /// Height of the round controls (`DSIconButton.glass`), kept while they are hidden so the vinyl does not move.
-    private static let controlsHeight: CGFloat = 60
 
     @State private var viewModel: GameViewModel
 
@@ -22,7 +19,11 @@ struct GameView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
+            DSGameHeader(
+                caption: String(localized: "game.playlist"),
+                title: viewModel.viewData.playlist.name,
+                badge: viewModel.modeSummary
+            )
             Spacer(minLength: DSSpacing.space6)
             switch viewModel.state {
             case .idle, .loading:
@@ -49,20 +50,6 @@ struct GameView: View {
         .onDisappear {
             Task { await viewModel.stop() }
         }
-    }
-
-    private var header: some View {
-        HStack(spacing: DSSpacing.space3) {
-            VStack(alignment: .leading, spacing: DSSpacing.space1 / 2) {
-                DSText(style: .caption).localized("game.playlist")
-                DSText(viewModel.viewData.playlist.name, style: .headline)
-                    .lineLimit(1)
-            }
-            .accessibilityElement(children: .combine)
-            Spacer(minLength: 0)
-            DSChip(viewModel.modeSummary)
-        }
-        .frame(minHeight: DSSpacing.tapMin)
     }
 
     private var player: some View {
@@ -106,26 +93,16 @@ struct GameView: View {
                         details: song.album.map { [.init(String(localized: "game.reveal.album"), value: $0)] } ?? [],
                         trailingDetail: revealedDuration
                     )
-                    continueButton
+                    // A worded button, unlike the round Next, so it does not read as skipping the song.
+                    DSButton(trailingSystemImage: "chevron.right") {
+                        Task { await viewModel.continueToNextSong() }
+                    }
+                    .localized("game.continue")
                 }
                 .transition(DSSongRevealCard.revealTransition)
             }
         }
         .frame(maxWidth: .infinity, minHeight: Self.revealCardHeight, alignment: .top)
-    }
-
-    /// A worded button, unlike the round Next, so it does not read as skipping the song.
-    private var continueButton: some View {
-        Button {
-            Task { await viewModel.continueToNextSong() }
-        } label: {
-            HStack(spacing: DSSpacing.space2) {
-                Text("game.continue")
-                Image(systemName: "chevron.right")
-                    .accessibilityHidden(true)
-            }
-        }
-        .buttonStyle(DSButtonStyle(style: .primary))
     }
 
     /// The song's length, under the year.
@@ -137,32 +114,33 @@ struct GameView: View {
         if viewModel.viewData.isRevealed {
             // The round controls hide; Continue goes under the card.
             Color.clear
-                .frame(height: Self.controlsHeight)
+                .frame(height: DSGameControls.height)
                 .accessibilityHidden(true)
         } else {
-            playingControls
-                .transition(.opacity)
+            DSGameControls(
+                isPaused: viewModel.viewData.isPaused,
+                texts: Self.controlTexts,
+                togglePause: .init(isEnabled: viewModel.canTogglePause) {
+                    Task { await viewModel.togglePause() }
+                },
+                reveal: .init(isEnabled: viewModel.canReveal) {
+                    Task { await viewModel.reveal() }
+                },
+                next: .init(isEnabled: viewModel.canPlayNextSong) {
+                    Task { await viewModel.playNextSong() }
+                }
+            )
+            .transition(.opacity)
         }
     }
 
-    private var playingControls: some View {
-        HStack(spacing: Self.controlsSpacing) {
-            DSIconButton(systemImage: viewModel.viewData.isPaused ? "play.fill" : "pause.fill") {
-                Task { await viewModel.togglePause() }
-            }
-            .localized(viewModel.viewData.isPaused ? "game.play" : "game.pause")
-            .disabled(!viewModel.canTogglePause)
-            DSIconButton(systemImage: "questionmark.circle.fill") {
-                Task { await viewModel.reveal() }
-            }
-            .localized("game.reveal")
-            .disabled(!viewModel.canReveal)
-            DSIconButton(systemImage: "forward.end.fill") {
-                Task { await viewModel.playNextSong() }
-            }
-            .localized("game.next")
-            .disabled(!viewModel.canPlayNextSong)
-        }
+    private static var controlTexts: DSGameControls.Texts {
+        DSGameControls.Texts(
+            pause: String(localized: "game.pause"),
+            play: String(localized: "game.play"),
+            reveal: String(localized: "game.reveal"),
+            next: String(localized: "game.next")
+        )
     }
 }
 
