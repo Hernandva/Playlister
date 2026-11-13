@@ -1345,7 +1345,7 @@
         }
       }
     },
-    "providerStarter.changeProvider.hint" : {
+    "gameStarter.changeProvider.hint" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1362,7 +1362,7 @@
         }
       }
     },
-    "providerStarter.changeProvider.message %@" : {
+    "gameStarter.changeProvider.message %@" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1379,7 +1379,7 @@
         }
       }
     },
-    "providerStarter.changeProvider.returnHome" : {
+    "gameStarter.changeProvider.returnHome" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1396,7 +1396,7 @@
         }
       }
     },
-    "providerStarter.changeProvider.stay" : {
+    "gameStarter.changeProvider.stay" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1413,7 +1413,7 @@
         }
       }
     },
-    "providerStarter.changeProvider.title" : {
+    "gameStarter.changeProvider.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1430,7 +1430,7 @@
         }
       }
     },
-    "providerStarter.changePlaylist" : {
+    "gameStarter.changePlaylist" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1447,7 +1447,7 @@
         }
       }
     },
-    "providerStarter.connected %@" : {
+    "gameStarter.connected %@" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1464,7 +1464,7 @@
         }
       }
     },
-    "providerStarter.error %@" : {
+    "gameStarter.error %@" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1481,7 +1481,7 @@
         }
       }
     },
-    "providerStarter.greeting" : {
+    "gameStarter.greeting" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1498,7 +1498,7 @@
         }
       }
     },
-    "providerStarter.play" : {
+    "gameStarter.play" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1515,7 +1515,7 @@
         }
       }
     },
-    "providerStarter.play.accessibility" : {
+    "gameStarter.play.accessibility" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1532,7 +1532,7 @@
         }
       }
     },
-    "providerStarter.play.saveError" : {
+    "gameStarter.play.saveError" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1549,7 +1549,7 @@
         }
       }
     },
-    "providerStarter.play.settingsError" : {
+    "gameStarter.play.settingsError" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1566,7 +1566,7 @@
         }
       }
     },
-    "providerStarter.retry" : {
+    "gameStarter.retry" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1583,7 +1583,7 @@
         }
       }
     },
-    "providerStarter.selectPlaylist.action" : {
+    "gameStarter.selectPlaylist.action" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1600,7 +1600,7 @@
         }
       }
     },
-    "providerStarter.selectPlaylist.message" : {
+    "gameStarter.selectPlaylist.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1617,7 +1617,7 @@
         }
       }
     },
-    "providerStarter.selectPlaylist.title" : {
+    "gameStarter.selectPlaylist.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1634,7 +1634,7 @@
         }
       }
     },
-    "providerStarter.selectedPlaylist.header.last" : {
+    "gameStarter.selectedPlaylist.header.last" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1651,7 +1651,7 @@
         }
       }
     },
-    "providerStarter.selectedPlaylist.header.selected" : {
+    "gameStarter.selectedPlaylist.header.selected" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1668,7 +1668,7 @@
         }
       }
     },
-    "providerStarter.selectedPlaylist.songs %lld" : {
+    "gameStarter.selectedPlaylist.songs %lld" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1709,7 +1709,7 @@
         }
       }
     },
-    "providerStarter.settings" : {
+    "gameStarter.settings" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -1726,7 +1726,7 @@
         }
       }
     },
-    "providerStarter.title" : {
+    "gameStarter.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {

@@ -14,7 +14,7 @@ final class GameDependencies {
 
     /// - Parameters:
     ///   - provider: The music service the user signed in with.
-    ///   - playlist: The playlist chosen in ProviderStarter, played by the game.
+    ///   - playlist: The playlist chosen in GameStarter, played by the game.
     ///   - settings: The game settings saved in Settings.
     ///   - externalDisplaySession: Where the game is shown on an external display (a TV through AirPlay).
     init(

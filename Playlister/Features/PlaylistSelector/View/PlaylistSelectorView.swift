@@ -5,7 +5,7 @@ import SwiftUI
 /// Playlist selector: a search field, the playlists found with it, the «Hitster» playlists and the user's playlists.
 /// Every section loads on its own, in parallel, and disappears when it has no playlists. The search results load
 /// 25 more each time the user scrolls to the last one. A playlist without artwork shows the covers of four random
-/// songs. Tapping a playlist asks to confirm it; once confirmed, ProviderStarter shows it and the selector closes.
+/// songs. Tapping a playlist asks to confirm it; once confirmed, GameStarter shows it and the selector closes.
 /// Holding a playlist down shows its songs, 25 at a time, with «Use this playlist» to confirm it from there.
 struct PlaylistSelectorView: View {
     /// Card sides of the design system: 200 pt for «Hitster», 150 pt for the search and «Your playlists».
@@ -183,7 +183,7 @@ struct PlaylistSelectorView: View {
         )
     }
 
-    /// Goes back to ProviderStarter once the sheet has closed, so both animations do not run at the same time.
+    /// Goes back to GameStarter once the sheet has closed, so both animations do not run at the same time.
     private func closeIfSelected() {
         if viewModel.wantsToClose {
             dismiss()

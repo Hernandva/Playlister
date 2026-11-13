@@ -3,7 +3,7 @@ import PlaylisterData
 
 protocol SaveLastPlaylistUseCaseProtocol: Sendable {
     /// Stores `playlist` as the last playlist of the music service the user signed in with.
-    func execute(playlist: ProviderStarterViewData.Playlist) async throws
+    func execute(playlist: GameStarterViewData.Playlist) async throws
 }
 
 /// Playlist handed to the LastPlaylist repository, mapped from the ViewData type.
@@ -20,14 +20,14 @@ struct SaveLastPlaylistUseCase: SaveLastPlaylistUseCaseProtocol {
     private let repository: any LastPlaylistRepositoryProtocol
 
     /// Receives only the container and resolves what it needs from it.
-    /// `ProviderStarterDependencies` lives on the main actor, so this init does too.
+    /// `GameStarterDependencies` lives on the main actor, so this init does too.
     @MainActor
-    init(dependencies: ProviderStarterDependencies) {
+    init(dependencies: GameStarterDependencies) {
         self.provider = dependencies.resolveProvider()
         self.repository = dependencies.resolveRepository()
     }
 
-    func execute(playlist: ProviderStarterViewData.Playlist) async throws {
+    func execute(playlist: GameStarterViewData.Playlist) async throws {
         let savedPlaylist = SavedPlaylist(
             id: playlist.id,
             name: playlist.name,

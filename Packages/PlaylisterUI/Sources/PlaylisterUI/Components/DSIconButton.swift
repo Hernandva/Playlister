@@ -51,7 +51,7 @@ public struct DSIconButton: View, DSLocalizableText {
 ///         Image(systemName: "slider.horizontal.3")
 ///     }
 ///     .buttonStyle(DSIconButtonStyle(diameter: DSSpacing.tapMin))
-///     .accessibilityLabel(String(localized: "providerStarter.settings"))
+///     .accessibilityLabel(String(localized: "gameStarter.settings"))
 public struct DSIconButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
     private let style: DSIconButton.Style

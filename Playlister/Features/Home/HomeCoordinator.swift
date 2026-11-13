@@ -17,7 +17,7 @@ final class HomeCoordinator: Coordinator, HomeCoordinatorProtocol {
     /// One case per feature that can be opened from Home.
     enum Route: Hashable {
         /// Home with a session, for the music service the user signed in with.
-        case providerStarter(MusicProvider)
+        case gameStarter(MusicProvider)
         // @codegen:routes
     }
 
@@ -39,7 +39,7 @@ final class HomeCoordinator: Coordinator, HomeCoordinatorProtocol {
     }
 
     func openProvider(_ provider: HomeViewModel.Provider) {
-        path.append(Route.providerStarter(Self.musicProvider(for: provider)))
+        path.append(Route.gameStarter(Self.musicProvider(for: provider)))
     }
 
     /// Pops every screen opened after signing in, back to Home.
@@ -49,8 +49,8 @@ final class HomeCoordinator: Coordinator, HomeCoordinatorProtocol {
 
     func destination(for route: Route) -> AnyView {
         switch route {
-        case .providerStarter(let provider):
-            return AnyView(ProviderStarterCoordinator(
+        case .gameStarter(let provider):
+            return AnyView(GameStarterCoordinator(
                 provider: provider,
                 signOut: { [weak self] in
                     self?.signOut()

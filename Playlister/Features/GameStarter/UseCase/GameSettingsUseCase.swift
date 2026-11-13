@@ -3,8 +3,8 @@ import PlaylisterData
 
 protocol GameSettingsUseCaseProtocol: Sendable {
     /// Returns only the game settings of the music service the user signed in with.
-    /// The view model adds them to its `ProviderStarterViewData` and hands them to the game.
-    func execute() async throws -> ProviderStarterViewData.GameSettings
+    /// The view model adds them to its `GameStarterViewData` and hands them to the game.
+    func execute() async throws -> GameStarterViewData.GameSettings
 }
 
 /// Request sent to the Settings repository: each music service has its own settings.
@@ -19,21 +19,21 @@ struct GameSettingsUseCase: GameSettingsUseCaseProtocol {
     private let repository: any SettingsRepositoryProtocol
 
     /// Receives only the container and resolves what it needs from it.
-    /// `ProviderStarterDependencies` lives on the main actor, so this init does too.
+    /// `GameStarterDependencies` lives on the main actor, so this init does too.
     @MainActor
-    init(dependencies: ProviderStarterDependencies) {
+    init(dependencies: GameStarterDependencies) {
         self.provider = dependencies.resolveProvider()
         self.repository = dependencies.resolveSettingsRepository()
     }
 
-    func execute() async throws -> ProviderStarterViewData.GameSettings {
+    func execute() async throws -> GameStarterViewData.GameSettings {
         let response = try await repository.fetch(GameSettingsRequest(provider: provider))
         return Self.settings(from: response)
     }
 }
 
 private extension GameSettingsUseCase {
-    typealias Settings = ProviderStarterViewData.GameSettings
+    typealias Settings = GameStarterViewData.GameSettings
 
     /// Maps SettingsResponseProtocol into the data the view model adds to its ViewData.
     static func settings(from response: any SettingsResponseProtocol) -> Settings {
@@ -52,7 +52,7 @@ private extension GameSettingsUseCase {
         )
     }
 
-    static func category(_ category: SettingsBingoCategory) -> ProviderStarterViewData.BingoCategory {
+    static func category(_ category: SettingsBingoCategory) -> GameStarterViewData.BingoCategory {
         switch category {
         case .pink: .pink
         case .yellow: .yellow

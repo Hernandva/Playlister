@@ -3,7 +3,7 @@ import Foundation
 /// Display-ready data of Game. The view model owns it as a variable and adds each use case result
 /// to its own field, so a new result never erases the rest of the data.
 struct GameViewData: Equatable, Sendable {
-    /// The playlist the game is played with, chosen in ProviderStarter.
+    /// The playlist the game is played with, chosen in GameStarter.
     struct Playlist: Equatable, Sendable {
         /// Identifier of the playlist in its music service.
         let id: String
@@ -104,9 +104,9 @@ struct GameViewData: Equatable, Sendable {
         }
     }
 
-    /// Known before anything loads: it comes from ProviderStarter.
+    /// Known before anything loads: it comes from GameStarter.
     var playlist: Playlist
-    /// Known before anything loads: it comes from ProviderStarter.
+    /// Known before anything loads: it comes from GameStarter.
     var settings: Settings
     /// Songs of the playlist in the order the game plays them: shuffled once when the game starts. The first one is
     /// the current song; Next (or a song that cannot be played) sends it to the end. `nil` until they load.

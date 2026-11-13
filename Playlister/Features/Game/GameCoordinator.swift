@@ -18,7 +18,7 @@ final class GameCoordinator: Coordinator {
 
     /// - Parameters:
     ///   - provider: The music service the user signed in with.
-    ///   - playlist: The playlist chosen in ProviderStarter, played by the game.
+    ///   - playlist: The playlist chosen in GameStarter, played by the game.
     ///   - settings: The game settings saved in Settings.
     convenience init(provider: MusicProvider, playlist: GameViewData.Playlist, settings: GameViewData.Settings) {
         self.init(dependencies: GameDependencies(provider: provider, playlist: playlist, settings: settings))

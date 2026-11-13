@@ -3,7 +3,7 @@ import Observation
 
 @MainActor
 @Observable
-final class ProviderStarterViewModel {
+final class GameStarterViewModel {
     enum State: Equatable {
         case idle
         case loading
@@ -13,7 +13,7 @@ final class ProviderStarterViewModel {
 
     private(set) var state: State = .idle
     /// Data of the screen. Each use case result updates only its own field.
-    private(set) var viewData: ProviderStarterViewData
+    private(set) var viewData: GameStarterViewData
 
     /// `true` while Play saves the selected playlist.
     private(set) var isStartingGame = false
@@ -27,12 +27,12 @@ final class ProviderStarterViewModel {
     private let lastPlaylistUseCase: any LastPlaylistUseCaseProtocol
     private let saveLastPlaylistUseCase: any SaveLastPlaylistUseCaseProtocol
     private let gameSettingsUseCase: any GameSettingsUseCaseProtocol
-    private let openGame: @MainActor (ProviderStarterViewData.Playlist, ProviderStarterViewData.GameSettings) -> Void
+    private let openGame: @MainActor (GameStarterViewData.Playlist, GameStarterViewData.GameSettings) -> Void
 
     /// Receives only the container and resolves what it needs from it.
-    init(dependencies: ProviderStarterDependencies) {
-        let provider = ProviderStarterViewData.Provider(dependencies.resolveProvider())
-        self.viewData = ProviderStarterViewData(provider: provider)
+    init(dependencies: GameStarterDependencies) {
+        let provider = GameStarterViewData.Provider(dependencies.resolveProvider())
+        self.viewData = GameStarterViewData(provider: provider)
         self.lastPlaylistUseCase = dependencies.resolveLastPlaylistUseCase()
         self.saveLastPlaylistUseCase = dependencies.resolveSaveLastPlaylistUseCase()
         self.gameSettingsUseCase = dependencies.resolveGameSettingsUseCase()
@@ -40,18 +40,18 @@ final class ProviderStarterViewModel {
     }
 
     /// The music service the user signed in with, known before its data loads.
-    var provider: ProviderStarterViewData.Provider {
+    var provider: GameStarterViewData.Provider {
         viewData.provider
     }
 
     /// Text of the badge at the top: «Spotify connected».
     var connectedTitle: String {
-        String(localized: "providerStarter.connected \(provider.displayName)")
+        String(localized: "gameStarter.connected \(provider.displayName)")
     }
 
     /// The playlist shown in the card and played by Play: the selected one, else the last one.
     /// `nil` while it loads or when there is none.
-    var selectedPlaylist: ProviderStarterViewData.Playlist? {
+    var selectedPlaylist: GameStarterViewData.Playlist? {
         guard state == .loaded else { return nil }
         return viewData.selectedPlaylist ?? viewData.lastPlaylist
     }
@@ -68,12 +68,12 @@ final class ProviderStarterViewModel {
 
     /// Title of the sheet that offers to change the music service.
     var changeProviderSheetTitle: String {
-        String(localized: "providerStarter.changeProvider.title")
+        String(localized: "gameStarter.changeProvider.title")
     }
 
     /// Explanation of the sheet: the service in use and that Home lets the user pick another one.
     var changeProviderSheetMessage: String {
-        String(localized: "providerStarter.changeProvider.message \(provider.displayName)")
+        String(localized: "gameStarter.changeProvider.message \(provider.displayName)")
     }
 
     /// The badge at the top was tapped: offers to go back to Home to change the music service.
@@ -94,12 +94,12 @@ final class ProviderStarterViewModel {
     }
 
     /// Song count under the playlist name: «312 songs», or `nil` when it is not known.
-    func songCountText(for playlist: ProviderStarterViewData.Playlist) -> String? {
-        playlist.songCount.map { String(localized: "providerStarter.selectedPlaylist.songs \($0)") }
+    func songCountText(for playlist: GameStarterViewData.Playlist) -> String? {
+        playlist.songCount.map { String(localized: "gameStarter.selectedPlaylist.songs \($0)") }
     }
 
     /// Called by the playlist selector with the playlist the user chose.
-    func selectPlaylist(_ playlist: ProviderStarterViewData.Playlist) {
+    func selectPlaylist(_ playlist: GameStarterViewData.Playlist) {
         viewData.selectedPlaylist = playlist
         playErrorMessage = nil
     }
@@ -115,7 +115,7 @@ final class ProviderStarterViewModel {
         do {
             try await saveAsLastPlaylist(playlist)
         } catch {
-            playErrorMessage = String(localized: "providerStarter.play.saveError")
+            playErrorMessage = String(localized: "gameStarter.play.saveError")
             return
         }
         do {
@@ -123,12 +123,12 @@ final class ProviderStarterViewModel {
             viewData.gameSettings = settings
             openGame(playlist, settings)
         } catch {
-            playErrorMessage = String(localized: "providerStarter.play.settingsError")
+            playErrorMessage = String(localized: "gameStarter.play.settingsError")
         }
     }
 
     /// Stores `playlist` as the last playlist, unless it already is.
-    private func saveAsLastPlaylist(_ playlist: ProviderStarterViewData.Playlist) async throws {
+    private func saveAsLastPlaylist(_ playlist: GameStarterViewData.Playlist) async throws {
         guard playlist != viewData.lastPlaylist else { return }
         try await saveLastPlaylistUseCase.execute(playlist: playlist)
         viewData.lastPlaylist = playlist
@@ -140,7 +140,7 @@ final class ProviderStarterViewModel {
             viewData.lastPlaylist = try await lastPlaylistUseCase.execute()
             state = .loaded
         } catch {
-            state = .failed(String(localized: "providerStarter.error \(provider.displayName)"))
+            state = .failed(String(localized: "gameStarter.error \(provider.displayName)"))
         }
     }
 }

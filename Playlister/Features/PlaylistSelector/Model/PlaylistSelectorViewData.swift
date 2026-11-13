@@ -4,7 +4,7 @@ import PlaylisterData
 /// Display-ready data of PlaylistSelector. The view model owns it as a variable and adds each use case result
 /// to its own field, so a new result never erases the rest of the data.
 struct PlaylistSelectorViewData: Equatable, Sendable {
-    /// A playlist shown in a carousel and handed to ProviderStarter when the user selects it.
+    /// A playlist shown in a carousel and handed to GameStarter when the user selects it.
     /// Only what the music service returns for the playlist itself: its songs are read only by the long-press sheet.
     struct Playlist: Equatable, Sendable, Identifiable {
         /// Identifier of the playlist in its music service.

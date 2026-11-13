@@ -171,10 +171,10 @@ adds the route to the parent coordinator and updates this file.
 | Feature | Opened from | Repository |
 |---|---|---|
 | `Home` | — (root) | `Authorization`, `Login` |
-| `ProviderStarter` | Home | `LastPlaylistRepository`, `SettingsRepository` |
-| `Settings` | ProviderStarter | `SettingsRepository` |
-| `PlaylistSelector` | ProviderStarter | `PlaylistsRepository`, `SongRepository` |
-| `Game` | ProviderStarter | `Song`, `Player`, `Artist` |
+| `GameStarter` | Home | `LastPlaylistRepository`, `SettingsRepository` |
+| `Settings` | GameStarter | `SettingsRepository` |
+| `PlaylistSelector` | GameStarter | `PlaylistsRepository`, `SongRepository` |
+| `Game` | GameStarter | `Song`, `Player`, `Artist` |
 <!-- codegen:feature-registry:end -->
 
 ## App map
@@ -185,9 +185,9 @@ Which feature opens which. `A --> B` means feature A can open feature B.
 ```mermaid
 graph TD
     Home
-    Home --> ProviderStarter
-    ProviderStarter --> Settings
-    ProviderStarter --> PlaylistSelector
-    ProviderStarter --> Game
+    Home --> GameStarter
+    GameStarter --> Settings
+    GameStarter --> PlaylistSelector
+    GameStarter --> Game
 ```
 <!-- codegen:app-map:end -->

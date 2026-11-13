@@ -1,8 +1,8 @@
 import Foundation
 import PlaylisterData
 
-/// Display-ready data of ProviderStarter. The view model owns it and adds each use case result to its own field.
-struct ProviderStarterViewData: Equatable, Sendable {
+/// Display-ready data of GameStarter. The view model owns it and adds each use case result to its own field.
+struct GameStarterViewData: Equatable, Sendable {
     /// Music service the user signed in with.
     enum Provider: Equatable, Sendable {
         case spotify

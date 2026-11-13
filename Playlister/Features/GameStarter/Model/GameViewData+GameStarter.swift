@@ -1,9 +1,9 @@
 import Foundation
 
-/// Hands the settings read by ProviderStarter to the Game feature, which has its own types.
-/// `ProviderStarterCoordinator` uses it when it opens the game.
+/// Hands the settings read by GameStarter to the Game feature, which has its own types.
+/// `GameStarterCoordinator` uses it when it opens the game.
 extension GameViewData.Settings {
-    init(_ settings: ProviderStarterViewData.GameSettings) {
+    init(_ settings: GameStarterViewData.GameSettings) {
         self.init(
             playback: settings.playback == .fullSong ? .fullSong : .clip,
             clipSeconds: settings.clipSeconds,
@@ -14,7 +14,7 @@ extension GameViewData.Settings {
         )
     }
 
-    private static func category(_ category: ProviderStarterViewData.BingoCategory) -> GameViewData.BingoCategory {
+    private static func category(_ category: GameStarterViewData.BingoCategory) -> GameViewData.BingoCategory {
         switch category {
         case .pink: .pink
         case .yellow: .yellow

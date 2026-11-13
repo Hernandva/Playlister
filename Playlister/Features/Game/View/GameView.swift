@@ -6,7 +6,7 @@ import SwiftUI
 /// - Playing: Pause (Play while paused), Reveal and Next, which sends the song to the end of the queue.
 /// - Revealed: the controls hide, the vinyl shows the cover and the song card rises at the bottom with Continue
 ///   under it, which takes the song out of the game and plays the next one.
-/// - The mode chip at the top pauses the song and opens a sheet that ends the game and goes back to ProviderStarter;
+/// - The mode chip at the top pauses the song and opens a sheet that ends the game and goes back to GameStarter;
 ///   closing it without ending plays the song again.
 /// - «Partida · bingo»: each round draws a category before its song plays; the background glow, the vinyl, the
 ///   progress bar and the tint take its color, and its name shows under the vinyl.
@@ -87,7 +87,7 @@ struct GameView: View {
         .animation(.easeOut(duration: 0.4), value: viewModel.externalDisplaySession.isDisplayConnected)
     }
 
-    /// Goes back to ProviderStarter once the sheet has closed, so both animations do not run at the same time.
+    /// Goes back to GameStarter once the sheet has closed, so both animations do not run at the same time.
     /// Leaving the view stops the music. Otherwise the game goes on, playing again the song the sheet paused.
     private func endGameIfRequested() {
         if viewModel.wantsToEndGame {

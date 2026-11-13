@@ -1,24 +1,24 @@
 import PlaylisterData
 import SwiftUI
 
-/// Entry point of the ProviderStarter feature: Home with a session, opened once the user signed in.
-/// Builds the view through `ProviderStarterDependencies` and resolves the routes to the features opened from it.
+/// Entry point of the GameStarter feature: Home with a session, opened once the user signed in.
+/// Builds the view through `GameStarterDependencies` and resolves the routes to the features opened from it.
 @MainActor
-final class ProviderStarterCoordinator: Coordinator {
-    /// One case per feature that can be opened from ProviderStarter.
+final class GameStarterCoordinator: Coordinator {
+    /// One case per feature that can be opened from GameStarter.
     enum Route: Hashable {
         /// Playback, game mode, Bingo categories and account.
         case settings
         /// Recommended and own playlists, to choose the one to play.
         case playlistSelector
         /// The game, played with the playlist chosen and the game settings read when Play was tapped.
-        case game(ProviderStarterViewData.Playlist, ProviderStarterViewData.GameSettings)
+        case game(GameStarterViewData.Playlist, GameStarterViewData.GameSettings)
         // @codegen:routes
     }
 
-    private let dependencies: ProviderStarterDependencies
+    private let dependencies: GameStarterDependencies
 
-    init(dependencies: ProviderStarterDependencies) {
+    init(dependencies: GameStarterDependencies) {
         self.dependencies = dependencies
     }
 
@@ -31,7 +31,7 @@ final class ProviderStarterCoordinator: Coordinator {
         signOut: @escaping @MainActor () -> Void,
         navigate: @escaping @MainActor (Route) -> Void
     ) {
-        self.init(dependencies: ProviderStarterDependencies(
+        self.init(dependencies: GameStarterDependencies(
             provider: provider,
             signOut: signOut,
             navigate: navigate
@@ -39,7 +39,7 @@ final class ProviderStarterCoordinator: Coordinator {
     }
 
     func start() -> some View {
-        ProviderStarterView(dependencies: dependencies)
+        GameStarterView(dependencies: dependencies)
             .navigationDestination(for: Route.self) { route in
                 self.destination(for: route)
             }
@@ -56,7 +56,7 @@ final class ProviderStarterCoordinator: Coordinator {
             let selectPlaylist = dependencies.resolveSelectPlaylist()
             return AnyView(PlaylistSelectorCoordinator(provider: dependencies.resolveProvider()) { playlist in
                 // The selector does not read the songs, so the count is unknown until the game loads them.
-                selectPlaylist(ProviderStarterViewData.Playlist(
+                selectPlaylist(GameStarterViewData.Playlist(
                     id: playlist.id,
                     name: playlist.name,
                     songCount: nil,

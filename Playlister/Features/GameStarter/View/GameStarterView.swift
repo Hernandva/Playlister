@@ -5,16 +5,16 @@ import SwiftUI
 /// Home with a session: the connected service, the playlist card and the Play button.
 /// The card has the same format with and without a playlist: with none it invites the user to choose one
 /// («Elegir lista») and Play is hidden; with one it shows it and «Cambiar lista» opens the selector.
-struct ProviderStarterView: View {
+struct GameStarterView: View {
     /// Keeps the column readable on iPad.
     private static let maxContentWidth: CGFloat = 480
     private static let coverSide: CGFloat = 112
 
-    @State private var viewModel: ProviderStarterViewModel
+    @State private var viewModel: GameStarterViewModel
     @Environment(\.dismiss) private var dismiss
 
     /// Receives only the container and resolves the view model from it.
-    init(dependencies: ProviderStarterDependencies) {
+    init(dependencies: GameStarterDependencies) {
         _viewModel = State(initialValue: dependencies.resolveViewModel())
     }
 
@@ -61,10 +61,10 @@ struct ProviderStarterView: View {
         DSBottomSheet(
             title: viewModel.changeProviderSheetTitle,
             message: viewModel.changeProviderSheetMessage,
-            primaryAction: .init(String(localized: "providerStarter.changeProvider.returnHome")) {
+            primaryAction: .init(String(localized: "gameStarter.changeProvider.returnHome")) {
                 viewModel.didChooseReturnHome()
             },
-            secondaryAction: .init(String(localized: "providerStarter.changeProvider.stay"), style: .plain) {
+            secondaryAction: .init(String(localized: "gameStarter.changeProvider.stay"), style: .plain) {
                 viewModel.dismissChangeProviderSheet()
             }
         )
@@ -73,16 +73,16 @@ struct ProviderStarterView: View {
     private var header: some View {
         // Settings on the leading side and the badge on the trailing side, like the chip in Game's header.
         HStack {
-            NavigationLink(value: ProviderStarterCoordinator.Route.settings) {
+            NavigationLink(value: GameStarterCoordinator.Route.settings) {
                 Image(systemName: "slider.horizontal.3")
             }
             .buttonStyle(DSIconButtonStyle(diameter: DSSpacing.tapMin))
-            .accessibilityLabel(String(localized: "providerStarter.settings"))
+            .accessibilityLabel(String(localized: "gameStarter.settings"))
             Spacer()
             DSStatusBadge(viewModel.connectedTitle, style: badgeStyle) {
                 viewModel.didTapProviderBadge()
             }
-            .accessibilityHint(String(localized: "providerStarter.changeProvider.hint"))
+            .accessibilityHint(String(localized: "gameStarter.changeProvider.hint"))
         }
     }
 
@@ -96,9 +96,9 @@ struct ProviderStarterView: View {
     private var greeting: some View {
         VStack(alignment: .leading, spacing: DSSpacing.space1) {
             DSText(style: .body, color: DSColor.textSecondary)
-                .localized("providerStarter.greeting")
+                .localized("gameStarter.greeting")
             DSText(style: .largeTitle)
-                .localized("providerStarter.title")
+                .localized("gameStarter.title")
                 .accessibilityAddTraits(.isHeader)
         }
     }
@@ -110,8 +110,8 @@ struct ProviderStarterView: View {
             VStack(alignment: .leading, spacing: DSSpacing.space2) {
                 DSSectionHeader()
                     .localized(viewModel.isShowingSelection
-                        ? "providerStarter.selectedPlaylist.header.selected"
-                        : "providerStarter.selectedPlaylist.header.last")
+                        ? "gameStarter.selectedPlaylist.header.selected"
+                        : "gameStarter.selectedPlaylist.header.last")
                 selectedPlaylistContent
             }
         }
@@ -121,9 +121,9 @@ struct ProviderStarterView: View {
     private var selectPlaylistCard: some View {
         playlistCard(
             covers: [],
-            title: String(localized: "providerStarter.selectPlaylist.title"),
-            subtitle: String(localized: "providerStarter.selectPlaylist.message"),
-            action: String(localized: "providerStarter.selectPlaylist.action")
+            title: String(localized: "gameStarter.selectPlaylist.title"),
+            subtitle: String(localized: "gameStarter.selectPlaylist.message"),
+            action: String(localized: "gameStarter.selectPlaylist.action")
         )
     }
 
@@ -141,7 +141,7 @@ struct ProviderStarterView: View {
                     covers: playlist.covers,
                     title: playlist.name,
                     subtitle: viewModel.songCountText(for: playlist),
-                    action: String(localized: "providerStarter.changePlaylist")
+                    action: String(localized: "gameStarter.changePlaylist")
                 )
             }
         case .failed(let message):
@@ -151,7 +151,7 @@ struct ProviderStarterView: View {
                     DSButton(style: .plain) {
                         Task { await viewModel.load() }
                     }
-                    .localized("providerStarter.retry")
+                    .localized("gameStarter.retry")
                 }
                 .frame(maxWidth: .infinity, minHeight: Self.coverSide, alignment: .leading)
             }
@@ -173,7 +173,7 @@ struct ProviderStarterView: View {
                     if let subtitle {
                         DSText(subtitle, style: .subheadline)
                     }
-                    NavigationLink(value: ProviderStarterCoordinator.Route.playlistSelector) {
+                    NavigationLink(value: GameStarterCoordinator.Route.playlistSelector) {
                         Text(action)
                     }
                     .buttonStyle(DSButtonStyle(style: .plain))
@@ -189,8 +189,8 @@ struct ProviderStarterView: View {
             DSButton(style: .primary, trailingSystemImage: "play.fill") {
                 Task { await viewModel.didTapPlay() }
             }
-            .localized("providerStarter.play")
-            .accessibilityHint(String(localized: "providerStarter.play.accessibility"))
+            .localized("gameStarter.play")
+            .accessibilityHint(String(localized: "gameStarter.play.accessibility"))
             .disabled(viewModel.isStartingGame)
             if let message = viewModel.playErrorMessage {
                 DSText(message, style: .footnote, color: DSColor.destructive)
@@ -203,6 +203,6 @@ struct ProviderStarterView: View {
 
 #Preview {
     NavigationStack {
-        ProviderStarterCoordinator(provider: .appleMusic, signOut: {}, navigate: { _ in }).start()
+        GameStarterCoordinator(provider: .appleMusic, signOut: {}, navigate: { _ in }).start()
     }
 }

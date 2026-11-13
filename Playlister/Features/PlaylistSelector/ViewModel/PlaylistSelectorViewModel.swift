@@ -238,7 +238,7 @@ final class PlaylistSelectorViewModel {
     /// «Select playlist»: hands the playlist to the feature that opened the selector and asks the view to close.
     func confirmSelection() {
         guard let playlist = pendingPlaylist else { return }
-        // ProviderStarter shows the same covers as the card, the custom ones included.
+        // GameStarter shows the same covers as the card, the custom ones included.
         selectPlaylist(PlaylistSelectorViewData.Playlist(
             id: playlist.id,
             name: playlist.name,
