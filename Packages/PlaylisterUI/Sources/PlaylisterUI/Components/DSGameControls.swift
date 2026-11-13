@@ -63,7 +63,7 @@ public struct DSGameControls: View {
     }
 
     private func button(_ text: String, systemImage: String, _ control: Control) -> some View {
-        DSIconButton(text, systemImage: systemImage, action: control.action)
+        DSIconButton(text, systemImage: systemImage, style: .gradient, action: control.action)
             .disabled(!control.isEnabled)
     }
 }
