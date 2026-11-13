@@ -10,7 +10,7 @@ import SwiftUI
 /// - `revealed`: turns every 6 s and the album cover pops in (scale 0.6 → 1). With `isPaused` (e.g. the song
 ///   ended) the disc stops at its angle, and turns on from it when it is `false` again.
 /// - Bingo: with a `category`, grooves, ring and glow take its color, the centre is solid with `bg-night` bars,
-///   and the category name appears under the disc.
+///   and «CATEGORÍA» with the category name pops in under the disc while it is not revealed.
 /// - With Reduce Motion the disc does not turn and the bars are static.
 public struct DSVinyl: View {
     public enum Phase: Equatable, Sendable {
@@ -40,7 +40,7 @@ public struct DSVinyl: View {
     }
 
     public var body: some View {
-        VStack(spacing: DSSpacing.space4) {
+        VStack(spacing: DSSpacing.space6) {
             ZStack {
                 DSVinylDisc(tint: category?.color, secondsPerTurn: isRevealed ? 6 : 1.8, isSpinning: isSpinning)
                 center
@@ -49,14 +49,29 @@ public struct DSVinyl: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(accessibilityText)
             .accessibilityAddTraits(.isImage)
-            if let category {
-                Text(category.title(for: level))
-                    .font(DSTypeScale.title2)
-                    .foregroundStyle(category.color)
-                    .multilineTextAlignment(.center)
+            if let category, !isRevealed {
+                categoryLabel(category)
+                    .id(category)
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.6), value: phase)
+        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: category)
+    }
+
+    /// «CATEGORÍA» over the category name in its color.
+    private func categoryLabel(_ category: DSBingoCategory) -> some View {
+        VStack(spacing: DSSpacing.space1) {
+            Text(Bundle.main.localizedString(forKey: "vinyl.category", value: "Categoría", table: nil).uppercased())
+                .font(DSFont.caption)
+                .tracking(0.72)
+                .foregroundStyle(DSColor.textSecondary)
+            Text(category.title(for: level))
+                .font(DSTypeScale.title2.weight(.heavy))
+                .foregroundStyle(category.color)
+        }
+        .multilineTextAlignment(.center)
+        .accessibilityElement(children: .combine)
     }
 
     @ViewBuilder private var center: some View {
@@ -131,13 +146,21 @@ private struct DSVinylDisc: View {
             }
         }
         .clipShape(Circle())
-        .overlay(Circle().strokeBorder(tint?.opacity(0.5) ?? DSPalette.orchid.opacity(0.22), lineWidth: 2).padding(-2))
+        .overlay(ring)
         .shadow(
             color: tint?.opacity(0.55) ?? DSShadow.disc.color,
             radius: DSShadow.disc.radius,
             x: 0,
             y: DSShadow.disc.yOffset
         )
+    }
+
+    /// Outer ring: solid 3 pt in the category color, or `orchid` at 22 % without one.
+    private var ring: some View {
+        let width: CGFloat = tint == nil ? 2 : 3
+        return Circle()
+            .strokeBorder(tint ?? DSPalette.orchid.opacity(0.22), lineWidth: width)
+            .padding(-width)
     }
 
     /// Repeating radial grooves: 2 pt dark, 2 pt light. They look the same at any angle, so they do not turn.
@@ -197,6 +220,7 @@ private struct DSEqualizerCenter: View {
             ZStack {
                 if let tint {
                     Circle().fill(tint)
+                        .overlay(Circle().strokeBorder(Color.white.opacity(0.3), lineWidth: 3))
                 } else {
                     DSPrimaryGradient().clipShape(Circle())
                 }

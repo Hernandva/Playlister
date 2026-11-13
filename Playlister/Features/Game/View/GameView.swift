@@ -6,6 +6,8 @@ import SwiftUI
 /// - Playing: Pause (Play while paused), Reveal and Next, which sends the song to the end of the queue.
 /// - Revealed: the controls hide, the vinyl shows the cover and the song card rises at the bottom with Continue
 ///   under it, which takes the song out of the game and plays the next one.
+/// - «Partida · bingo»: each round draws a category before its song plays; the background glow, the vinyl, the
+///   progress bar and the tint take its color, and its name shows under the vinyl.
 struct GameView: View {
     /// Room kept under the controls for the revealed song card, so the vinyl does not move when it appears.
     private static let revealCardHeight: CGFloat = 196
@@ -22,7 +24,8 @@ struct GameView: View {
             DSGameHeader(
                 caption: String(localized: "game.playlist"),
                 title: viewModel.viewData.playlist.name,
-                badge: viewModel.modeSummary
+                badge: viewModel.modeSummary,
+                badgeStyle: viewModel.viewData.settings.mode == .bingo ? .bingo : .standard
             )
             Spacer(minLength: DSSpacing.space6)
             switch viewModel.state {
@@ -42,8 +45,9 @@ struct GameView: View {
         .animation(.easeOut(duration: 0.4), value: viewModel.viewData.isRevealed)
         .padding(.horizontal, DSSpacing.space4)
         .padding(.bottom, DSSpacing.space6)
-        .background { DSAuraBackground() }
-        .tint(DSPalette.bubblegum)
+        .background { DSAuraBackground(glow: category?.color) }
+        .animation(.easeOut(duration: 0.4), value: category)
+        .tint(category?.color ?? DSPalette.bubblegum)
         .preferredColorScheme(.dark)
         .navigationBarTitleDisplayMode(.inline)
         .task { await viewModel.load() }
@@ -54,12 +58,13 @@ struct GameView: View {
 
     private var player: some View {
         VStack(spacing: DSSpacing.space6) {
-            DSVinyl(phase: vinylPhase)
+            DSVinyl(phase: vinylPhase, category: category, level: bingoLevel)
             DSProgressBar(
                 progress: viewModel.progress,
                 elapsed: viewModel.elapsedText,
                 duration: viewModel.durationText,
-                smoothing: GameViewModel.progressInterval
+                smoothing: GameViewModel.progressInterval,
+                tint: category?.color
             )
             controls
             if let playbackError = viewModel.viewData.playbackError {
@@ -68,6 +73,15 @@ struct GameView: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    /// Bingo category of the round, in the design system's terms. `nil` in the classic mode.
+    private var category: DSBingoCategory? {
+        viewModel.viewData.bingoCategory.map(DSBingoCategory.init)
+    }
+
+    private var bingoLevel: DSBingoLevel {
+        viewModel.viewData.settings.bingoLevel == .expert ? .expert : .beginner
     }
 
     private var vinylPhase: DSVinyl.Phase {
@@ -141,6 +155,18 @@ struct GameView: View {
             reveal: String(localized: "game.reveal"),
             next: String(localized: "game.next")
         )
+    }
+}
+
+private extension DSBingoCategory {
+    init(_ category: GameViewData.BingoCategory) {
+        switch category {
+        case .pink: self = .pink
+        case .yellow: self = .yellow
+        case .cyan: self = .cyan
+        case .green: self = .green
+        case .orange: self = .orange
+        }
     }
 }
 

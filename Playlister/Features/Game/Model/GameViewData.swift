@@ -113,4 +113,7 @@ struct GameViewData: Equatable, Sendable {
     var isPaused = false
     /// Current time of the song in the player, in seconds of the whole song. Read by `GamePlayBackStatusUseCase`.
     var playbackTime: TimeInterval = 0
+    /// Bingo category of the current song, drawn from `settings.bingoCategories` before it plays. `nil` in the
+    /// classic mode.
+    var bingoCategory: BingoCategory?
 }

@@ -8,15 +8,18 @@ public struct DSGameHeader: View {
     private let caption: String
     private let title: String
     private let badge: String
+    private let badgeStyle: DSChip.Style
 
     /// - Parameters:
     ///   - caption: Small caps label above the title («LISTA»).
     ///   - title: The playlist name.
     ///   - badge: Summary in the chip («Clásico · 20 s»).
-    public init(caption: String, title: String, badge: String) {
+    ///   - badgeStyle: Style of the chip: `.bingo` in the Bingo mode.
+    public init(caption: String, title: String, badge: String, badgeStyle: DSChip.Style = .standard) {
         self.caption = caption
         self.title = title
         self.badge = badge
+        self.badgeStyle = badgeStyle
     }
 
     public var body: some View {
@@ -28,7 +31,7 @@ public struct DSGameHeader: View {
             }
             .accessibilityElement(children: .combine)
             Spacer(minLength: 0)
-            DSChip(badge)
+            DSChip(badge, style: badgeStyle)
         }
         .frame(minHeight: DSSpacing.tapMin)
     }
@@ -37,7 +40,12 @@ public struct DSGameHeader: View {
 #Preview {
     VStack(spacing: DSSpacing.space4) {
         DSGameHeader(caption: "LISTA", title: "Hitster España", badge: "Clásico · 20 s")
-        DSGameHeader(caption: "LISTA", title: "Una lista con un nombre muy largo de verdad", badge: "Bingo · Experto")
+        DSGameHeader(
+            caption: "LISTA",
+            title: "Una lista con un nombre muy largo de verdad",
+            badge: "Bingo · Experto",
+            badgeStyle: .bingo
+        )
     }
     .padding(DSSpacing.space4)
     .background(DSColor.background)

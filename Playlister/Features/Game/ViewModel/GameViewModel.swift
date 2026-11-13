@@ -210,6 +210,7 @@ final class GameViewModel {
     private func playCurrentSong() async {
         stopProgress()
         viewData.playbackError = nil
+        drawBingoCategory()
         var skipped = 0
         while let song = currentSong {
             do {
@@ -231,6 +232,16 @@ final class GameViewModel {
             }
         }
         viewData.playbackError = Self.message(for: .unavailable)
+    }
+
+    /// In the Bingo mode, picks the category of the new round at random among the ones turned on in Settings.
+    private func drawBingoCategory() {
+        let settings = viewData.settings
+        guard settings.mode == .bingo else {
+            viewData.bingoCategory = nil
+            return
+        }
+        viewData.bingoCategory = settings.bingoCategories.randomElement()
     }
 
     /// Sends the current song to the end of the queue, so the next one becomes the current song.

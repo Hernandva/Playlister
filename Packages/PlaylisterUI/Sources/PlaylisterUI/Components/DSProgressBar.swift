@@ -5,6 +5,8 @@ import SwiftUI
 ///
 /// Times are passed already formatted («0:08», «0:20»).
 ///
+/// In the Bingo mode pass the round's `tint` (the category color): the fill is that solid color instead.
+///
 /// When `progress` is read on a timer, pass the timer's interval as `smoothing`: the fill then grows linearly
 /// over that time instead of jumping at each reading. Going back (a new song at 0) is never animated, and with
 /// Reduce Motion the fill jumps.
@@ -19,6 +21,7 @@ public struct DSProgressBar: View {
     private let duration: String
     private let width: CGFloat
     private let smoothing: TimeInterval
+    private let tint: Color?
 
     /// - Parameters:
     ///   - progress: 0…1. Values outside the range are clamped.
@@ -26,18 +29,21 @@ public struct DSProgressBar: View {
     ///   - duration: Total time, formatted.
     ///   - width: Width of the bar. 230 pt under the 250 pt vinyl.
     ///   - smoothing: Seconds the fill takes to reach a new, higher `progress`. 0 jumps to it.
+    ///   - tint: Solid color of the fill, e.g. the Bingo category. `nil` uses the primary gradient.
     public init(
         progress: Double,
         elapsed: String,
         duration: String,
         width: CGFloat = 230,
-        smoothing: TimeInterval = 0
+        smoothing: TimeInterval = 0,
+        tint: Color? = nil
     ) {
         self.progress = min(max(progress, 0), 1)
         self.elapsed = elapsed
         self.duration = duration
         self.width = width
         self.smoothing = smoothing
+        self.tint = tint
     }
 
     public var body: some View {
@@ -45,7 +51,7 @@ public struct DSProgressBar: View {
             Capsule()
                 .fill(DSPalette.orchid.opacity(0.2))
                 .overlay(alignment: .leading) {
-                    DSPrimaryGradient()
+                    fill
                         .frame(width: width * shownProgress)
                         .clipShape(Capsule())
                 }
@@ -69,6 +75,14 @@ public struct DSProgressBar: View {
             withAnimation(animates ? .linear(duration: smoothing) : nil) {
                 shownProgress = newValue
             }
+        }
+    }
+
+    @ViewBuilder private var fill: some View {
+        if let tint {
+            tint
+        } else {
+            DSPrimaryGradient()
         }
     }
 }
@@ -96,6 +110,7 @@ public struct DSProgressBar: View {
         DSProgressBar(progress: 0, elapsed: "0:00", duration: "0:20")
         DSProgressBar(progress: 0.4, elapsed: "0:08", duration: "0:20")
         DSProgressBar(progress: 1, elapsed: "0:20", duration: "0:20")
+        DSProgressBar(progress: 0.4, elapsed: "0:08", duration: "0:20", tint: DSBingoCategory.green.color)
     }
     .padding(DSSpacing.space6)
     .background(DSColor.background)
