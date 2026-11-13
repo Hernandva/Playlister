@@ -44,6 +44,14 @@ struct GameViewData: Equatable, Sendable {
         case orange
     }
 
+    /// The song that started playing, returned by `PlayGameSongUseCase`.
+    struct Round: Equatable, Sendable {
+        /// Second of the song where playback started: 0, or a random point for a clip.
+        let startTime: TimeInterval
+        /// Length of the whole song, from the player or else from the playlist, when it is known.
+        let songDuration: TimeInterval?
+    }
+
     /// The game settings the user saved in Settings, read when Play was tapped.
     struct Settings: Equatable, Sendable {
         var playback: Playback
@@ -87,4 +95,8 @@ struct GameViewData: Equatable, Sendable {
     var currentIndex = 0
     /// Why the current song could not be played, already localised, or `nil` while it plays.
     var playbackError: String?
+    /// The current song once it plays, or `nil` until then.
+    var round: Round?
+    /// Current time of the song in the player, in seconds of the whole song. Read by `GamePlaybackTimeUseCase`.
+    var playbackTime: TimeInterval = 0
 }

@@ -15,8 +15,12 @@ enum GamePlaybackError: Error, Equatable {
 
 protocol PlayGameSongUseCaseProtocol: Sendable {
     /// Plays the song as the settings say: a clip from the beginning or from a random point, or the whole song.
-    /// Throws `GamePlaybackError`.
-    func execute(song: GameViewData.Song, settings: GameViewData.Settings, provider: MusicProvider) async throws
+    /// Returns where it started. Throws `GamePlaybackError`.
+    func execute(
+        song: GameViewData.Song,
+        settings: GameViewData.Settings,
+        provider: MusicProvider
+    ) async throws -> GameViewData.Round
 }
 
 /// Request sent to the Player repository: the song and where it starts.
@@ -37,17 +41,23 @@ struct PlayGameSongUseCase: PlayGameSongUseCaseProtocol {
         self.repository = dependencies.resolvePlayerRepository()
     }
 
-    func execute(song: GameViewData.Song, settings: GameViewData.Settings, provider: MusicProvider) async throws {
+    func execute(
+        song: GameViewData.Song,
+        settings: GameViewData.Settings,
+        provider: MusicProvider
+    ) async throws -> GameViewData.Round {
         let request = PlayGameSongRequest(
             provider: provider,
             songID: song.playbackID,
             startTime: Self.startTime(of: song, settings: settings)
         )
+        let response: any PlayerResponseProtocol
         do {
-            _ = try await repository.play(request)
+            response = try await repository.play(request)
         } catch let error as PlayerError {
             throw GamePlaybackError(error)
         }
+        return GameViewData.Round(startTime: request.startTime, songDuration: response.duration ?? song.duration)
     }
 
     /// 0, unless a clip starts at random: then any second that leaves the whole clip before the end of the song.

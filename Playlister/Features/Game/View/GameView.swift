@@ -65,7 +65,8 @@ struct GameView: View {
             DSProgressBar(
                 progress: viewModel.progress,
                 elapsed: viewModel.elapsedText,
-                duration: viewModel.durationText
+                duration: viewModel.durationText,
+                smoothing: GameViewModel.progressInterval
             )
             controls
             if let playbackError = viewModel.viewData.playbackError {

@@ -55,6 +55,10 @@ final class GameDependencies {
         PlayGameSongUseCase(dependencies: self)
     }
 
+    func resolveGamePlaybackTimeUseCase() -> any GamePlaybackTimeUseCaseProtocol {
+        GamePlaybackTimeUseCase(dependencies: self)
+    }
+
     func resolveStopGameSongUseCase() -> any StopGameSongUseCaseProtocol {
         StopGameSongUseCase(dependencies: self)
     }

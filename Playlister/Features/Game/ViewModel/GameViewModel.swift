@@ -14,6 +14,9 @@ final class GameViewModel {
 
     /// Songs in a row that cannot be played before the game gives up and shows the error.
     private static let maxSkippedSongs = 5
+    /// How often the progress reads the player's time, in seconds: MusicKit does not announce it.
+    /// The progress bar animates over the same time, so it grows without jumps.
+    static let progressInterval: TimeInterval = 1
 
     private(set) var state: State = .idle
     /// Data of the screen. Each use case result updates only its own field.
@@ -23,6 +26,9 @@ final class GameViewModel {
     private let fetchSongsUseCase: any FetchGameSongsUseCaseProtocol
     private let playSongUseCase: any PlayGameSongUseCaseProtocol
     private let stopSongUseCase: any StopGameSongUseCaseProtocol
+    private let playbackTimeUseCase: any GamePlaybackTimeUseCaseProtocol
+    /// Reads the player's time while a song plays.
+    @ObservationIgnored private var progressTask: Task<Void, Never>?
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: GameDependencies) {
@@ -34,6 +40,7 @@ final class GameViewModel {
         self.fetchSongsUseCase = dependencies.resolveFetchGameSongsUseCase()
         self.playSongUseCase = dependencies.resolvePlayGameSongUseCase()
         self.stopSongUseCase = dependencies.resolveStopGameSongUseCase()
+        self.playbackTimeUseCase = dependencies.resolveGamePlaybackTimeUseCase()
     }
 
     /// Summary of the settings for the chip at the top: «Clásico · 20 s», «Clásico · Canción entera»
@@ -56,14 +63,15 @@ final class GameViewModel {
         }
     }
 
-    /// Played share of the current song, 0…1. Not bound to playback yet.
+    /// Played share of the round, 0…1: of the clip, or of the whole song.
     var progress: Double {
-        0
+        guard let length = roundLength, length > 0 else { return 0 }
+        return elapsed / length
     }
 
-    /// Elapsed time of the current song. Not bound to playback yet.
+    /// Time played since the round started.
     var elapsedText: String {
-        Self.formatted(seconds: 0)
+        Self.formatted(seconds: Int(elapsed))
     }
 
     /// The song that is playing: the first of the shuffled queue when the game starts.
@@ -72,15 +80,26 @@ final class GameViewModel {
         return queue[viewData.currentIndex]
     }
 
-    /// Length of a round: the clip length, or the length of the current song when it plays whole.
+    /// Length of the round: the clip length, or the length of the song when it plays whole.
     var durationText: String {
-        let settings = viewData.settings
-        switch settings.playback {
-        case .clip:
-            return Self.formatted(seconds: settings.clipSeconds)
-        case .fullSong:
-            return Self.formatted(seconds: Int(currentSong?.duration ?? 0))
+        Self.formatted(seconds: Int(roundLength ?? 0))
+    }
+
+    /// Length of the round in seconds: the clip, or the whole song; `nil` while the song's length is unknown.
+    private var roundLength: TimeInterval? {
+        switch viewData.settings.playback {
+        case .clip: TimeInterval(viewData.settings.clipSeconds)
+        case .fullSong: viewData.round?.songDuration ?? currentSong?.duration
         }
+    }
+
+    /// Seconds played since the round started, from the player's time. 0 until the song sounds, and never past the
+    /// round's length.
+    private var elapsed: TimeInterval {
+        guard let round = viewData.round else { return 0 }
+        let played = max(0, viewData.playbackTime - round.startTime)
+        guard let length = roundLength else { return played }
+        return min(played, length)
     }
 
     private static func formatted(seconds: Int) -> String {
@@ -111,6 +130,7 @@ final class GameViewModel {
 
     /// Stops the music when the user leaves the game.
     func stop() async {
+        stopProgress()
         await stopSongUseCase.execute(provider: provider)
     }
 
@@ -118,11 +138,17 @@ final class GameViewModel {
     /// `maxSkippedSongs` in a row; errors of the account or the service stop and are shown, since every song would
     /// fail the same way.
     private func playCurrentSong() async {
+        stopProgress()
         viewData.playbackError = nil
         var skipped = 0
         while let song = currentSong {
             do {
-                try await playSongUseCase.execute(song: song, settings: viewData.settings, provider: provider)
+                viewData.round = try await playSongUseCase.execute(
+                    song: song,
+                    settings: viewData.settings,
+                    provider: provider
+                )
+                startProgress()
                 return
             } catch is CancellationError {
                 return
@@ -135,6 +161,27 @@ final class GameViewModel {
             }
         }
         viewData.playbackError = Self.message(for: .unavailable)
+    }
+
+    /// Reads the player's time every `progressInterval` until `stopProgress()`.
+    private func startProgress() {
+        progressTask = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let self else { return }
+                let time = await playbackTimeUseCase.execute(provider: provider)
+                guard !Task.isCancelled else { return }
+                viewData.playbackTime = time
+                try? await Task.sleep(for: .seconds(Self.progressInterval))
+            }
+        }
+    }
+
+    /// Stops reading the player's time and empties the round, so the bar starts again at 0.
+    private func stopProgress() {
+        progressTask?.cancel()
+        progressTask = nil
+        viewData.round = nil
+        viewData.playbackTime = 0
     }
 
     private static func message(for error: GamePlaybackError) -> String {
