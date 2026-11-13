@@ -26,6 +26,10 @@ final class GameViewModel {
     private(set) var state: State = .idle
     /// Data of the screen. Each use case result updates only its own field.
     private(set) var viewData: GameViewData
+    /// `true` while the sheet opened from the mode chip, which offers to end the game, is shown.
+    var isEndGameSheetPresented = false
+    /// Set when the user chose to end the game: the view goes back once the sheet has closed.
+    private(set) var wantsToEndGame = false
 
     private let provider: MusicProvider
     private let fetchSongsUseCase: any FetchGameSongsUseCaseProtocol
@@ -39,6 +43,8 @@ final class GameViewModel {
     @ObservationIgnored private var progressTask: Task<Void, Never>?
     /// Asks MusicBrainz for the kind of artist of the current song.
     @ObservationIgnored private var artistKindTask: Task<Void, Never>?
+    /// `true` when opening the end-game sheet paused the song, so closing it plays the song again.
+    @ObservationIgnored private var pausedForEndGameSheet = false
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: GameDependencies) {
@@ -91,7 +97,8 @@ final class GameViewModel {
         return min(played, length)
     }
 
-    private static func formatted(seconds: Int) -> String {
+    /// «m:ss», for the progress times and the revealed card.
+    static func formatted(seconds: Int) -> String {
         Duration.seconds(seconds).formatted(.time(pattern: .minuteSecond))
     }
 
@@ -329,45 +336,37 @@ final class GameViewModel {
     }
 }
 
-// MARK: - Texts of the screen
+// MARK: - End of the game
 
 extension GameViewModel {
-    /// Summary of the settings for the chip at the top: «Clásico · 20 s», «Clásico · Canción entera»
-    /// or «Bingo · Principiante».
-    var modeSummary: String {
-        let settings = viewData.settings
-        switch settings.mode {
-        case .classic:
-            let playback = switch settings.playback {
-            case .clip: String(localized: "game.mode.clip \(settings.clipSeconds)")
-            case .fullSong: String(localized: "game.mode.fullSong")
-            }
-            return "\(String(localized: "settings.mode.classic")) · \(playback)"
-        case .bingo:
-            let level = switch settings.bingoLevel {
-            case .beginner: String(localized: "settings.bingo.level.beginner")
-            case .expert: String(localized: "settings.bingo.level.expert")
-            }
-            return "\(String(localized: "settings.mode.bingo")) · \(level)"
-        }
+    /// The mode chip at the top was tapped: offers to end the game, and pauses the song while the offer is shown.
+    /// A song the user had already paused stays paused when the sheet closes.
+    func didTapModeChip() async {
+        wantsToEndGame = false
+        isEndGameSheetPresented = true
+        pausedForEndGameSheet = false
+        guard canTogglePause, !viewData.isPaused else { return }
+        await togglePause()
+        pausedForEndGameSheet = viewData.isPaused
     }
 
-    /// Release year of the current song for the revealed card, or «—» when it is unknown.
-    var revealedYear: String {
-        currentSong?.releaseYear.map(String.init) ?? "—"
+    /// «End game» in the sheet: closes it and asks the view to go back once it has closed.
+    func didChooseEndGame() {
+        wantsToEndGame = true
+        isEndGameSheetPresented = false
     }
 
-    /// Length of the whole current song for the revealed card, when it is known.
-    var revealedDurationText: String? {
-        (viewData.round?.songDuration ?? currentSong?.duration).map { Self.formatted(seconds: Int($0)) }
+    /// «Keep playing» in the sheet.
+    func dismissEndGameSheet() {
+        isEndGameSheetPresented = false
     }
 
-    fileprivate static func message(for error: GamePlaybackError) -> String {
-        switch error {
-        case .subscriptionRequired: String(localized: "game.playback.subscriptionRequired")
-        case .notAuthorized: String(localized: "game.playback.notAuthorized")
-        case .unsupportedProvider: String(localized: "game.playback.unsupportedProvider")
-        case .unavailable: String(localized: "game.playback.unavailable")
+    /// The sheet closed without ending the game («Keep playing» or a swipe): plays again the song it paused.
+    func endGameSheetDidClose() async {
+        guard pausedForEndGameSheet else { return }
+        pausedForEndGameSheet = false
+        if viewData.isPaused {
+            await togglePause()
         }
     }
 }

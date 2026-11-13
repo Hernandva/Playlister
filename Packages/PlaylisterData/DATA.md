@@ -216,9 +216,10 @@ player.
 MusicBrainz.
 
 - With an ISRC it calls `GET /isrc/{isrc}?inc=artist-credits` and reads the type of the first artist credited on the
-  first recording (the main artist of «A feat. B»). Without one, or when MusicBrainz does not know the ISRC, it
-  searches `GET /artist?query=artist:"…"&limit=1` and keeps the best match only with a score of
-  `ArtistRepository.minimumSearchScore` (90) or more.
+  first recording (the main artist of «A feat. B»). Without one, when MusicBrainz does not know the ISRC, or when
+  the recording's artist has no kind (`unknown`), it searches `GET /artist?query=artist:"…"&limit=1` and keeps the
+  best match only with a score of `ArtistRepository.minimumSearchScore` (90) or more. When that search finds no
+  kind either (or fails), the recording's `unknown` answer is kept.
 - MusicBrainz types map as `Person` → `solo`; `Group`, `Orchestra`, `Choir` → `group`; anything else, or no match,
   → `unknown`, which is not an error.
 - The internal `MusicBrainzClient` (in `Remote/MusicBrainz/`) calls through `NetworkClient` with the `User-Agent`

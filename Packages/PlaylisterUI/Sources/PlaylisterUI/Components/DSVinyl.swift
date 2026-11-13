@@ -10,7 +10,7 @@ import SwiftUI
 /// - `revealed`: turns every 6 s and the album cover pops in (scale 0.6 → 1). With `isPaused` (e.g. the song
 ///   ended) the disc stops at its angle, and turns on from it when it is `false` again.
 /// - Bingo: with a `category`, grooves, ring and glow take its color, the centre is solid with `bg-night` bars,
-///   and «CATEGORÍA» with the category name pops in under the disc while it is not revealed.
+///   and «CATEGORÍA» with the category name pops in under the disc, and stays there once it is revealed.
 /// - With Reduce Motion the disc does not turn and the bars are static.
 public struct DSVinyl: View {
     public enum Phase: Equatable, Sendable {
@@ -49,7 +49,7 @@ public struct DSVinyl: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(accessibilityText)
             .accessibilityAddTraits(.isImage)
-            if let category, !isRevealed {
+            if let category {
                 categoryLabel(category)
                     .id(category)
                     .transition(.scale(scale: 0.8).combined(with: .opacity))

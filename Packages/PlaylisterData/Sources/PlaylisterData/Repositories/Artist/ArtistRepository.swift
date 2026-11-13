@@ -3,8 +3,9 @@ import Foundation
 /// Public API of the Artist repository. Features depend on this protocol, never on the concrete class.
 public protocol ArtistRepositoryProtocol: Sendable {
     /// Whether the main artist of a song is a solo artist or a group, from MusicBrainz: by the song's ISRC when it
-    /// has one, else by searching the artist's name. An artist MusicBrainz does not know is `.unknown`, not an
-    /// error. Throws `ArtistError.unavailable`; a cancelled call rethrows `CancellationError`.
+    /// has one, and by searching the artist's name when there is none or the ISRC tells nothing. An artist
+    /// MusicBrainz does not know is `.unknown`, not an error. Throws `ArtistError.unavailable`; a cancelled call
+    /// rethrows `CancellationError`.
     func fetchKind(_ request: some ArtistRequestProtocol) async throws -> any ArtistResponseProtocol
 }
 
@@ -45,20 +46,37 @@ public final class ArtistRepository: ArtistRepositoryProtocol {
         return response
     }
 
-    /// By ISRC first; when MusicBrainz does not know the recording (or the call fails), by the artist's name.
+    /// By ISRC first; when MusicBrainz does not know the recording (or the call fails), or knows it but not the kind
+    /// of its artist, by the artist's name. When the name tells no more, the recording's answer is kept.
     private func lookUp(_ request: ArtistRequestDAO) async throws -> ArtistResponseDAO {
-        if let isrc = request.isrc {
-            do {
-                if let response = try await client.recording(isrc: isrc).mainArtist.map(ArtistResponseDAO.init) {
-                    return response
-                }
-            } catch is CancellationError {
-                throw CancellationError()
-            } catch {
-                // An unknown ISRC answers 404: the artist's name may still be found.
-            }
+        guard let byISRC = try await recording(isrc: request.isrc) else {
+            return try await search(request.artistName)
         }
-        return try await search(request.artistName)
+        guard byISRC.kind == .unknown else {
+            return byISRC
+        }
+        do {
+            let byName = try await search(request.artistName)
+            return byName.kind == .unknown ? byISRC : byName
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            // The recording already answered: a failed search does not make it an error.
+            return byISRC
+        }
+    }
+
+    /// The main artist of the recording with `isrc`, or `nil` without an ISRC, when MusicBrainz does not know it
+    /// (an unknown ISRC answers 404) or when the call fails.
+    private func recording(isrc: String?) async throws -> ArtistResponseDAO? {
+        guard let isrc else { return nil }
+        do {
+            return try await client.recording(isrc: isrc).mainArtist.map(ArtistResponseDAO.init)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            return nil
+        }
     }
 
     private func search(_ name: String) async throws -> ArtistResponseDAO {

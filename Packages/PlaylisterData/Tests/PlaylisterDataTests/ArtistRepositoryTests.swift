@@ -63,6 +63,37 @@ struct ArtistRepositoryTests {
         #expect(await musicBrainz.calls == ["isrc:ES5022100001", "name:ROSALÍA"])
     }
 
+    /// A recording whose artist has no type in MusicBrainz.
+    private static let untypedRecording = """
+    {"isrc": "USRC17607839", "recordings": [{"id": "c2", "title": "Song",
+      "artist-credit": [{"name": "Artist", "artist": {"id": "a1", "name": "Artist"}}]}]}
+    """
+
+    @Test func searchesTheNameWhenTheRecordingHasNoKind() async throws {
+        let musicBrainz = FakeMusicBrainz(recordingJSON: Self.untypedRecording, searchJSON: """
+        {"artists": [{"id": "a1", "name": "Artist", "type": "Person", "score": 100}]}
+        """)
+        let response = try await ArtistRepository(client: musicBrainz)
+            .fetchKind(Request(artistName: "Artist", isrc: "USRC17607839"))
+
+        #expect(response.kind == .solo)
+        #expect(await musicBrainz.calls == ["isrc:USRC17607839", "name:Artist"])
+    }
+
+    @Test func keepsTheRecordingWhenTheSearchTellsNoMore() async throws {
+        let weakSearch = FakeMusicBrainz(recordingJSON: Self.untypedRecording, searchJSON: """
+        {"artists": [{"id": "x", "name": "Someone Else", "type": "Group", "score": 60}]}
+        """)
+        let failedSearch = FakeMusicBrainz(recordingJSON: Self.untypedRecording)
+
+        for musicBrainz in [weakSearch, failedSearch] {
+            let response = try await ArtistRepository(client: musicBrainz)
+                .fetchKind(Request(artistName: "Artist", isrc: "USRC17607839"))
+            #expect(response.kind == .unknown)
+            #expect(response.artistName == "Artist")
+        }
+    }
+
     @Test func aWeakSearchMatchIsUnknown() async throws {
         let musicBrainz = FakeMusicBrainz(searchJSON: """
         {"artists": [{"id": "1", "name": "Someone Else", "type": "Group", "score": 60}]}
