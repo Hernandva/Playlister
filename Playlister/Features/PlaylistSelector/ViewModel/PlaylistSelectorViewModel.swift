@@ -38,8 +38,6 @@ final class PlaylistSelectorViewModel {
     private(set) var wantsToClose = false
     /// Long-press sheet with the songs of a playlist.
     let playlistSongs: PlaylistSongsViewModel
-    /// Playlist chosen with «Use this playlist»: its confirmation opens once the songs sheet has closed.
-    private var playlistToConfirm: Playlist?
 
     /// Playlists whose custom artwork is loading or loaded, so each one is asked for once.
     private var customArtworkRequests: Set<String> = []
@@ -238,14 +236,7 @@ final class PlaylistSelectorViewModel {
     /// «Select playlist»: hands the playlist to the feature that opened the selector and asks the view to close.
     func confirmSelection() {
         guard let playlist = pendingPlaylist else { return }
-        // GameStarter shows the same covers as the card, the custom ones included.
-        selectPlaylist(PlaylistSelectorViewData.Playlist(
-            id: playlist.id,
-            name: playlist.name,
-            curatorName: playlist.curatorName,
-            covers: covers(for: playlist)
-        ))
-        wantsToClose = true
+        select(playlist)
         pendingPlaylist = nil
     }
 
@@ -264,25 +255,31 @@ final class PlaylistSelectorViewModel {
 
     /// A playlist was held down: shows its songs.
     func didLongPress(_ playlist: Playlist) {
-        playlistToConfirm = nil
+        wantsToClose = false
         playlistSongs.open(playlist)
     }
 
-    /// «Use this playlist» in the songs sheet: closes it and then asks to confirm the playlist.
+    /// «Use this playlist» in the songs sheet: selects the playlist without asking to confirm it, closes the sheet
+    /// and asks the view to close once it has.
     func useSongsPlaylist() {
-        playlistToConfirm = playlistSongs.playlist
+        guard let playlist = playlistSongs.playlist else { return }
+        select(playlist)
         playlistSongs.close()
     }
 
-    /// The songs sheet has closed: opens the confirmation of the playlist chosen in it, if any, so both sheets
-    /// never animate at the same time.
-    func songsSheetDidClose() {
-        guard let playlist = playlistToConfirm else { return }
-        playlistToConfirm = nil
-        didTap(playlist)
-    }
-
     // MARK: Private
+
+    /// Hands `playlist` to the feature that opened the selector and asks the view to close.
+    private func select(_ playlist: Playlist) {
+        // GameStarter shows the same covers as the card, the custom ones included.
+        selectPlaylist(PlaylistSelectorViewData.Playlist(
+            id: playlist.id,
+            name: playlist.name,
+            curatorName: playlist.curatorName,
+            covers: covers(for: playlist)
+        ))
+        wantsToClose = true
+    }
 
     private func resetSearch() {
         viewData.search = nil

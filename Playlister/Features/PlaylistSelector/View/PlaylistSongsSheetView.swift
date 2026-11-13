@@ -2,7 +2,8 @@ import PlaylisterUI
 import SwiftUI
 
 /// Long-press sheet of the selector: the songs of a playlist, 25 more each time the user scrolls to the last one,
-/// and «Use this playlist», which asks to confirm it. Shown by `PlaylistSelectorView` with `.sheet(item:)`.
+/// and «Use this playlist», which selects it and goes back to GameStarter. Shown by `PlaylistSelectorView` with
+/// `.sheet(item:)`.
 struct PlaylistSongsSheetView: View {
     let viewModel: PlaylistSongsViewModel
     let playlist: PlaylistSelectorViewData.Playlist
