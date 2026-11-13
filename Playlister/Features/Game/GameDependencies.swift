@@ -7,15 +7,22 @@ final class GameDependencies {
     private let provider: MusicProvider
     private let playlist: GameViewData.Playlist
     private let settings: GameViewData.Settings
+    private let songRepository: any SongRepositoryProtocol
 
     /// - Parameters:
     ///   - provider: The music service the user signed in with.
     ///   - playlist: The playlist chosen in ProviderStarter, played by the game.
     ///   - settings: The game settings saved in Settings.
-    init(provider: MusicProvider, playlist: GameViewData.Playlist, settings: GameViewData.Settings) {
+    init(
+        provider: MusicProvider,
+        playlist: GameViewData.Playlist,
+        settings: GameViewData.Settings,
+        songRepository: any SongRepositoryProtocol = SongRepository()
+    ) {
         self.provider = provider
         self.playlist = playlist
         self.settings = settings
+        self.songRepository = songRepository
     }
 
     /// The music service the user signed in with.
@@ -33,8 +40,12 @@ final class GameDependencies {
         settings
     }
 
-    func resolveUseCase() -> any GameUseCaseProtocol {
-        GameUseCase(dependencies: self)
+    func resolveSongRepository() -> any SongRepositoryProtocol {
+        songRepository
+    }
+
+    func resolveFetchGameSongsUseCase() -> any FetchGameSongsUseCaseProtocol {
+        FetchGameSongsUseCase(dependencies: self)
     }
 
     func resolveViewModel() -> GameViewModel {

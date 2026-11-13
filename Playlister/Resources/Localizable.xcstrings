@@ -171,6 +171,23 @@
         }
       }
     },
+    "game.empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This playlist has no songs."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta lista no tiene canciones."
+          }
+        }
+      }
+    },
     "game.mode.clip %lld" : {
       "extractionState" : "manual",
       "localizations" : {

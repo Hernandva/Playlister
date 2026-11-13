@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import PlaylisterData
 
 @MainActor
 @Observable
@@ -15,7 +16,8 @@ final class GameViewModel {
     /// Data of the screen. Each use case result updates only its own field.
     private(set) var viewData: GameViewData
 
-    private let useCase: any GameUseCaseProtocol
+    private let provider: MusicProvider
+    private let fetchSongsUseCase: any FetchGameSongsUseCaseProtocol
 
     /// Receives only the container and resolves what it needs from it.
     init(dependencies: GameDependencies) {
@@ -23,7 +25,8 @@ final class GameViewModel {
             playlist: dependencies.resolvePlaylist(),
             settings: dependencies.resolveSettings()
         )
-        self.useCase = dependencies.resolveUseCase()
+        self.provider = dependencies.resolveProvider()
+        self.fetchSongsUseCase = dependencies.resolveFetchGameSongsUseCase()
     }
 
     /// Summary of the settings for the chip at the top: «Clásico · 20 s», «Clásico · Canción entera»
@@ -56,21 +59,41 @@ final class GameViewModel {
         Self.formatted(seconds: 0)
     }
 
-    /// Length of a round: the clip length, or «0:00» for a full song until its length is known.
+    /// The song that is playing: the first of the shuffled queue when the game starts.
+    var currentSong: GameViewData.Song? {
+        guard let queue = viewData.queue, queue.indices.contains(viewData.currentIndex) else { return nil }
+        return queue[viewData.currentIndex]
+    }
+
+    /// Length of a round: the clip length, or the length of the current song when it plays whole.
     var durationText: String {
         let settings = viewData.settings
-        return Self.formatted(seconds: settings.playback == .clip ? settings.clipSeconds : 0)
+        switch settings.playback {
+        case .clip:
+            return Self.formatted(seconds: settings.clipSeconds)
+        case .fullSong:
+            return Self.formatted(seconds: Int(currentSong?.duration ?? 0))
+        }
     }
 
     private static func formatted(seconds: Int) -> String {
         Duration.seconds(seconds).formatted(.time(pattern: .minuteSecond))
     }
 
+    /// Reads every song of the playlist and shuffles them into the queue, so the game starts with a random one.
     func load() async {
         state = .loading
         do {
-            viewData.content = try await useCase.execute()
+            let songs = try await fetchSongsUseCase.execute(playlistID: viewData.playlist.id, provider: provider)
+            guard !songs.isEmpty else {
+                state = .failed(String(localized: "game.empty"))
+                return
+            }
+            viewData.queue = songs.shuffled()
+            viewData.currentIndex = 0
             state = .loaded
+        } catch is CancellationError {
+            state = .idle
         } catch {
             state = .failed(error.localizedDescription)
         }

@@ -56,14 +56,25 @@ struct GameViewData: Equatable, Sendable {
         var bingoCategories: Set<BingoCategory>
     }
 
-    /// Data returned by `GameUseCase`. Rename it after what it holds and add one type and one field
-    /// per use case, with the properties the view needs.
-    struct Content: Equatable, Sendable {}
+    /// A song of the playlist, returned by `FetchGameSongsUseCase`.
+    struct Song: Equatable, Sendable, Identifiable {
+        /// Identifier of the song in its music service.
+        let id: String
+        let title: String
+        let artist: String
+        /// Album artwork, or `nil` when the song has none.
+        let cover: URL?
+        /// Length of the song, when the service gives it.
+        let duration: TimeInterval?
+    }
 
     /// Known before anything loads: it comes from ProviderStarter.
     var playlist: Playlist
     /// Known before anything loads: it comes from ProviderStarter.
     var settings: Settings
-    /// Result of `GameUseCase`, or `nil` until it loads.
-    var content: Content?
+    /// Songs of the playlist in the order the game plays them: shuffled once when the game starts.
+    /// `nil` until they load.
+    var queue: [Song]?
+    /// Position in `queue` of the song that is playing.
+    var currentIndex = 0
 }
